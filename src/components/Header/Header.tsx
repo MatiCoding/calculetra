@@ -1,6 +1,6 @@
 function Header() {
     return (
-        <header>Calculetra</header>
+        <header></header>
     );
 }
 
