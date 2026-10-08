@@ -6,7 +6,5 @@ labels: enhacement
 
 ## What
 
-## Why
-
 ## Acceptance criteria
 - []
