@@ -1,6 +1,15 @@
-function ModeSwitch() {
+import type { GameType } from '../../types/gameType'
+
+type ModeSwitchProps = {
+    gameMode: GameType
+    setGameMode: (mode: GameType) => void
+}
+
+function ModeSwitch({ gameMode, setGameMode }: ModeSwitchProps) {
     return (
-        <header></header>
+        <button type="button" onClick={() => setGameMode(gameMode === 'numbers' ? 'letters' : 'numbers')}>
+            {gameMode === 'numbers' ? 'Cambiar a letras' : 'Cambiar a números'}
+        </button>
     );
 }
 
