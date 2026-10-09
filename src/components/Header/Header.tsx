@@ -1,6 +1,10 @@
+import styles from './Header.module.css';
+
 function Header() {
     return (
-        <header></header>
+        <header className={styles.header}>
+            <h1 className={styles.title}>Calculetra</h1>
+        </header>
     );
 }
 

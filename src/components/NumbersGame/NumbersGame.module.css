@@ -1,0 +1,24 @@
+.target {
+    font-size: 2rem;
+}
+
+.numbersUl {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.numbersLi{
+    width: 60px;
+    height: 60px;
+    border: 1px solid #000;
+    border-radius: 50%;
+    background-color: #f0f0f0;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
