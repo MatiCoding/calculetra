@@ -1,6 +1,6 @@
 function LettersGame() {
     return (
-        <header></header>
+        <p>Próximamente</p>
     );
 }
 
