@@ -1,4 +1,4 @@
-import styles from './UnderConstruction.module.css';
+import styles from './UnderDevelopment.module.css';
 
 const NUMBER_TILES = [100, 75, 50, 25, 8, 3];
 const LETTER_TILES = ['C', 'A', 'L', 'C', 'U', 'L', 'E', 'T', 'R', 'A'];
