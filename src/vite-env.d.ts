@@ -2,6 +2,8 @@
 
 interface ImportMetaEnv {
     readonly VITE_UNDER_CONSTRUCTION?: string;
+    readonly VITE_SUPABASE_URL?: string;
+    readonly VITE_SUPABASE_PUBLISHABLE_KEY?: string;
 }
 
 interface ImportMeta {

@@ -2,6 +2,15 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+// The game is wrapped in AuthProvider, which would create the real Supabase
+// client. CI has no .env, so we replace the auth module with a fake one.
+vi.mock('./auth/auth', () => ({
+  getCurrentUser: vi.fn().mockResolvedValue(null),
+  onAuthChange: vi.fn(() => () => {}),
+  signUp: vi.fn(),
+  logIn: vi.fn(),
+}));
+
 async function renderRoot(flag: string | undefined) {
   vi.stubEnv('VITE_UNDER_CONSTRUCTION', flag);
   vi.resetModules();

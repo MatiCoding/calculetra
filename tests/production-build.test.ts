@@ -7,6 +7,11 @@ import { build, type Rolldown } from 'vite';
 async function buildJs(flag: string): Promise<string> {
     process.env.VITE_UNDER_CONSTRUCTION = flag;
 
+    // Fake Supabase values. Without them supabaseClient.ts always throws, and
+    // the minifier removes everything after that throw from the bundle.
+    process.env.VITE_SUPABASE_URL = 'https://test.supabase.co';
+    process.env.VITE_SUPABASE_PUBLISHABLE_KEY = 'test-publishable-key';
+
     const result = await build({
         mode: 'production',
         logLevel: 'silent',
@@ -24,6 +29,8 @@ async function buildJs(flag: string): Promise<string> {
 describe('production build', () => {
     afterEach(() => {
         delete process.env.VITE_UNDER_CONSTRUCTION;
+        delete process.env.VITE_SUPABASE_URL;
+        delete process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
     });
 
     it('ships only the under construction page when the flag is on', async () => {
