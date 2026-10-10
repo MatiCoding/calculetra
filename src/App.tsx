@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Route, Routes } from 'react-router'
 
 import Header from './components/Header/Header'
 import ModeSwitch from './components/ModeSwitch/ModeSwitch'
@@ -12,10 +13,21 @@ function App() {
   return (
     <>
       <Header />
-      <ModeSwitch gameMode = {gameMode} setGameMode = {setGameMode} />
-      <main>
-        { gameMode === 'numbers' ? <NumbersGame /> : <LettersGame /> }
-      </main>
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <>
+              <ModeSwitch gameMode = {gameMode} setGameMode = {setGameMode} />
+              <main>
+                { gameMode === 'numbers' ? <NumbersGame /> : <LettersGame /> }
+              </main>
+            </>
+          }
+        />
+        {/* Placeholder until the sign up form exists. */}
+        <Route path="/signup" element={<main><h2>Crear cuenta</h2></main>} />
+      </Routes>
       <Footer />
     </>
   )

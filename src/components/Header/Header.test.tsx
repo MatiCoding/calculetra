@@ -7,7 +7,7 @@ function Header() {
             <h1 className={styles.title}>
                 <Link to="/">Calculetra</Link>
             </h1>
-            <Link to="/signup" className={styles.authLink}>Crear cuenta</Link>
+            <Link to="/signup">Crear cuenta</Link>
         </header>
     );
 }
