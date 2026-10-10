@@ -1,15 +1,21 @@
-import { Link } from 'react-router';
-import styles from './Header.module.css';
+// @vitest-environment jsdom
+import { cleanup, render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router';
+import { afterEach, describe, expect, it } from 'vitest';
+import Header from './Header';
 
-function Header() {
-    return (
-        <header className={styles.header}>
-            <h1 className={styles.title}>
-                <Link to="/">Calculetra</Link>
-            </h1>
-            <Link to="/signup">Crear cuenta</Link>
-        </header>
-    );
-}
+describe('Header', () => {
+    afterEach(cleanup);
 
-export default Header
+    it('links the title to the home page', () => {
+        render(<MemoryRouter><Header /></MemoryRouter>);
+
+        expect(screen.getByRole('link', { name: 'Calculetra' }).getAttribute('href')).toBe('/');
+    });
+
+    it('links "Crear cuenta" to the sign up page', () => {
+        render(<MemoryRouter><Header /></MemoryRouter>);
+
+        expect(screen.getByRole('link', { name: 'Crear cuenta' }).getAttribute('href')).toBe('/signup');
+    });
+});
