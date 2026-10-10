@@ -25,3 +25,19 @@ export async function signUp(email: string, password: string): Promise<AuthUser 
     if (data.user === null) return null
     return toAuthUser(data.user)
 }
+
+export async function getCurrentUser(): Promise<AuthUser | null> {
+    const {data, error} = await supabase.auth.getSession()
+    if (error) throw error
+    if (data.session === null) return null
+    return toAuthUser(data.session.user)
+}
+
+// Calls `callback` every time the user logs in or out.
+// Returns a function that stops listening.
+export function onAuthChange(callback: (user: AuthUser | null) => void): () => void {
+  const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+    callback(session ? toAuthUser(session.user) : null)
+  })
+  return () => data.subscription.unsubscribe()
+}
