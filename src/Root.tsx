@@ -2,7 +2,7 @@ import { BrowserRouter } from 'react-router'
 import App from './App.tsx'
 import UnderConstruction from './components/UnderDevelopment/UnderDevelopment.tsx'
 import { IS_UNDER_CONSTRUCTION } from './config/flags'
-import { AuthProvider } from './auth/AuthProvider.tsx'
+import { AuthProvider } from './auth/context/AuthProvider.tsx'
 
 function Root() {
   if (IS_UNDER_CONSTRUCTION) return <UnderConstruction />

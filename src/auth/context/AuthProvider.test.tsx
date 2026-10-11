@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
 import { act, cleanup, render, renderHook, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { getCurrentUser, onAuthChange, type AuthUser } from './auth'
+import { getCurrentUser, onAuthChange, type AuthUser } from '../api/auth'
 import { AuthProvider } from './AuthProvider'
 import { useAuth } from './useAuth'
 
-vi.mock('./auth', () => ({
+vi.mock('../api/auth', () => ({
   getCurrentUser: vi.fn(),
   onAuthChange: vi.fn(),
   signUp: vi.fn(),
