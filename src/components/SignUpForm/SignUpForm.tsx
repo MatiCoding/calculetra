@@ -1,5 +1,7 @@
 import { useState, type SubmitEvent } from 'react';
 import {validateSignUp} from '../../auth/signUp/validateSignUp';
+import {useAuth} from '../../auth/context/useAuth';
+import {getSignUpErrorMessage} from '../../auth/signUp/signUpErrors';
 
 function SignUpForm() {
     // Controlled inputs: React state holds each value and the input shows it.
@@ -7,8 +9,10 @@ function SignUpForm() {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
+    const { signUp } = useAuth()
+    const [submitting, setSubmitting] = useState(false)
 
-    function handleSubmit(event: SubmitEvent<HTMLFormElement>){
+    async function handleSubmit(event: SubmitEvent<HTMLFormElement>){
         event.preventDefault();
         const validationError = validateSignUp(email, password, confirmPassword);
         if (validationError) {
@@ -16,6 +20,13 @@ function SignUpForm() {
         } else {
             setError(null);
         }
+
+        try { 
+            await signUp(email.trim(), password) 
+        } catch (err) { 
+            setError(getSignUpErrorMessage(err)) 
+        } finally { 
+            setSubmitting(false) }
     }
 
     return (
@@ -46,7 +57,7 @@ function SignUpForm() {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                 />
                 {error && <p style={{ color: 'red' }}>{error}</p>}
-                <button type="submit">Crear cuenta</button>
+                <button type="submit" disabled={submitting}>Crear cuenta</button>
             </form>
         </>
     );

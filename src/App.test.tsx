@@ -1,8 +1,14 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
+
+// SignUpForm uses useAuth, but these tests only check navigation,
+// so a fake hook is enough and no AuthProvider is needed.
+vi.mock('./auth/context/useAuth', () => ({
+  useAuth: () => ({ user: null, loading: false, signUp: vi.fn(), logIn: vi.fn() }),
+}))
 
 // MemoryRouter keeps the URL in memory, so each test chooses the page it
 // starts on. The last entry in initialEntries is the current page.
