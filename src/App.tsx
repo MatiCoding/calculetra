@@ -7,6 +7,7 @@ import NumbersGame from './components/NumbersGame/NumbersGame'
 import LettersGame from './components/LettersGame/LettersGame'
 import Footer from './components/Footer/Footer'
 import type { GameType } from './types/gameType'
+import SignUpForm from './components/SignUpForm/SignUpForm'
 
 function App() {
   const [gameMode, setGameMode] = useState<GameType>('numbers')
@@ -26,7 +27,7 @@ function App() {
           }
         />
         {/* Placeholder until the sign up form exists. */}
-        <Route path="/signup" element={<main><h2>Crear cuenta</h2></main>} />
+        <Route path="/signup" element={<main><SignUpForm /></main>} />
       </Routes>
       <Footer />
     </>
