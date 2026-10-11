@@ -1,33 +1,51 @@
 import { useState, type SubmitEvent } from 'react';
+import { useNavigate } from 'react-router';
 import {validateSignUp} from '../../auth/signUp/validateSignUp';
 import {useAuth} from '../../auth/context/useAuth';
 import {getSignUpErrorMessage} from '../../auth/signUp/signUpErrors';
 
 function SignUpForm() {
+    const navigate = useNavigate();
+    const [checkInbox, setCheckInbox] = useState(false)
+
     // Controlled inputs: React state holds each value and the input shows it.
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
-    const { signUp } = useAuth()
-    const [submitting, setSubmitting] = useState(false)
+    const { signUp } = useAuth();
+    const [submitting, setSubmitting] = useState(false);
 
     async function handleSubmit(event: SubmitEvent<HTMLFormElement>){
         event.preventDefault();
         const validationError = validateSignUp(email, password, confirmPassword);
         if (validationError) {
             setError(validationError);
-        } else {
-            setError(null);
+            return;
         }
+        setError(null);
+        setSubmitting(true);
 
         try { 
-            await signUp(email.trim(), password) 
+            const user = await signUp(email.trim(), password) 
+            if (user === null){
+                setCheckInbox(true);
+            } else {
+                navigate('/')
+            }
         } catch (err) { 
             setError(getSignUpErrorMessage(err)) 
         } finally { 
             setSubmitting(false) }
     }
+
+    if (checkInbox){
+        return (
+            <>
+                <h2>Revisa tu correo</h2>
+                <p role="status">Te hemos enviado un enlace a {email} para confirmar tu cuenta.</p>
+            </>
+    )}
 
     return (
         <>
@@ -56,7 +74,7 @@ function SignUpForm() {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                 />
-                {error && <p style={{ color: 'red' }}>{error}</p>}
+                {error && <p role="alert" style={{ color: 'red' }}>{error}</p>}
                 <button type="submit" disabled={submitting}>Crear cuenta</button>
             </form>
         </>
