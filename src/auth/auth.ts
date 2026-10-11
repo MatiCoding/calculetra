@@ -19,11 +19,12 @@ export async function logIn(email: string, password: string): Promise<AuthUser> 
   return toAuthUser(data.user)
 }
 
+// Returns null if the aacount is created but not yet confirmed (email confirmation pending).
 export async function signUp(email: string, password: string): Promise<AuthUser | null> {
     const {data, error} = await supabase.auth.signUp({ email, password })
     if (error) throw error
-    if (data.user === null) return null
-    return toAuthUser(data.user)
+    if (data.session === null) return null
+    return toAuthUser(data.session.user)
 }
 
 export async function getCurrentUser(): Promise<AuthUser | null> {
