@@ -1,5 +1,5 @@
 import { useState, type SubmitEvent } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, Link } from 'react-router';
 import {validateSignUp} from '../../auth/signUp/validateSignUp';
 import {useAuth} from '../../auth/context/useAuth';
 import {getSignUpErrorMessage} from '../../auth/signUp/signUpErrors';
@@ -83,7 +83,7 @@ function SignUpForm() {
                 {error && <p role="alert" className={styles.error}>{error}</p>}
                 <button type="submit" disabled={submitting}>Crear cuenta</button>
             </form>
-            <p>¿Ya tienes cuenta? <a href="/login">Inicia sesión</a></p>
+            <p>¿Ya tienes cuenta? <Link to="/login">Inicia sesión</Link></p>
         </>
     );
 }
