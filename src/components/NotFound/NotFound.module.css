@@ -75,3 +75,54 @@
 .tilted{
     transform: translateY(-10px) rotate(4deg);
 }
+
+.equation {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    border-radius: 12px;
+    background-color: white;
+    border: 1px solid rgba(31,36,48,0.15);
+    font-family: ui-monospace, Consolas, monospace;
+
+}
+
+.equation span:first-child {
+    color: var(--color-letter);
+    font-weight: bold;
+}
+
+.equation span:last-child{
+    color: var(--color-muted);
+}
+
+.actions{
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.primary, .secondary {
+    cursor: pointer;
+    font: inherit;
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    text-decoration: none;
+}
+
+.primary {
+    background-color: var(--color-accent);
+    color: white;
+    /* Without this border transparent, it looks bigger than secondary. */
+    border: 1px solid transparent;
+}
+
+.secondary {
+    background-color: transparent;
+    border: 1px solid rgba(31,36,48,0.15);
+    color: var(--color-text);
+}
