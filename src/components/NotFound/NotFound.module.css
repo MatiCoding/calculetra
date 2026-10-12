@@ -55,6 +55,16 @@
     box-shadow: 0 10px 0 rgba(0, 0, 0, 0.2);
     animation: drop 500ms ease-out both, float 3s ease-in-out infinite;
     will-change: translate;
+    transition: scale 150ms ease-in-out;
+    cursor: pointer;
+}
+
+.letterTile:hover, .numberTile:hover {
+    scale: 1.08;
+}
+
+.letterTile:active, .numberTile:active {
+    scale: 0.95;
 }
 
 .tiles span:nth-child(1) {
@@ -129,6 +139,7 @@
     font-weight: 600;
     font-size: 1rem;
     text-decoration: none;
+    transition: opacity 150ms ease, background-color 150ms ease;
 }
 
 .primary {
@@ -138,14 +149,27 @@
     border: 1px solid transparent;
 }
 
+.primary:hover {
+    opacity: 0.85;
+}
+
 .secondary {
     background-color: transparent;
     border: 1px solid rgba(31,36,48,0.15);
     color: var(--color-text);
 }
 
+.secondary:hover {
+    background-color: rgba(31,36,48,0.05);
+}
 
-@media (prefers-reduce-motion: reduce) {
+.primary:focus-visible, .secondary:focus-visible {
+    outline: 3px solid var(--color-number);
+    outline-offset: 3px;
+}
+
+
+@media (prefers-reduced-motion: reduce) {
     .letterTile, .numberTile {
         animation: none;
     }
