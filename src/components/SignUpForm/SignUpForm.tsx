@@ -4,7 +4,7 @@ import {validateSignUp} from '../../auth/signUp/validateSignUp';
 import {useAuth} from '../../auth/context/useAuth';
 import {getSignUpErrorMessage} from '../../auth/signUp/signUpErrors';
 
-import styles from './SignUpForm.module.css';
+import styles from '../AuthForm.module.css';
 
 function SignUpForm() {
     const navigate = useNavigate();
