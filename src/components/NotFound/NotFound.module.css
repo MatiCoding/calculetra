@@ -1,0 +1,77 @@
+.notFound {
+    --color-text: #1f2430;
+    --color-muted: #5c6370;
+    --color-letter: #1e5aa8;
+    --color-number: #e8a317;
+    --color-accent: #1e5aa8;
+
+    min-height: 60vh;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+    color: var(--color-text);
+}
+
+.content{
+    max-width: 620px;
+}
+
+.badge{
+    display: inline-block;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border: 1px solid rgba(31,36,48,0.15);
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-muted);
+    margin-bottom: 24px;
+}
+
+.text {
+    color: var(--color-muted);
+    line-height: 1.5;
+}
+
+.tiles {
+    display: flex;
+    justify-content:center;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 28px;
+}
+
+.letterTile, .numberTile {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 8rem;
+    font-weight: 800;
+    font-family: 'InterVariable', sans-serif;
+    line-height: 1;
+    box-shadow: 0 10px 0 rgba(0, 0, 0, 0.2);
+}
+
+.letterTile {
+    width: 136px;
+    height: 160px;
+    border-radius: 20px;
+    background-color: var(--color-letter);
+    color: white;
+}
+
+.numberTile {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background-color: var(--color-number);
+    color: var(--color-text);
+    transform: rotate(-8deg);
+}
+
+.tilted{
+    transform: translateY(-10px) rotate(4deg);
+}
