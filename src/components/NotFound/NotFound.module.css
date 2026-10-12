@@ -5,17 +5,25 @@
     --color-number: #e8a317;
     --color-accent: #1e5aa8;
 
-    min-height: 60vh;
+    flex: 1;
     box-sizing: border-box;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 24px 16px;
     color: var(--color-text);
+    position:relative;
+    overflow: hidden;
 }
 
 .content{
     max-width: 620px;
+    position: relative;
+}
+
+.title {
+    font-size: 2.25rem;
+    letter-spacing: -0.02em;
 }
 
 .badge{
@@ -48,9 +56,9 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 8rem;
+    font-size: 7rem;
     font-weight: 800;
-    font-family: 'InterVariable', sans-serif;
+    font-family: 'Inter Variable', sans-serif;
     line-height: 1;
     box-shadow: 0 10px 0 rgba(0, 0, 0, 0.2);
     animation: drop 500ms ease-out both, float 3s ease-in-out infinite;
@@ -168,6 +176,32 @@
     outline-offset: 3px;
 }
 
+.bgTile {
+    position: absolute;
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 700;
+    opacity: 0.09;
+    pointer-events: none;
+}
+
+.bgLetter {
+    width: 44px;
+    height: 52px;
+    border-radius: 8px;
+    background-color: var(--color-letter);
+    color: white;
+    font-size: 1.6rem;
+}
+
+.bgNumber {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background-color: var(--color-number);
+    color: var(--color-text);
+}
 
 @media (prefers-reduced-motion: reduce) {
     .letterTile, .numberTile {
