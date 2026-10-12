@@ -53,6 +53,23 @@
     font-family: 'InterVariable', sans-serif;
     line-height: 1;
     box-shadow: 0 10px 0 rgba(0, 0, 0, 0.2);
+    animation: drop 500ms ease-out both, float 3s ease-in-out infinite;
+    will-change: translate;
+}
+
+.tiles span:nth-child(1) {
+    animation-delay: 0ms, 700ms;
+    animation-duration: 500ms, 3s;
+}
+
+.tiles span:nth-child(2) {
+    animation-delay: 120ms, 800ms;
+    animation-duration: 500ms, 3.6s;
+}
+
+.tiles span:nth-child(3) {
+    animation-delay: 240ms, 900ms;
+    animation-duration: 500ms, 3.2s;
 }
 
 .letterTile {
@@ -125,4 +142,36 @@
     background-color: transparent;
     border: 1px solid rgba(31,36,48,0.15);
     color: var(--color-text);
+}
+
+
+@media (prefers-reduce-motion: reduce) {
+    .letterTile, .numberTile {
+        animation: none;
+    }
+}
+
+@keyframes drop {
+    from {
+        opacity: 0;
+        translate: 0 -40px;
+    }
+    to {
+        opacity: 1;
+        translate: 0 0;
+    }
+}
+
+@keyframes float {
+    0% {
+        translate: 0 0;
+    }
+
+    50% {
+        translate: 0 -6px;
+    }
+
+    100% {
+        translate: 0 0;
+    }
 }
