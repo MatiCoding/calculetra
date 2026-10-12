@@ -6,6 +6,9 @@ function NotFound() {
 
     return (
         <main>
+            <title>Página no encontrada - Calculetra</title>
+            <meta name="robots" content="noindex" />
+
             <h2>Esta página no existe</h2>
             <p>
                 <span>100 × 4 + 4 = 404</span>

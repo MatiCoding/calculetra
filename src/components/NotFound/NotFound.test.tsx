@@ -46,4 +46,17 @@ describe('NotFound', () => {
 
         expect(screen.getByText('Página de inicio')).toBeTruthy();
     });
+
+        it('sets the browser tab title', () => {
+        renderNotFound(['/reto-de-ayer']);
+
+        expect(document.title).toBe('Página no encontrada - Calculetra');
+    });
+
+    it('tells search engines not to index the page', () => {
+        renderNotFound(['/reto-de-ayer']);
+
+        const robots = document.head.querySelector('meta[name="robots"]');
+        expect(robots?.getAttribute('content')).toBe('noindex');
+    });
 });
