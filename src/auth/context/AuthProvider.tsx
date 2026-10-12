@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react'
-import { getCurrentUser, logIn, onAuthChange, signUp, type AuthUser } from './auth'
+import { getCurrentUser, logIn, onAuthChange, signUp, type AuthUser } from '../api/auth'
 import { AuthContext } from './AuthContext'
 
 export function AuthProvider({ children }: { children: ReactNode }) {

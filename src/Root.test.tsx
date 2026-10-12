@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 // The game is wrapped in AuthProvider, which would create the real Supabase
 // client. CI has no .env, so we replace the auth module with a fake one.
-vi.mock('./auth/auth', () => ({
+vi.mock('./auth/api/auth', () => ({
   getCurrentUser: vi.fn().mockResolvedValue(null),
   onAuthChange: vi.fn(() => () => {}),
   signUp: vi.fn(),
