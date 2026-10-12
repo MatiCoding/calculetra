@@ -4,6 +4,8 @@ import {validateSignUp} from '../../auth/signUp/validateSignUp';
 import {useAuth} from '../../auth/context/useAuth';
 import {getSignUpErrorMessage} from '../../auth/signUp/signUpErrors';
 
+import styles from './SignUpForm.module.css';
+
 function SignUpForm() {
     const navigate = useNavigate();
     const [checkInbox, setCheckInbox] = useState(false)
@@ -45,18 +47,20 @@ function SignUpForm() {
                 <h2>Revisa tu correo</h2>
                 <p role="status">Te hemos enviado un enlace a {email} para confirmar tu cuenta.</p>
             </>
-    )}
+        )
+    }
 
     return (
         <>
             <h2>Crear cuenta</h2>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} className={styles.form}>
                 <label htmlFor="signup-email">Email</label>
                 <input
                     id="signup-email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    autoComplete="email"
                 />
 
                 <label htmlFor="signup-password">Contraseña</label>
@@ -65,6 +69,7 @@ function SignUpForm() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="new-password"
                 />
 
                 <label htmlFor="signup-confirm-password">Repite la contraseña</label>
@@ -73,10 +78,12 @@ function SignUpForm() {
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
+                    autoComplete="new-password"
                 />
-                {error && <p role="alert" style={{ color: 'red' }}>{error}</p>}
+                {error && <p role="alert" className={styles.error}>{error}</p>}
                 <button type="submit" disabled={submitting}>Crear cuenta</button>
             </form>
+            <p>¿Ya tienes cuenta? <a href="/login">Inicia sesión</a></p>
         </>
     );
 }

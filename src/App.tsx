@@ -28,6 +28,7 @@ function App() {
         />
         {/* Placeholder until the sign up form exists. */}
         <Route path="/signup" element={<main><SignUpForm /></main>} />
+        <Route path="/login" element={<main><h2>Próximamente</h2></main>} />
       </Routes>
       <Footer />
     </>
