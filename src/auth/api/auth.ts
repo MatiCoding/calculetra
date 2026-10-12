@@ -27,6 +27,11 @@ export async function signUp(email: string, password: string): Promise<AuthUser 
     return toAuthUser(data.session.user)
 }
 
+export async function logOut(): Promise<void> {
+    const {error} = await supabase.auth.signOut()
+    if (error) throw error
+}
+
 export async function getCurrentUser(): Promise<AuthUser | null> {
     const {data, error} = await supabase.auth.getSession()
     if (error) throw error

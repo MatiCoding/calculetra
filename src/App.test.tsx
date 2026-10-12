@@ -7,7 +7,7 @@ import App from './App';
 // SignUpForm uses useAuth, but these tests only check navigation,
 // so a fake hook is enough and no AuthProvider is needed.
 vi.mock('./auth/context/useAuth', () => ({
-  useAuth: () => ({ user: null, loading: false, signUp: vi.fn(), logIn: vi.fn() }),
+  useAuth: () => ({ user: null, loading: false, signUp: vi.fn(), logIn: vi.fn(), logOut: vi.fn() }),
 }))
 
 // MemoryRouter keeps the URL in memory, so each test chooses the page it

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { getCurrentUser, logIn, onAuthChange, signUp } from './auth'
+import { getCurrentUser, logIn, onAuthChange, signUp, logOut } from './auth'
 import { supabase } from './supabaseClient'
 
 // Replace the real client with a fake one, so the tests never call Supabase
@@ -11,6 +11,7 @@ vi.mock('./supabaseClient', () => ({
       signInWithPassword: vi.fn(),
       getSession: vi.fn(),
       onAuthStateChange: vi.fn(),
+      signOut: vi.fn(),
     },
   },
 }))
@@ -143,5 +144,22 @@ describe('onAuthChange', () => {
 
     stop()
     expect(unsubscribe).toHaveBeenCalledOnce()
+  })
+})
+
+describe('logOut', () => {
+  it('resolves when Supabase logs the user out', async () => {
+    vi.mocked(supabase.auth.signOut).mockResolvedValue({ error: null } as never)
+
+    await expect(logOut()).resolves.toBeUndefined()
+    expect(supabase.auth.signOut).toHaveBeenCalledOnce()
+  })
+
+  it('throws the Supabase error', async () => {
+    vi.mocked(supabase.auth.signOut).mockResolvedValue({
+      error: new Error('Network error'),
+    } as never)
+
+    await expect(logOut()).rejects.toThrow('Network error')
   })
 })
