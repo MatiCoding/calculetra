@@ -51,4 +51,23 @@ describe('App routes', () => {
 
     expect(screen.getByText(/Objetivo/)).toBeTruthy();
   });
+
+    it('shows the 404 page on an unknown route', () => {
+    renderAt('/esto-no-existe');
+
+    expect(screen.getByRole('heading', { name: 'Esta página no existe' })).toBeTruthy();
+    expect(screen.queryByText(/Objetivo/)).toBeNull();
+  });
+
+  it('keeps the header on the 404 page', () => {
+    renderAt('/esto-no-existe');
+
+    expect(screen.getByRole('link', { name: 'Calculetra' })).toBeTruthy();
+  });
+
+  it.each(['/', '/signup', '/login'])('does not show the 404 page on %s', (path) => {
+    renderAt(path);
+
+    expect(screen.queryByRole('heading', { name: 'Esta página no existe' })).toBeNull();
+  });
 });
