@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react'
-import { getCurrentUser, logIn, onAuthChange, signUp, type AuthUser } from '../api/auth'
+import { getCurrentUser, logIn, onAuthChange, signUp, type AuthUser, logOut } from '../api/auth'
 import { AuthContext } from './AuthContext'
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -20,7 +20,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   return (
-    <AuthContext.Provider value={{ user, loading, signUp, logIn }}>
+    <AuthContext.Provider value={{ user, loading, signUp, logIn, logOut }}>
       {children}
     </AuthContext.Provider>
   )

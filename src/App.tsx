@@ -9,6 +9,7 @@ import Footer from './components/Footer/Footer'
 import type { GameType } from './types/gameType'
 import SignUpForm from './components/SignUpForm/SignUpForm'
 import NotFound from './components/NotFound/NotFound'
+import LogInForm from './components/LogInForm/LogInForm'
 
 function App() {
   const [gameMode, setGameMode] = useState<GameType>('numbers')
@@ -28,7 +29,7 @@ function App() {
           }
         />
         <Route path="/signup" element={<main><SignUpForm /></main>} />
-        <Route path="/login" element={<main><h2>Próximamente</h2></main>} />
+        <Route path="/login" element={<main><LogInForm /></main>} />
 
         <Route path="*" element={<NotFound />} />
       </Routes>

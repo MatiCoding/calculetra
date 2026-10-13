@@ -1,4 +1,5 @@
 import type { User } from '@supabase/supabase-js'
+import {AuthApiError} from '@supabase/supabase-js'
 import { supabase } from './supabaseClient'
 
 // The rest of the app only knows this type, never Supabase's User.
@@ -23,8 +24,14 @@ export async function logIn(email: string, password: string): Promise<AuthUser> 
 export async function signUp(email: string, password: string): Promise<AuthUser | null> {
     const {data, error} = await supabase.auth.signUp({ email, password })
     if (error) throw error
+    if (data.user !== null && data.user.identities?.length === 0) throw new AuthApiError('Usuario ya registrado', 422, 'user_already_exists')
     if (data.session === null) return null
     return toAuthUser(data.session.user)
+}
+
+export async function logOut(): Promise<void> {
+    const {error} = await supabase.auth.signOut()
+    if (error) throw error
 }
 
 export async function getCurrentUser(): Promise<AuthUser | null> {

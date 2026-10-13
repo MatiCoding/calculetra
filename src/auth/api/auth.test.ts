@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { getCurrentUser, logIn, onAuthChange, signUp } from './auth'
+import { getCurrentUser, logIn, onAuthChange, signUp, logOut } from './auth'
 import { supabase } from './supabaseClient'
 
 // Replace the real client with a fake one, so the tests never call Supabase
@@ -11,6 +11,7 @@ vi.mock('./supabaseClient', () => ({
       signInWithPassword: vi.fn(),
       getSession: vi.fn(),
       onAuthStateChange: vi.fn(),
+      signOut: vi.fn(),
     },
   },
 }))
@@ -49,6 +50,17 @@ describe('signUp', () => {
 
     await expect(signUp('a@b.com', 'secret123')).rejects.toThrow('User already registered')
   })
+
+  it('throws "user already exists" when the email is already registered', async () => {
+  // Supabase hides existing emails: it answers with a user that has no identities.
+  vi.mocked(supabase.auth.signUp).mockResolvedValue({
+    data: { user: { ...supabaseUser, identities: [] }, session: null },
+    error: null,
+  } as never)
+  await expect(signUp('a@b.com', 'secret123')).rejects.toMatchObject({
+    code: 'user_already_exists',
+  })
+})
 })
 
 describe('logIn', () => {
@@ -143,5 +155,22 @@ describe('onAuthChange', () => {
 
     stop()
     expect(unsubscribe).toHaveBeenCalledOnce()
+  })
+})
+
+describe('logOut', () => {
+  it('resolves when Supabase logs the user out', async () => {
+    vi.mocked(supabase.auth.signOut).mockResolvedValue({ error: null } as never)
+
+    await expect(logOut()).resolves.toBeUndefined()
+    expect(supabase.auth.signOut).toHaveBeenCalledOnce()
+  })
+
+  it('throws the Supabase error', async () => {
+    vi.mocked(supabase.auth.signOut).mockResolvedValue({
+      error: new Error('Network error'),
+    } as never)
+
+    await expect(logOut()).rejects.toThrow('Network error')
   })
 })
