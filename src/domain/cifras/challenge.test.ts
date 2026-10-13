@@ -85,6 +85,15 @@ describe('generateChallenge', () => {
       generateChallenge(createRandom(7)),
     );
   });
+
+  it('can draw every number of the bag', () => {
+    const drawn = new Set(challenges.flatMap(({ numbers }) => numbers));
+    
+    expect([...drawn].sort((a, b) => a - b)).toEqual([
+      ...SMALL_NUMBERS,
+      ...BIG_NUMBERS,
+    ]);
+  });
 });
 
 describe('getDailyChallenge', () => {

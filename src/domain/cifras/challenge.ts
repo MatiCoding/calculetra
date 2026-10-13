@@ -2,6 +2,7 @@ import type { Challenge } from "./types";
 import { createRandom, hashString } from "./random";
 
 const bag : Array<number> = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 25, 50, 75, 100];
+const NUMBERS_PER_CHALLENGE = 6;
 
 export function getDateKey(date: Date): string {
     return new Intl.DateTimeFormat("en-CA", {timeZone: "Europe/Madrid"}).format(date)
@@ -10,8 +11,8 @@ export function getDateKey(date: Date): string {
 export function generateChallenge(random: () => number): Challenge {
     const copy : Array<number> = [...bag];
     /* Fisher-Yates shuffle */
-    for (let i = 5; i >= 0; i--) {
-        const j = Math.floor(random() * (i + 1));
+    for (let i = 0; i < NUMBERS_PER_CHALLENGE; i++) {
+        const j = i + Math.floor(random() * (copy.length - i))
         const temp = copy[i];
         copy[i] = copy[j];
         copy[j] = temp;
@@ -23,7 +24,7 @@ export function generateChallenge(random: () => number): Challenge {
     const cantidad = max - min + 1
 
     return {
-        numbers: copy.slice(0, 6),  // We return only the first 6 numbers after shuffling.
+        numbers: copy.slice(0, NUMBERS_PER_CHALLENGE),  // We return only the first NUMBERS_PER_CHALLENGE numbers after shuffling.
         target: min + Math.floor(random() * cantidad)    // We generate a random target number between 100 and 999.
     }
 }
