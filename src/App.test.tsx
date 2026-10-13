@@ -36,10 +36,18 @@ describe('App routes', () => {
     expect(screen.queryByText(/Objetivo/)).toBeNull();
   });
 
-  it('goes to the sign up page from the header link', () => {
+    it('goes to the log in page from the header link', () => {
     renderAt('/');
 
-    fireEvent.click(screen.getByRole('link', { name: 'Crear cuenta' }));
+    fireEvent.click(screen.getByRole('link', { name: 'Iniciar sesión' }));
+
+    expect(screen.getByRole('heading', { name: 'Iniciar sesión' })).toBeTruthy();
+  });
+
+  it('goes to the sign up page from the log in page', () => {
+    renderAt('/login');
+
+    fireEvent.click(screen.getByRole('link', { name: 'Crea una' }));
 
     expect(screen.getByRole('heading', { name: 'Crear cuenta' })).toBeTruthy();
   });
