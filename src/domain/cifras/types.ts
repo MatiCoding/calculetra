@@ -1,0 +1,1 @@
+export type Challenge = { numbers: Array<number>, target : number};
