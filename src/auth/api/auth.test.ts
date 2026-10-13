@@ -50,6 +50,17 @@ describe('signUp', () => {
 
     await expect(signUp('a@b.com', 'secret123')).rejects.toThrow('User already registered')
   })
+
+  it('throws "user already exists" when the email is already registered', async () => {
+  // Supabase hides existing emails: it answers with a user that has no identities.
+  vi.mocked(supabase.auth.signUp).mockResolvedValue({
+    data: { user: { ...supabaseUser, identities: [] }, session: null },
+    error: null,
+  } as never)
+  await expect(signUp('a@b.com', 'secret123')).rejects.toMatchObject({
+    code: 'user_already_exists',
+  })
+})
 })
 
 describe('logIn', () => {
