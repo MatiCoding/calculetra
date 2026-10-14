@@ -1,3 +1,14 @@
+:root {
+    --color-bg: #f4f1ea;
+    --color-card: #ffffff;
+    --color-text: #1f2430;
+    --color-muted: #5c6370;
+    --color-letter: #1e5aa8;
+    --color-number: #e8a317;
+    --color-accent: #1e5aa8;
+
+}
+
 body {
     margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;

@@ -5,20 +5,26 @@
 .numbersUl {
     list-style: none;
     padding: 0;
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
     justify-content: center;
-    gap: 16px;
+    gap: 10px;
     flex-wrap: wrap;
+    max-width: 482px;
+    margin-inline: auto;
 }
 
-.numbersLi{
-    width: 60px;
-    height: 60px;
-    border: 1px solid #000;
+.tile {
+    border: none;
+    font: inherit;
+    padding: 0;
+    cursor: pointer;
+    width: 100%;
+    aspect-ratio: 1;
     border-radius: 50%;
-    background-color: #f0f0f0;
-    font-weight: bold;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    background-color: var(--color-number);
+    color: var(--color-text);
+    font-weight: 800;
+    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
+    font-size: clamp(1rem, 4vw, 1.5rem);
 }

@@ -34,11 +34,12 @@ function NumbersGame() {
             <h3>Números disponibles:</h3>
             <ul aria-label="Números" className={styles.numbersUl}>
                 {state.tiles.map((tile) => (
-                    <li key={tile.id} className={styles.numbersLi}>
+                    <li key={tile.id}>
                         <button
                             aria-pressed={tile.id === state.selectedId}
                             onClick={() => dispatch({ type: 'selectTile', id: tile.id })}
                             disabled={state.finished}
+                            className={styles.tile}
                         >
                             {tile.value}
                         </button>
