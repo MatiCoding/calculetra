@@ -5,19 +5,24 @@
 .numbersUl {
     list-style: none;
     padding: 0;
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    display: flex;
     justify-content: center;
     gap: 10px;
-    flex-wrap: wrap;
-    max-width: 482px;
     margin-inline: auto;
+}
+
+.tileItem{
+    flex: 0 1 72px;
+    min-width: 0;
 }
 
 .tile {
     border: none;
     font: inherit;
     padding: 0;
+    line-height: 1;
+    display: grid;
+    place-items: center;
     cursor: pointer;
     width: 100%;
     aspect-ratio: 1;
@@ -27,4 +32,36 @@
     font-weight: 800;
     box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
     font-size: clamp(1rem, 4vw, 1.5rem);
+}
+
+.tile[aria-pressed="true"] {
+    box-shadow: 0 0 0 3px var(--color-letter),
+                0 6px 0 rgba(0, 0, 0, 0.2);
+    translate: 0 -4px;
+}
+
+.operators {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.operatorButton{
+    width: 48px;
+    height: 48px;
+    border-radius: 4px;
+    background-color: var(--color-letter);
+    color: white;
+    border: none;
+    font: inherit;
+    cursor: pointer;
+    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2)
+}
+
+.operatorButton[aria-pressed="true"] {
+    background-color: white;
+    color: var(--color-letter);
+    box-shadow: 0 0 0 3px var(--color-letter),
+                0 6px 0 rgba(0, 0, 0, 0.2);
+    translate: 0 -4px;
 }

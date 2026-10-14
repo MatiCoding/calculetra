@@ -7,7 +7,7 @@ import styles from './NumbersGame.module.css';
 
 const OPERATORS: Array<{ operator: Operator; label: string }> = [
     { operator: '+', label: 'Sumar' },
-    { operator: '-', label: 'Restar' },
+    { operator: '−', label: 'Restar' },
     { operator: '×', label: 'Multiplicar' },
     { operator: '÷', label: 'Dividir' },
 ];
@@ -24,17 +24,10 @@ function NumbersGame() {
     return (
         <div>
             <h2 className={styles.target}>Objetivo: {state.challenge.target}</h2>
-            <ol aria-label="Pasos">
-                {state.steps.map((step) => (
-                    <li key={step.result.id}>
-                        {step.left.value} {step.operator} {step.right.value} = {step.result.value}
-                    </li>
-                ))}
-            </ol>
             <h3>Números disponibles:</h3>
             <ul aria-label="Números" className={styles.numbersUl}>
                 {state.tiles.map((tile) => (
-                    <li key={tile.id}>
+                    <li key={tile.id} className = {styles.tileItem}>
                         <button
                             aria-pressed={tile.id === state.selectedId}
                             onClick={() => dispatch({ type: 'selectTile', id: tile.id })}
@@ -46,7 +39,7 @@ function NumbersGame() {
                     </li>
                 ))}
             </ul>
-            <div role="group" aria-label="Operaciones">
+            <div role="group" aria-label="Operaciones" className={styles.operators}>
                 {OPERATORS.map(({ operator, label }) => (
                     <button
                         key={operator}
@@ -54,6 +47,7 @@ function NumbersGame() {
                         aria-pressed={operator === state.operator}
                         onClick={() => dispatch({ type: 'selectOperator', operator })}
                         disabled={state.finished}
+                        className={styles.operatorButton}
                     >
                         {operator}
                     </button>
@@ -77,6 +71,15 @@ function NumbersGame() {
                     </div>
                 )}
             </div>
+
+            
+            <ol aria-label="Pasos">
+                {state.steps.map((step) => (
+                    <li key={step.result.id}>
+                        {step.left.value} {step.operator} {step.right.value} = {step.result.value}
+                    </li>
+                ))}
+            </ol>
         </div>
     );
 }
