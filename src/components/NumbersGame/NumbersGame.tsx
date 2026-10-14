@@ -19,7 +19,7 @@ const ERROR_MESSAGES: Record<OperationError, string> = {
 
 function NumbersGame() {
     const [state, dispatch] = useReducer(gameReducer, undefined, () => initialState(getDailyChallenge(new Date())));
-    let bestValue = getBestValue(state);
+    const bestValue = getBestValue(state);
 
     return (
         <div>
