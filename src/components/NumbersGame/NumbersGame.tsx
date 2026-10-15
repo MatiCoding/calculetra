@@ -5,11 +5,11 @@ import {calculateScore, getBestValue} from '../../domain/cifras/score';
 import type { OperationError, Operator } from '../../domain/cifras/types';
 import styles from './NumbersGame.module.css';
 
-const OPERATORS: Array<{ operator: Operator; label: string }> = [
-    { operator: '+', label: 'Sumar' },
-    { operator: '−', label: 'Restar' },
-    { operator: '×', label: 'Multiplicar' },
-    { operator: '÷', label: 'Dividir' },
+const OPERATORS: Array<{ operator: Operator; label: string; symbol: string }> = [
+    { operator: '+', label: 'Sumar', symbol: '+' },
+    { operator: '-', label: 'Restar', symbol: '−' },
+    { operator: '×', label: 'Multiplicar', symbol: '×' },
+    { operator: '÷', label: 'Dividir', symbol: '÷' },
 ];
 
 const ERROR_MESSAGES: Record<OperationError, string> = {
@@ -40,7 +40,7 @@ function NumbersGame() {
                 ))}
             </ul>
             <div role="group" aria-label="Operaciones" className={styles.operators}>
-                {OPERATORS.map(({ operator, label }) => (
+                {OPERATORS.map(({ operator, label, symbol }) => (
                     <button
                         key={operator}
                         aria-label={label}
@@ -49,7 +49,7 @@ function NumbersGame() {
                         disabled={state.finished}
                         className={styles.operatorButton}
                     >
-                        {operator}
+                        {symbol}
                     </button>
                 ))}
             </div>
