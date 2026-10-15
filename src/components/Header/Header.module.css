@@ -28,8 +28,20 @@
 
 /* On narrow phones the big title leaves no room for the link and stops
    being centered, so it gets a bit smaller. */
-@media (max-width: 480px) {
+@media (max-width: 820px) {
+    .header {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
     .title {
         font-size: 2rem;
+        grid-column: 1;
+    }
+
+    .authLink {
+        justify-self: center;
+        flex-wrap: wrap;
+        justify-content: center;
     }
 }

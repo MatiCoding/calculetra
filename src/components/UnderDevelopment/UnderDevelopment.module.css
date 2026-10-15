@@ -1,12 +1,4 @@
 .page {
-    --color-bg: #f4f1ea;
-    --color-card: #ffffff;
-    --color-text: #1f2430;
-    --color-muted: #5c6370;
-    --color-letter: #1e5aa8;
-    --color-number: #e8a317;
-    --color-accent: #1e5aa8;
-
     min-height: 100vh;
     min-height: 100dvh;
     box-sizing: border-box;
