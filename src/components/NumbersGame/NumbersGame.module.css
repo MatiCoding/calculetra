@@ -2,6 +2,10 @@
     font-size: 2rem;
 }
 
+.container {
+    padding-inline: 16px;
+}
+
 .numbersUl {
     list-style: none;
     padding: 0;
@@ -32,6 +36,8 @@
     font-weight: 800;
     box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
     font-size: clamp(1rem, 4vw, 1.5rem);
+
+    transition: translate 150ms ease, box-shadow 150ms ease;
 }
 
 .tile[aria-pressed="true"] {
@@ -54,8 +60,12 @@
     color: white;
     border: none;
     font: inherit;
+    font-size: 1.5rem;
+    font-weight: 700;
     cursor: pointer;
     box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
+
+    transition: translate 150ms ease, box-shadow 150ms ease;
 }
 
 .operatorButton[aria-pressed="true"] {
@@ -128,4 +138,38 @@
     padding: 0;
     list-style-position: inside;
     font-family: ui-monospace, Consolas, monospace;
+}
+
+.result {
+    width: fit-content;
+    margin: 16px auto;
+    padding: 16px 32px;
+    border: 1px solid rgba(31, 36, 48, 0.15);
+    border-radius: 12px;
+}
+
+.result dl {
+    margin: 0;
+}
+
+.result dt {
+    color: var(--color-muted);
+    font-size: 0.875rem;
+}
+
+.result dd {
+    margin: 0 0 12px;
+    font-weight: 700;
+    font-size: 1.25rem;
+}
+
+.result .score {
+    font-size: 3rem;
+    color: var(--color-letter);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tile, .operatorButton, .primary, .secondary {
+        transition: none;
+    }
 }

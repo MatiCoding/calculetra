@@ -163,9 +163,12 @@ describe('NumbersGame', () => {
         playFirstSum();
         clickButton('Terminar');
 
-        expect(screen.getByText(`Mejor número: ${best}`)).toBeTruthy();
-        expect(screen.getByText(`Distancia: ${distance}`)).toBeTruthy();
-        expect(screen.getByText(`Puntos: ${calculateScore(challenge.target, best)}`)).toBeTruthy();
+        const result = screen.getByRole('region', { name: 'Resultado' });
+        const valueOf = (label: string) => within(result).getByText(label).nextElementSibling?.textContent;
+
+        expect(valueOf('Puntos')).toBe(String(calculateScore(challenge.target, best)));
+        expect(valueOf('Mejor número')).toBe(String(best));
+        expect(valueOf('Distancia')).toBe(String(distance));
     });
 
     it('does not let the player keep playing after finishing', () => {
@@ -186,7 +189,7 @@ describe('NumbersGame', () => {
         clickButton('Terminar');
         clickButton('Reiniciar');
 
-        expect(screen.queryByText(/Mejor número/)).toBeNull();
+        expect(screen.queryByRole('region', { name: 'Resultado' })).toBeNull();
         expect(numberButtons().every((button) => !(button as HTMLButtonElement).disabled)).toBe(true);
     });
 });

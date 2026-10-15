@@ -22,7 +22,7 @@ function NumbersGame() {
     const bestValue = getBestValue(state);
 
     return (
-        <div>
+        <div className={styles.container}>
             <h2 className={styles.target}>Objetivo: {state.challenge.target}</h2>
             <h3>Números disponibles:</h3>
             <ul aria-label="Números" className={styles.numbersUl}>
@@ -69,17 +69,19 @@ function NumbersGame() {
                 </button>
             </div>
 
-            <div>
-                {state.finished && (
-                    <div>
-                        <div>Mejor número: {bestValue}</div>
-                        <div>Distancia: {Math.abs(bestValue- state.challenge.target)}</div>
-                        <div>Puntos: {calculateScore(state.challenge.target, bestValue)}</div>
-                    </div>
-                )}
-            </div>
+            {state.finished && (
+                <section aria-label="Resultado" className={styles.result}>
+                    <dl>
+                        <dt>Puntos</dt>
+                        <dd className={styles.score}>{calculateScore(state.challenge.target, bestValue)}</dd>
+                        <dt>Mejor número</dt>
+                        <dd>{bestValue}</dd>
+                        <dt>Distancia</dt>
+                        <dd>{Math.abs(bestValue - state.challenge.target)}</dd>
+                    </dl>
+                </section>
+            )}
 
-            
             <ol aria-label="Pasos" className={styles.steps}>
                 {state.steps.map((step) => (
                     <li key={step.result.id}>
