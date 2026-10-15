@@ -40,6 +40,11 @@
     translate: 0 -4px;
 }
 
+.tile:focus-visible, .operatorButton:focus-visible {
+    outline: 3px solid var(--color-text);
+    outline-offset: 4px;
+}
+
 .operators {
     display: flex;
     justify-content: center;
