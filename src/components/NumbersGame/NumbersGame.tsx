@@ -53,14 +53,21 @@ function NumbersGame() {
                     </button>
                 ))}
             </div>
-            {state.error !== null && <p role="alert">{ERROR_MESSAGES[state.error]}</p>}
-            <button onClick={() => dispatch({ type: 'undo' })} disabled={state.steps.length === 0 || state.finished}>
-                Deshacer
-            </button>
-            <button onClick={() => dispatch({ type: 'finish' })} disabled={state.finished}>
-                Terminar
-            </button>
-            <button onClick={() => dispatch({ type: 'reset' })}>Reiniciar</button>
+            {state.error !== null && <p role="alert" className={styles.error}>
+                {ERROR_MESSAGES[state.error]}
+            </p>}
+
+            <div className={styles.actions}>
+                <button onClick={() => dispatch({ type: 'undo' })} disabled={state.steps.length === 0 || state.finished} className={styles.secondary}>
+                    Deshacer
+                </button>
+                <button onClick={() => dispatch({ type: 'finish' })} disabled={state.finished} className={styles.primary}>
+                    Terminar
+                </button>
+                <button onClick={() => dispatch({ type: 'reset' })} className={styles.secondary}>
+                    Reiniciar
+                </button>
+            </div>
 
             <div>
                 {state.finished && (
@@ -73,7 +80,7 @@ function NumbersGame() {
             </div>
 
             
-            <ol aria-label="Pasos">
+            <ol aria-label="Pasos" className={styles.steps}>
                 {state.steps.map((step) => (
                     <li key={step.result.id}>
                         {step.left.value} {step.operator} {step.right.value} = {step.result.value}

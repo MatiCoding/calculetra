@@ -11,7 +11,7 @@
     margin-inline: auto;
 }
 
-.tileItem{
+.tileItem {
     flex: 0 1 72px;
     min-width: 0;
 }
@@ -40,18 +40,13 @@
     translate: 0 -4px;
 }
 
-.tile:focus-visible, .operatorButton:focus-visible {
-    outline: 3px solid var(--color-text);
-    outline-offset: 4px;
-}
-
 .operators {
     display: flex;
     justify-content: center;
     gap: 10px;
 }
 
-.operatorButton{
+.operatorButton {
     width: 48px;
     height: 48px;
     border-radius: 4px;
@@ -60,7 +55,7 @@
     border: none;
     font: inherit;
     cursor: pointer;
-    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2)
+    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
 }
 
 .operatorButton[aria-pressed="true"] {
@@ -69,4 +64,68 @@
     box-shadow: 0 0 0 3px var(--color-letter),
                 0 6px 0 rgba(0, 0, 0, 0.2);
     translate: 0 -4px;
+}
+
+.error {
+    color: #b42318;
+    font-weight: 600;
+}
+
+.actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+}
+
+.primary, .secondary {
+    cursor: pointer;
+    font: inherit;
+    font-weight: 600;
+    padding: 12px 20px;
+    border-radius: 12px;
+    transition: opacity 150ms ease, background-color 150ms ease;
+}
+
+.primary {
+    background-color: var(--color-accent);
+    color: white;
+    border: 1px solid transparent;
+}
+
+.primary:hover:not(:disabled) {
+    opacity: 0.85;
+}
+
+.secondary {
+    background-color: transparent;
+    color: var(--color-text);
+    border: 1px solid rgba(31, 36, 48, 0.15);
+}
+
+.secondary:hover:not(:disabled) {
+    background-color: rgba(31, 36, 48, 0.05);
+}
+
+.tile:focus-visible,
+.operatorButton:focus-visible,
+.primary:focus-visible,
+.secondary:focus-visible {
+    outline: 3px solid var(--color-text);
+    outline-offset: 4px;
+}
+
+.tile:disabled,
+.operatorButton:disabled,
+.primary:disabled,
+.secondary:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.steps {
+    padding: 0;
+    list-style-position: inside;
+    font-family: ui-monospace, Consolas, monospace;
 }
