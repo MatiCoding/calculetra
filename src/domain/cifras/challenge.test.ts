@@ -5,10 +5,6 @@ import { createRandom } from './random';
 const SMALL_NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 const BIG_NUMBERS = [25, 50, 75, 100];
 
-function countOf(numbers: number[], value: number): number {
-  return numbers.filter((number) => number === value).length;
-}
-
 describe('getDateKey', () => {
   it('formats the date as YYYY-MM-DD with leading zeros', () => {
     expect(getDateKey(new Date('2026-01-05T10:00:00Z'))).toBe('2026-01-05');
@@ -56,14 +52,9 @@ describe('generateChallenge', () => {
     }
   });
 
-  it('uses each small number at most twice and each big number at most once', () => {
+  it('never repeats a number', () => {
     for (const { numbers } of challenges) {
-      for (const small of SMALL_NUMBERS) {
-        expect(countOf(numbers, small)).toBeLessThanOrEqual(2);
-      }
-      for (const big of BIG_NUMBERS) {
-        expect(countOf(numbers, big)).toBeLessThanOrEqual(1);
-      }
+      expect(new Set(numbers).size).toBe(numbers.length);
     }
   });
 
