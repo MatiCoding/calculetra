@@ -25,7 +25,7 @@ export function generateChallenge(random: () => number): Challenge {
 
     return {
         numbers: copy.slice(0, NUMBERS_PER_CHALLENGE),  // We return only the first NUMBERS_PER_CHALLENGE numbers after shuffling.
-        target: min + Math.floor(random() * cantidad)    // We generate a random target number between 100 and 999.
+        target: min + Math.floor(random() * cantidad)    // We generate a random target number between 101 and 999.
     }
 }
 
