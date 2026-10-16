@@ -12,8 +12,9 @@ A daily numbers-and-letters puzzle inspired by the Spanish TV show *Cifras y Let
 [![Supabase](https://img.shields.io/badge/Supabase-Auth-3FCF8E?logo=supabase&logoColor=white)](https://supabase.com)
 [![Vercel](https://img.shields.io/badge/Vercel-deployed-000000?logo=vercel&logoColor=white)](https://calculetra.vercel.app)
 [![License](https://img.shields.io/badge/License-GPL--3.0-blue)](LICENSE)
+[![Docs](https://github.com/MatiCoding/calculetra/actions/workflows/docs.yml/badge.svg?branch=main)](https://maticoding.github.io/calculetra/)
 
-**[Play it](https://calculetra.vercel.app)** · [Rules](docs/rules/cifras.md) · [Getting started](#getting-started) · [Documentation](#documentation) · [Contributing](CONTRIBUTING.md)
+**[Play it](https://calculetra.vercel.app)** · [Rules](docs/rules/cifras.md) · [Getting started](#getting-started) · [Documentation](https://maticoding.github.io/calculetra/) · [Contributing](CONTRIBUTING.md)
 
 </div>
 
@@ -120,21 +121,25 @@ This runs every test file once and shows which tests passed or failed. While you
 CI runs these same checks on every push to `developer` and on every pull request, so running them locally first saves you a red build:
 
 ```bash
-npm run lint   # looks for common mistakes and bad practices
-npm test       # runs the tests
-npm run build  # checks the types and builds the production version into dist/
+npm run lint       # looks for common mistakes and bad practices
+npm test           # runs the tests
+npm run build      # checks the types and builds the production version into dist/
+npm run docs:build # builds the documentation site and fails on broken links
 ```
 
 ### Available scripts
 
-| Command              | What it does                                    |
-| -------------------- | ----------------------------------------------- |
-| `npm run dev`        | Starts the development server with live reload  |
-| `npm test`           | Runs the tests once                             |
-| `npm run test:watch` | Runs the tests and re-runs them on every change |
-| `npm run lint`       | Runs ESLint                                     |
-| `npm run build`      | Type-checks and builds for production           |
-| `npm run preview`    | Serves the production build locally             |
+| Command                | What it does                                              |
+| ---------------------- | --------------------------------------------------------- |
+| `npm run dev`          | Starts the development server with live reload            |
+| `npm test`             | Runs the tests once                                       |
+| `npm run test:watch`   | Runs the tests and re-runs them on every change           |
+| `npm run lint`         | Runs ESLint                                               |
+| `npm run build`        | Type-checks and builds for production                     |
+| `npm run preview`      | Serves the production build locally                       |
+| `npm run docs:dev`     | Starts the documentation site with live reload            |
+| `npm run docs:build`   | Builds the documentation site into `docs/.vitepress/dist` |
+| `npm run docs:preview` | Serves the built documentation site locally               |
 
 ## Project structure
 
@@ -161,6 +166,8 @@ docs/                # game rules, architecture and decisions
 Game logic lives in `src/domain` and is kept separate from the UI, so it can be tested on its own. The [architecture document](docs/architecture.md#5-building-blocks) explains how these folders depend on each other.
 
 ## Documentation
+
+The documentation is published at **[maticoding.github.io/calculetra](https://maticoding.github.io/calculetra/)**, with search and a sidebar. The same Markdown files live in [`docs/`](docs), so you can also read them here:
 
 - [Cifras rules](docs/rules/cifras.md): how the game works, with a worked example.
 - [Architecture](docs/architecture.md): how the app is built and why, with diagrams.
