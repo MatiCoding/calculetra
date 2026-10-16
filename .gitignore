@@ -24,3 +24,7 @@ dist-ssr
 *.sw?
 
 .env
+
+# VitePress
+docs/.vitepress/dist
+docs/.vitepress/cache
