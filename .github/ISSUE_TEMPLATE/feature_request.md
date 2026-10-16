@@ -1,10 +1,10 @@
 ---
 name: Feature request
 about: A new feature or improvement
-labels: enhacement
+labels: enhancement
 ---
 
 ## What
 
 ## Acceptance criteria
-- []
+- [ ]
