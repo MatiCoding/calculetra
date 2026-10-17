@@ -85,6 +85,7 @@ npm ci
 npm run lint
 npm test
 npm run build
+npm run docs:build
 ```
 
 If any of them fails, CI will fail too. See [Available scripts](README.md#available-scripts) in the README for what each command does.
