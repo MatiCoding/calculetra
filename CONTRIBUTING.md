@@ -15,7 +15,7 @@ Please open an issue before starting any non-trivial change, so we can agree on 
 
 The repository has two long-lived branches:
 
-- `main` is production. Every merge into it is deployed to Vercel, and it only receives releases from `developer`.
+- `main` is production. Every merge into it is deployed to Vercel, and it only receives releases from `developer` (see [Releases](#releases)).
 - `developer` is where changes are integrated before a release.
 
 To propose a change:
@@ -53,11 +53,67 @@ To propose a change:
    git merge upstream/developer
    ```
 
+If your change is something a player will notice, add a line to the `[Unreleased]` section of [`CHANGELOG.md`](CHANGELOG.md) in the same pull request (under `### Added`, `### Changed` or `### Fixed`). Internal changes such as tests, CI or refactors do not need one.
+
 CI runs lint, tests and build on every pull request. A pull request needs a green CI run before it is merged.
 
 ### Hotfixes
 
 Only for an urgent bug in production: create the branch from `main` and open the pull request to `main`. After it is merged, `main` is merged into `developer` so both branches have the fix.
+
+A hotfix is a patch release (for example `v0.1.1`): add the fix under `### Fixed` in `CHANGELOG.md` and follow the [release steps](#releases).
+
+## Releases
+
+Releases are made by the maintainer. Versions follow [Semantic Versioning](https://semver.org/), and every merge from `developer` into `main` is a release. The reasons are in [ADR 0002](docs/decisions/0002-versioning-and-releases.md).
+
+### Which version
+
+- **Minor** (`0.2.0`): a milestone is complete or there are new features.
+- **Patch** (`0.1.1`): only fixes to the published version, including hotfixes.
+- **Major** (`1.0.0`): reserved for when Cifras and Letras are stable.
+
+A version without a suffix is a normal release and is marked as *Latest* on GitHub. Only test versions with a suffix (`v1.0.0-rc.1`, `v0.4.0-beta.1`) are published as a *pre-release*: they are tagged on `developer`, tested on its Vercel preview deployment and never merged into `main`.
+
+### Steps
+
+1. On `developer`, set the new version in `package.json` and `package-lock.json` without creating a commit or a tag:
+
+   ```bash
+   npm version 0.2.0 --no-git-tag-version
+   ```
+
+2. In `CHANGELOG.md`:
+   - Rename `## [Unreleased]` to `## [0.2.0] - YYYY-MM-DD` and add a new, empty `## [Unreleased]` above it.
+   - Update the links at the bottom: `[Unreleased]` compares from the new tag, and the new version compares with the previous one.
+
+   ```md
+   [Unreleased]: https://github.com/MatiCoding/calculetra/compare/v0.2.0...HEAD
+   [0.2.0]: https://github.com/MatiCoding/calculetra/compare/v0.1.0...v0.2.0
+   ```
+
+3. Commit both files as `chore: release v0.2.0`, push and open a pull request from `developer` to `main` titled `Release v0.2.0`. Merge it when CI is green.
+
+4. Tag the merge on `main` with an annotated tag and push the tag (`git push` does not push tags):
+
+   ```bash
+   git switch main
+   git pull
+   git tag -a v0.2.0 -m "v0.2.0: <short summary>"
+   git push origin v0.2.0
+   ```
+
+5. On GitHub, go to **Releases → Draft a new release**, choose the tag, use the version as the title and paste only that version's section of the changelog. Publish it.
+
+6. Bring `main` back into `developer`:
+
+   ```bash
+   git switch developer
+   git merge main
+   git push
+   ```
+
+Vercel deploys `main` after the merge in step 3. The tag and the GitHub Release do not trigger a new deploy.
 
 ## Commit messages
 
