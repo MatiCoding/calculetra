@@ -57,3 +57,4 @@ What becomes easier or harder, risks, and follow-up work.
 | #    | Decision                                             | Status   |
 | ---- | ---------------------------------------------------- | -------- |
 | 0001 | [Use Supabase as the backend](0001-backend-supabase.md) | Accepted |
+| 0002 | [Version the app and release every merge to main](0002-versioning-and-releases.md) | Accepted|
