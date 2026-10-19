@@ -14,7 +14,7 @@ Refs #
 
 ## Checklist
 
-- [ ] The pull request targets `developer` (or `main` only for a hotfix).
+- [ ] The pull request targets `developer` (or `main` only for a release or hotfix).
 - [ ] Commits follow [Conventional Commits](https://www.conventionalcommits.org).
 - [ ] `npm run lint`, `npm test` and `npm run build` pass locally.
 - [ ] New logic and new components have tests.
