@@ -35,7 +35,7 @@ flowchart LR
 | Partner | What goes between it and the app |
 | --- | --- |
 | Player | Uses the app in a browser. The game works without an account. |
-| Vercel | Serves the static build (`dist/`). Every page, including `/login` or `/signup`, is answered with `index.html` (see `vercel.json`) so the router in the browser can handle it. Vercel builds and deploys `main` automatically. |
+| Vercel | Serves the static build (`dist/`). Every page, including `/login` or `/signup`, is answered with `index.html` (see `vercel.json`) so the router in the browser can handle it. Each published release is deployed by the Deploy workflow (see [ADR 0003](decisions/0003-deploy-on-release.md)); merges into main are not deployed on their own. |
 | Supabase Auth | Accounts with email and password, called directly from the browser through `@supabase/supabase-js`. See [ADR 0001](decisions/0001-backend-supabase.md). |
 | Supabase database | **Planned.** Game results, the daily leaderboard and stats are not stored yet. |
 
