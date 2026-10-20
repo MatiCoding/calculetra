@@ -35,6 +35,7 @@ export default withMermaid(
             { text: 'About ADRs', link: '/decisions/README' },
             { text: '0001. Use Supabase as the backend', link: '/decisions/0001-backend-supabase' },
             { text: '0002. Version the app and release every merge to main', link: '/decisions/0002-versioning-and-releases'},
+            { text: '0003. Deploy to production when a release is published', link: '/decisions/0003-deploy-on-release' },
           ],
         },
       ],
