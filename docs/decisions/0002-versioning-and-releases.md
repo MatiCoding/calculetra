@@ -1,6 +1,6 @@
 # 2. Version the app and release every merge to main
 
-- Status: Accepted. The deploy trigger is superseded by [0003](0003-deploy-on-release.md)
+- Status: Accepted. The deploy trigger is superseded by [0003](0003-deploy-on-release.md) and the release on every merge by [0005](0005-merge-without-release.md)
 - Date: 2026-10-19
 
 ## Context
