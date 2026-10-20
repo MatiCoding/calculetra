@@ -1,0 +1,39 @@
+name: Deploy
+
+on:
+  release:
+    types: [ published ]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to deploy (for example v0.1.2)'
+        required: true
+
+permissions:
+  contents: read
+
+# Only one production deploy at a time; a new one waits instead of cancelling a deploy in progress
+concurrency:
+  group: production
+  cancel-in-progress: false
+
+jobs:
+    deploy:
+        # Pre-releases also fire "published", so skip them. A manual run has no release, so it always runs.
+        if: github.event_name == 'workflow_dispatch' || !github.event.release.prerelease
+        runs-on: ubuntu-latest
+        env:
+            VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+            VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        steps:
+            # On a release, github.ref is the tag. On a manual run, use the tag from the input.
+            - uses: actions/checkout@v5
+              with:
+                ref: ${{ inputs.tag || github.ref }}
+            - uses: actions/setup-node@v5
+              with:
+                node-version: 22
+                cache: npm
+            - run: npx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+            - run: npx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+            - run: npx vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
