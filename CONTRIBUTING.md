@@ -15,7 +15,7 @@ Please open an issue before starting any non-trivial change, so we can agree on 
 
 The repository has two long-lived branches:
 
-- `main` is production. Every merge into it is deployed to Vercel, and it only receives releases from `developer` (see [Releases](#releases)).
+- `main` is production. It only receives releases from `developer`, and each published release is deployed to Vercel (see [Releases](#releases)).
 - `developer` is where changes are integrated before a release.
 
 To propose a change:
@@ -103,7 +103,7 @@ A version without a suffix is a normal release and is marked as *Latest* on GitH
    git push origin v0.2.0
    ```
 
-5. On GitHub, go to **Releases → Draft a new release**, choose the tag, use the version as the title and paste only that version's section of the changelog. Publish it.
+5. On GitHub, go to **Releases → Draft a new release**, choose the tag, use the version as the title and paste only that version's section of the changelog. Leave *Set as a pre-release* unchecked and publish it.
 
 6. Bring `main` back into `developer`:
 
@@ -113,7 +113,11 @@ A version without a suffix is a normal release and is marked as *Latest* on GitH
    git push
    ```
 
-Vercel deploys `main` after the merge in step 3. The tag and the GitHub Release do not trigger a new deploy.
+Publishing the release in step 5 is what deploys it: the **Deploy** workflow sends that tag to Vercel production and the **Docs** workflow publishes the documentation site. Merging into `main` deploys nothing on its own, and pre-releases are never deployed to production.
+
+### Deploying an older version
+
+To go back to a previous version, open **Actions → Deploy → Run workflow** on GitHub and enter its tag (for example `v0.1.1`). It deploys that tag to production without changing `main`. Then fix the problem and publish a new patch release.
 
 ## Commit messages
 

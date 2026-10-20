@@ -58,3 +58,4 @@ What becomes easier or harder, risks, and follow-up work.
 | ---- | ---------------------------------------------------- | -------- |
 | 0001 | [Use Supabase as the backend](0001-backend-supabase.md) | Accepted |
 | 0002 | [Version the app and release every merge to main](0002-versioning-and-releases.md) | Accepted |
+| 0003 | [Deploy to production when a release is published](0003-deploy-on-release.md) | Accepted |
