@@ -1,5 +1,5 @@
 import type { User } from '@supabase/supabase-js'
-import {AuthApiError} from '@supabase/supabase-js'
+import { AuthApiError, isAuthSessionMissingError } from '@supabase/supabase-js'
 import { supabase } from './supabaseClient'
 
 // The rest of the app only knows this type, never Supabase's User.
@@ -34,17 +34,21 @@ export async function logOut(): Promise<void> {
     if (error) throw error
 }
 
+// Asks the server if the saved session is still valid, instead of
+// trusting what is stored in the browser.
 export async function getCurrentUser(): Promise<AuthUser | null> {
-    const {data, error} = await supabase.auth.getSession()
+    const {data, error} = await supabase.auth.getUser()
+    if (isAuthSessionMissingError(error)) return null
     if (error) throw error
-    if (data.session === null) return null
-    return toAuthUser(data.session.user)
+    return toAuthUser(data.user)
 }
 
 // Calls `callback` every time the user logs in or out.
 // Returns a function that stops listening.
 export function onAuthChange(callback: (user: AuthUser | null) => void): () => void {
-  const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+  const { data } = supabase.auth.onAuthStateChange((event, session) => {
+    // The session at start-up is checked by getCurrentUser, not here.
+    if (event === 'INITIAL_SESSION') return
     callback(session ? toAuthUser(session.user) : null)
   })
   return () => data.subscription.unsubscribe()

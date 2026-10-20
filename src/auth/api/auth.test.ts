@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { getCurrentUser, logIn, onAuthChange, signUp, logOut } from './auth'
 import { supabase } from './supabaseClient'
+import { AuthSessionMissingError } from '@supabase/supabase-js'
 
 // Replace the real client with a fake one, so the tests never call Supabase
 // and do not need environment variables.
@@ -9,7 +10,7 @@ vi.mock('./supabaseClient', () => ({
     auth: {
       signUp: vi.fn(),
       signInWithPassword: vi.fn(),
-      getSession: vi.fn(),
+      getUser: vi.fn(),
       onAuthStateChange: vi.fn(),
       signOut: vi.fn(),
     },
@@ -84,9 +85,9 @@ describe('logIn', () => {
 })
 
 describe('getCurrentUser', () => {
-  it('returns the user when there is a session', async () => {
-    vi.mocked(supabase.auth.getSession).mockResolvedValue({
-      data: { session: { user: supabaseUser } },
+  it('returns the user when the server accepts the session', async () => {
+    vi.mocked(supabase.auth.getUser).mockResolvedValue({
+      data: { user: supabaseUser },
       error: null,
     } as never)
 
@@ -94,17 +95,17 @@ describe('getCurrentUser', () => {
   })
 
   it('returns null when nobody is logged in', async () => {
-    vi.mocked(supabase.auth.getSession).mockResolvedValue({
-      data: { session: null },
-      error: null,
+    vi.mocked(supabase.auth.getUser).mockResolvedValue({
+      data: { user: null },
+      error: new AuthSessionMissingError(),
     } as never)
 
     await expect(getCurrentUser()).resolves.toBeNull()
   })
 
-  it('throws the Supabase error', async () => {
-    vi.mocked(supabase.auth.getSession).mockResolvedValue({
-      data: { session: null },
+  it('throws any other Supabase error', async () => {
+    vi.mocked(supabase.auth.getUser).mockResolvedValue({
+      data: { user: null },
       error: new Error('Network error'),
     } as never)
 
@@ -124,7 +125,11 @@ describe('onAuthChange', () => {
       listener = callback
       return { data: { subscription: { unsubscribe } } }
     }) as never)
-    return { unsubscribe, emit: (session: unknown) => listener('EVENT', session) }
+    return {
+      unsubscribe,
+      emit: (session: unknown) => listener('EVENT', session),
+      emitEvent: (event: string, session: unknown) => listener(event, session),
+    }
   }
 
   it('calls the callback with the user when someone logs in', () => {
@@ -155,6 +160,16 @@ describe('onAuthChange', () => {
 
     stop()
     expect(unsubscribe).toHaveBeenCalledOnce()
+  })
+
+  it('ignores the initial session, which getCurrentUser checks', () => {
+    const { emitEvent } = setUpListener()
+    const callback = vi.fn()
+    
+    onAuthChange(callback)
+    emitEvent('INITIAL_SESSION', { user: supabaseUser })
+    
+    expect(callback).not.toHaveBeenCalled()
   })
 })
 
