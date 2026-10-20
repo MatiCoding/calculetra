@@ -30,7 +30,8 @@ export async function signUp(email: string, password: string): Promise<AuthUser 
 }
 
 export async function logOut(): Promise<void> {
-    const {error} = await supabase.auth.signOut()
+    // "global" ends the session on every device so a copied token stops working.
+    const {error} = await supabase.auth.signOut({scope: 'global'})
     if (error) throw error
 }
 

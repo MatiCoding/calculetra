@@ -178,7 +178,7 @@ describe('logOut', () => {
     vi.mocked(supabase.auth.signOut).mockResolvedValue({ error: null } as never)
 
     await expect(logOut()).resolves.toBeUndefined()
-    expect(supabase.auth.signOut).toHaveBeenCalledOnce()
+    expect(supabase.auth.signOut).toHaveBeenCalledWith({scope: 'global'})
   })
 
   it('throws the Supabase error', async () => {
