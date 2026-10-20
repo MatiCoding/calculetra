@@ -178,7 +178,7 @@ The documentation is published at **[maticoding.github.io/calculetra](https://ma
 
 Contributions are welcome. Read the [contributing guide](CONTRIBUTING.md) before you start. In short:
 
-- - `main` only receives changes that are ready to be published. Production is the latest published release, deployed when the release is published.
+- `main` only receives changes that are ready to be published. Production is the latest published release, deployed when the release is published.
 - `developer` is where changes are integrated. Fork the repository, create a branch from `developer` and open a pull request to `developer`.
 - Commits follow [Conventional Commits](https://www.conventionalcommits.org) (`feat:`, `fix:`, `docs:`…).
 - Lint, tests and build must pass, locally and in CI.
