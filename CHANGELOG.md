@@ -6,6 +6,11 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-10-20
+
+### Changed
+- Production is now deployed when a release is published, not on every merge into `main`.
+
 ## [0.1.1] - 2026-10-19
 
 ### Added
@@ -23,6 +28,7 @@ First playable version.
 - 404 page for unknown addresses.
 - Documentation website with the game rules, the architecture and the technical decisions.
 
-[Unreleased]: https://github.com/MatiCoding/calculetra/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/MatiCoding/calculetra/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/MatiCoding/calculetra/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/MatiCoding/calculetra/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/MatiCoding/calculetra/releases/tag/v0.1.0
