@@ -6,6 +6,11 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Security
+- The site now sends a Content Security Policy and other security headers, so scripts from other sites cannot run on it.
+- The saved session is checked with the server when the app opens, instead of being trusted as it is.
+- Logging out ends the session on every device, and access tokens expire after 15 minutes.
+
 ## [0.1.2] - 2026-10-20
 
 ### Changed

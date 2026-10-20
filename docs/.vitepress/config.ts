@@ -36,6 +36,8 @@ export default withMermaid(
             { text: '0001. Use Supabase as the backend', link: '/decisions/0001-backend-supabase' },
             { text: '0002. Version the app and release every merge to main', link: '/decisions/0002-versioning-and-releases'},
             { text: '0003. Deploy to production when a release is published', link: '/decisions/0003-deploy-on-release' },
+            { text: '0004. Keep the session in localStorage and reduce the risk', link: '/decisions/0004-session-storage'},
+            { text: '0005. Merge into main without making a release', link: '/decisions/0005-merge-without-release'},
           ],
         },
       ],

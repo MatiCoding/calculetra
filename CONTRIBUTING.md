@@ -15,8 +15,8 @@ Please open an issue before starting any non-trivial change, so we can agree on 
 
 The repository has two long-lived branches:
 
-- `main` is production. It only receives releases from `developer`, and each published release is deployed to Vercel (see [Releases](#releases)).
-- `developer` is where changes are integrated before a release.
+- `main` only receives changes that are finished and ready to be published, from `developer` or from a hotfix. Merging into `main` does not deploy anything: production is the latest published release (see [Releases](#releases)).
+- `developer` is where changes are integrated before they go to `main`.
 
 To propose a change:
 
@@ -57,15 +57,25 @@ If your change is something a player will notice, add a line to the `[Unreleased
 
 CI runs lint, tests and build on every pull request. A pull request needs a green CI run before it is merged.
 
+### Merging into main
+
+The maintainer merges `developer` into `main` when the changes in it are finished and ready to be published. It does not have to be a release:
+
+1. Open a pull request from `developer` to `main` with a title that summarizes what it brings, for example `Merge session security changes`.
+2. Merge it when CI is green. The version and `CHANGELOG.md` do not change: the entries stay under `[Unreleased]` until the next release.
+3. Bring `main` back into `developer` (`git switch developer && git merge main && git push`).
+
+Several merges can go into `main` before a release. The reasons are in [ADR 0005](docs/decisions/0005-merge-without-release.md).
+
 ### Hotfixes
 
 Only for an urgent bug in production: create the branch from `main` and open the pull request to `main`. After it is merged, `main` is merged into `developer` so both branches have the fix.
 
-A hotfix is a patch release (for example `v0.1.1`): add the fix under `### Fixed` in `CHANGELOG.md` and follow the [release steps](#releases).
+A hotfix is a patch release (for example `v0.1.1`): add the fix under `### Fixed` in `CHANGELOG.md`, and add the `chore: release vX.Y.Z` commit (steps 1–3 of [Releases](#releases)) to the hotfix branch itself, so the hotfix pull request is the release. Then tag, publish and merge back as in steps 4–6. The release also includes any unreleased changes already in `main`.
 
 ## Releases
 
-Releases are made by the maintainer. Versions follow [Semantic Versioning](https://semver.org/), and every merge from `developer` into `main` is a release. The reasons are in [ADR 0002](docs/decisions/0002-versioning-and-releases.md).
+Releases are made by the maintainer, when they decide to publish what is in `main`. Versions follow [Semantic Versioning](https://semver.org/). The reasons are in [ADR 0002](docs/decisions/0002-versioning-and-releases.md) and [ADR 0005](docs/decisions/0005-merge-without-release.md).
 
 ### Which version
 
@@ -134,7 +144,7 @@ Commits follow [Conventional Commits](https://www.conventionalcommits.org): `<ty
 | `ci`       | Changes to the GitHub Actions workflows          | `ci: run checks on pull requests to developer`  |
 | `chore`    | Anything else (config, dependencies, comments)   | `chore: add VITE_UNDER_CONSTRUCTION to .env.example` |
 
-Reference the issue in the commit body: `Refs #42` while you are working on it, and `Closes #42` in the last commit. GitHub closes the issue when that commit reaches `main` in the next release. Note that `Closes #42` in the description of a pull request to `developer` does **not** close the issue.
+Reference the issue in the commit body: `Refs #42` while you are working on it, and `Closes #42` in the last commit. GitHub closes the issue when that commit reaches `main`, even if it has not been released yet. Note that `Closes #42` in the description of a pull request to `developer` does **not** close the issue.
 
 ## Before opening a pull request
 
