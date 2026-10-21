@@ -6,6 +6,9 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- An account page, opened from your email in the header. Changing your password, changing your email and deleting your account will live there.
+
 ## [0.1.3] - 2026-10-21
 
 ### Security
