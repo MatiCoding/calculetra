@@ -6,6 +6,8 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-10-21
+
 ### Security
 - The site now sends a Content Security Policy and other security headers, so scripts from other sites cannot run on it.
 - The saved session is checked with the server when the app opens, instead of being trusted as it is.
@@ -33,7 +35,8 @@ First playable version.
 - 404 page for unknown addresses.
 - Documentation website with the game rules, the architecture and the technical decisions.
 
-[Unreleased]: https://github.com/MatiCoding/calculetra/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/MatiCoding/calculetra/compare/v0.1.3...HEAD
+[0.1.3]: https://github.com/MatiCoding/calculetra/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/MatiCoding/calculetra/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/MatiCoding/calculetra/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/MatiCoding/calculetra/releases/tag/v0.1.0
