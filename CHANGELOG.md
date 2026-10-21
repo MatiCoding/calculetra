@@ -8,6 +8,7 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 - An account page, opened from your email in the header. Changing your password, changing your email and deleting your account will live there.
+- Password reset: "¿Has olvidado tu contraseña?" in the login form sends an email with a link to choose a new password.
 
 ## [0.1.3] - 2026-10-21
 
