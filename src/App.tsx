@@ -13,6 +13,7 @@ import LogInForm from './components/LogInForm/LogInForm'
 import RequireAuth from './components/RequireAuth/RequireAuth'
 import AccountPage from './components/AccountPage/AccountPage'
 import ForgotPasswordForm from './components/ForgotPasswordForm/ForgotPasswordForm'
+import ResetPasswordPage from './components/ResetPasswordPage/ResetPasswordPage'
 
 function App() {
   const [gameMode, setGameMode] = useState<GameType>('numbers')
@@ -35,6 +36,7 @@ function App() {
         <Route path="/login" element={<main><LogInForm /></main>} />
         <Route path="/account" element={<main><RequireAuth><AccountPage /></RequireAuth></main>} />
         <Route path="/forgot-password" element={<main><ForgotPasswordForm /></main>} />
+        <Route path="/reset-password" element={<main><ResetPasswordPage /></main>} />
         
         <Route path="*" element={<NotFound />} />
       </Routes>
