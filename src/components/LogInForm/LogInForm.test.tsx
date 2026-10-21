@@ -109,4 +109,12 @@ describe('LogInForm', () => {
 
         expect(screen.getByRole('link', { name: 'Crea una' }).getAttribute('href')).toBe('/signup');
     });
+    
+    it('links to the password reset page', () => {
+        renderForm();
+
+        expect(screen.getByRole('link', { name: '¿Has olvidado tu contraseña?' }).getAttribute('href')).toBe(
+            '/forgot-password',
+        );
+    });
 });
