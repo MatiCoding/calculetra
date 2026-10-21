@@ -35,6 +35,24 @@ export async function logOut(): Promise<void> {
     if (error) throw error
 }
 
+// Sends an email with a link to /reset-password. Supabase answers the same
+// whether the email has an account or not, so nobody can find out which
+// emails are registered.
+export async function resetPassword(email: string): Promise<void> {
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    // The current site: localhost with npm run dev, the real domain in production.
+    redirectTo: `${window.location.origin}/reset-password`,
+  })
+  if (error) throw error
+}
+
+// Saves a new password for the logged-in user. The reset link logs the user
+// in, so the reset page can use it too.
+export async function updatePassword(password: string): Promise<void> {
+  const { error } = await supabase.auth.updateUser({ password })
+  if (error) throw error
+}
+
 // Asks the server if the saved session is still valid, instead of
 // trusting what is stored in the browser.
 export async function getCurrentUser(): Promise<AuthUser | null> {
