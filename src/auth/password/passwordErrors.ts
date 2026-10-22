@@ -16,6 +16,10 @@ export function getNewPasswordErrorMessage(error: unknown): string {
     return 'La contraseña es demasiado débil. Elige una más segura.'
   } else if (isAuthApiError(error) && error.code === 'same_password') {
     return 'La nueva contraseña tiene que ser distinta de la actual.'
+  } else if (isAuthApiError(error) && error.code === 'current_password_mismatch') {
+    return 'La contraseña actual no es correcta.'
+  } else if (isAuthApiError(error) && error.code === 'current_password_required') {
+    return 'Escribe tu contraseña actual.'
   } else if (isAuthRetryableFetchError(error)) {
     return 'No se ha podido conectar. Revisa tu conexión a internet y vuelve a probar.'
   } else {
