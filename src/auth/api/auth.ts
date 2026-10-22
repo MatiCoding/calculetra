@@ -35,9 +35,8 @@ export async function logOut(): Promise<void> {
     if (error) throw error
 }
 
-// Sends an email with a link to /reset-password. Supabase answers the same
-// whether the email has an account or not, so nobody can find out which
-// emails are registered.
+// Sends an email with a link to /reset-password. Supabase answers the same whether the email has an account or not, 
+// so nobody can find out which emails are registered.
 export async function resetPassword(email: string): Promise<void> {
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     // The current site: localhost with npm run dev, the real domain in production.
