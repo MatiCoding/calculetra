@@ -106,4 +106,57 @@ describe('NewPasswordForm', () => {
             expect(screen.getByRole('button', { name: 'Guardar contraseña' }).hasAttribute('disabled')).toBe(true),
         );
     });
+
+    describe('when it asks for the current password', () => {
+        const CURRENT = 'oldSecret123';
+
+        function fillCurrentPassword(value: string) {
+            fireEvent.change(screen.getByLabelText('Contraseña actual'), { target: { value } });
+        }
+
+        it('does not show the current password field by default', () => {
+            render(<NewPasswordForm />);
+
+            expect(screen.queryByLabelText('Contraseña actual')).toBeNull();
+        });
+
+        it('shows the current password field', () => {
+            render(<NewPasswordForm askCurrentPassword />);
+
+            expect(screen.getByLabelText('Contraseña actual')).toBeTruthy();
+        });
+
+        it('calls updatePassword with the new and the current password', async () => {
+            updatePassword.mockResolvedValue(undefined);
+            render(<NewPasswordForm askCurrentPassword />);
+
+            fillCurrentPassword(CURRENT);
+            fillForm(PASSWORD, PASSWORD);
+            submit();
+
+            await waitFor(() => expect(updatePassword).toHaveBeenCalledWith(PASSWORD, CURRENT));
+        });
+
+        it('shows an error and does not call updatePassword when the current password is empty', () => {
+            render(<NewPasswordForm askCurrentPassword />);
+
+            fillForm(PASSWORD, PASSWORD);
+            submit();
+
+            expect(screen.getByRole('alert').textContent).toBe('Escribe tu contraseña actual.');
+            expect(updatePassword).not.toHaveBeenCalled();
+        });
+
+        it('empties the current password field after saving', async () => {
+            updatePassword.mockResolvedValue(undefined);
+            render(<NewPasswordForm askCurrentPassword />);
+
+            fillCurrentPassword(CURRENT);
+            fillForm(PASSWORD, PASSWORD);
+            submit();
+
+            await screen.findByRole('status');
+            expect((screen.getByLabelText('Contraseña actual') as HTMLInputElement).value).toBe('');
+        });
+    });
 });
