@@ -35,6 +35,7 @@ describe('AccountPage', () => {
     it('shows the change password form', () => {
         render(<AccountPage />);
 
+        expect(screen.getByLabelText('Contraseña actual')).toBeTruthy();
         expect(screen.getByLabelText('Nueva contraseña')).toBeTruthy();
         expect(screen.getByLabelText('Repite la nueva contraseña')).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Guardar contraseña' })).toBeTruthy();

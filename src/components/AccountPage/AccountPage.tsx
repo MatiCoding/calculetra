@@ -14,7 +14,7 @@ function AccountPage() {
 
             <section className={styles.section}>
                 <h3>Cambiar contraseña</h3>
-                <NewPasswordForm />
+                <NewPasswordForm askCurrentPassword />
             </section>
 
             <section className={styles.section}>
