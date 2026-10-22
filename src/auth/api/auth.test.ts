@@ -232,6 +232,20 @@ describe('updatePassword', () => {
     expect(supabase.auth.updateUser).toHaveBeenCalledWith({ password: 'newSecret123' })
   })
 
+    it('sends the current password when it is given', async () => {
+    vi.mocked(supabase.auth.updateUser).mockResolvedValue({
+      data: { user: supabaseUser },
+      error: null,
+    } as never)
+
+    await updatePassword('newSecret123', 'oldSecret123')
+
+    expect(supabase.auth.updateUser).toHaveBeenCalledWith({
+      password: 'newSecret123',
+      current_password: 'oldSecret123',
+    })
+  })
+
   it('throws the Supabase error', async () => {
     vi.mocked(supabase.auth.updateUser).mockResolvedValue({
       data: { user: null },

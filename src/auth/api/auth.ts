@@ -47,8 +47,8 @@ export async function resetPassword(email: string): Promise<void> {
 
 // Saves a new password for the logged-in user. The reset link logs the user
 // in, so the reset page can use it too.
-export async function updatePassword(password: string): Promise<void> {
-  const { error } = await supabase.auth.updateUser({ password })
+export async function updatePassword(password: string, currentPassword?: string): Promise<void> {
+  const { error } = await supabase.auth.updateUser({ password, current_password: currentPassword })
   if (error) throw error
 }
 
