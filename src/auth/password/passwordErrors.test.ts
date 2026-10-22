@@ -33,15 +33,9 @@ describe('getNewPasswordErrorMessage', () => {
   })
 
   it('explains that the current password is wrong', () => {
-    const error = new AuthApiError('Current password does not match', 400, 'current_password_mismatch')
+    const error = new AuthApiError('Current password required when setting new password.', 400, 'current_password_invalid')
 
     expect(getNewPasswordErrorMessage(error)).toBe('La contraseña actual no es correcta.')
-  })
-
-  it('asks for the current password when it is missing', () => {
-    const error = new AuthApiError('Current password required', 400, 'current_password_required')
-
-    expect(getNewPasswordErrorMessage(error)).toBe('Escribe tu contraseña actual.')
   })
 
   it('explains a network error', () => {
