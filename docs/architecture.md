@@ -28,7 +28,7 @@ flowchart LR
 
     player -->|plays and logs in| browser
     vercel -->|HTML, JS and CSS| browser
-    browser -->|sign up, log in, log out, session| supabase
+    browser -->|sign up, log in, log out, session, password reset| supabase
     browser -.->|planned| db
 ```
 
@@ -57,7 +57,7 @@ flowchart TD
     components["components/<br/>screens and UI"]
     domain["domain/cifras/<br/>game logic"]
     authContext["auth/context/<br/>AuthProvider, useAuth"]
-    authForms["auth/signUp, auth/logIn<br/>validation and error messages"]
+    authForms["auth/signUp, auth/logIn, auth/password<br/>validation and error messages"]
     authApi["auth/api/<br/>Supabase client and calls"]
     config["config/<br/>feature flags"]
     types["types/<br/>shared types"]
@@ -78,16 +78,16 @@ flowchart TD
 
 | Block | Responsibility | Depends on |
 | --- | --- | --- |
-| `main.tsx`, `Root.tsx`, `App.tsx` | Start React, choose between the "under construction" page and the app, set up the router and the `AuthProvider`, and define the routes (`/`, `/signup`, `/login`, 404). | `components`, `auth/context`, `config`, `types` |
-| `components/` | One folder per component with its `.tsx`, CSS Module and test. `NumbersGame` is the game; `Header`, `SignUpForm` and `LogInForm` use the account; `LettersGame` is a placeholder. | `domain`, `auth`, `types` |
+| `main.tsx`, `Root.tsx`, `App.tsx` | Start React, choose between the "under construction" page and the app, set up the router and the `AuthProvider`, and define the routes (`/`, `/signup`, `/login`, `/account`, `/forgot-password`, `/reset-password`, 404). | `components`, `auth/context`, `config`, `types` |
+| `components/` | One folder per component with its `.tsx`, CSS Module and test. `NumbersGame` is the game; `Header`, `SignUpForm`, `LogInForm`, `AccountPage`, `ForgotPasswordForm`, `ResetPasswordPage` and `NewPasswordForm` use the account; `LettersGame` is a placeholder. | `domain`, `auth`, `types` |
 | `domain/cifras/` | Challenge generation, seeded random, operations, game reducer and score. | Nothing outside itself |
-| `auth/api/` | The Supabase client and the functions `signUp`, `logIn`, `logOut`, `getCurrentUser` and `onAuthChange`. Turns Supabase's user into `AuthUser`. | `@supabase/supabase-js` |
+| `auth/api/` | The Supabase client and the functions `logOut`, `resetPassword`, `updatePassword`, `getCurrentUser` and `onAuthChange`. Turns Supabase's user into `AuthUser`. | `@supabase/supabase-js` |
 | `auth/context/` | `AuthProvider` keeps the current user and `useAuth()` gives it to components. | `auth/api` |
-| `auth/signUp/`, `auth/logIn/` | Form validation and translating Supabase errors into messages in Spanish. | `@supabase/supabase-js` (only its error helpers) |
+| `auth/signUp/`, `auth/logIn/`, `auth/password/` | Form validation and translating Supabase errors into messages in Spanish. | `@supabase/supabase-js` (only its error helpers) |
 | `config/` | Feature flags read from environment variables. | Nothing |
 | `types/` | Types shared by several components, such as `GameType`. | Nothing |
 
-The arrow from `auth/signUp` and `auth/logIn` to Supabase is not a break of the rule in section 4: they only use Supabase's error helpers, and they are still inside `src/auth`.
+The arrow from `auth/signUp`, `auth/logIn` and `auth/password` to Supabase is not a break of the rule in section 4: they only use Supabase's error helpers, and they are still inside `src/auth`.
 
 ## 8. Cross-cutting concepts
 
@@ -109,7 +109,7 @@ The arrow from `auth/signUp` and `auth/logIn` to Supabase is not a break of the 
 
 ### Styling
 
-- Each component has its own [CSS Module](https://github.com/css-modules/css-modules) (`Component.module.css`), so class names do not clash. `SignUpForm` and `LogInForm` share `components/AuthForm.module.css`.
+- Each component has its own [CSS Module](https://github.com/css-modules/css-modules) (`Component.module.css`), so class names do not clash. `auth/signUp`, `auth/logIn` and `auth/password` share `components/AuthForm.module.css`.
 - Global styles and colour tokens (`--color-bg`, `--color-number`, `--color-accent`…) are defined in `src/index.css`. `NumbersGame`, `NotFound` and `UnderDevelopment` use them; `Header`, `ModeSwitch` and `AuthForm` do not yet.
 - The font is Inter, loaded with `@fontsource-variable/inter`.
 

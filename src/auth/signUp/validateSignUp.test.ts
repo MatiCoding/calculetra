@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { MIN_PASSWORD_LENGTH, validateSignUp } from './validateSignUp'
+import { MIN_PASSWORD_LENGTH } from '../password/validateNewPassword'
+import { validateSignUp } from './validateSignUp'
 
 const EMAIL = 'ana@example.com'
 const PASSWORD = 'a'.repeat(MIN_PASSWORD_LENGTH)

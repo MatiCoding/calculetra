@@ -1,5 +1,5 @@
 import { createContext } from 'react'
-import type { AuthUser, logIn, signUp, logOut } from '../api/auth'
+import type { AuthUser, logIn, signUp, logOut, resetPassword, updatePassword } from '../api/auth'
 
 export type AuthContextValue = {
   user: AuthUser | null
@@ -7,6 +7,8 @@ export type AuthContextValue = {
   signUp: typeof signUp
   logIn: typeof logIn
   logOut: typeof logOut
+  resetPassword: typeof resetPassword
+  updatePassword: typeof updatePassword
 }
 
 // Only AuthProvider and useAuth use this. Components call useAuth() instead.

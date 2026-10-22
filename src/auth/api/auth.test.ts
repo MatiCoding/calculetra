@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { getCurrentUser, logIn, onAuthChange, signUp, logOut } from './auth'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { getCurrentUser, logIn, onAuthChange, signUp, logOut, resetPassword, updatePassword } from './auth'
 import { supabase } from './supabaseClient'
 import { AuthSessionMissingError } from '@supabase/supabase-js'
 
@@ -13,6 +13,8 @@ vi.mock('./supabaseClient', () => ({
       getUser: vi.fn(),
       onAuthStateChange: vi.fn(),
       signOut: vi.fn(),
+      resetPasswordForEmail: vi.fn(),
+      updateUser: vi.fn(),
     },
   },
 }))
@@ -187,5 +189,69 @@ describe('logOut', () => {
     } as never)
 
     await expect(logOut()).rejects.toThrow('Network error')
+  })
+})
+
+describe('resetPassword', () => {
+  beforeEach(() => {
+    // These tests run in Node, where there is no window. Fake the part we use.
+    vi.stubGlobal('window', { location: { origin: 'https://calculetra.test' } })
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('asks Supabase for an email that opens /reset-password on this site', async () => {
+    vi.mocked(supabase.auth.resetPasswordForEmail).mockResolvedValue({ data: {}, error: null } as never)
+
+    await expect(resetPassword('a@b.com')).resolves.toBeUndefined()
+    expect(supabase.auth.resetPasswordForEmail).toHaveBeenCalledWith('a@b.com', {
+      redirectTo: 'https://calculetra.test/reset-password',
+    })
+  })
+
+  it('throws the Supabase error', async () => {
+    vi.mocked(supabase.auth.resetPasswordForEmail).mockResolvedValue({
+      data: null,
+      error: new Error('Network error'),
+    } as never)
+
+    await expect(resetPassword('a@b.com')).rejects.toThrow('Network error')
+  })
+})
+
+describe('updatePassword', () => {
+  it('saves the new password', async () => {
+    vi.mocked(supabase.auth.updateUser).mockResolvedValue({
+      data: { user: supabaseUser },
+      error: null,
+    } as never)
+
+    await expect(updatePassword('newSecret123')).resolves.toBeUndefined()
+    expect(supabase.auth.updateUser).toHaveBeenCalledWith({ password: 'newSecret123' })
+  })
+
+    it('sends the current password when it is given', async () => {
+    vi.mocked(supabase.auth.updateUser).mockResolvedValue({
+      data: { user: supabaseUser },
+      error: null,
+    } as never)
+
+    await updatePassword('newSecret123', 'oldSecret123')
+
+    expect(supabase.auth.updateUser).toHaveBeenCalledWith({
+      password: 'newSecret123',
+      current_password: 'oldSecret123',
+    })
+  })
+
+  it('throws the Supabase error', async () => {
+    vi.mocked(supabase.auth.updateUser).mockResolvedValue({
+      data: { user: null },
+      error: new Error('New password should be different from the old password.'),
+    } as never)
+
+    await expect(updatePassword('secret123')).rejects.toThrow('New password should be different')
   })
 })

@@ -11,6 +11,8 @@ vi.mock('../api/auth', () => ({
   signUp: vi.fn(),
   logIn: vi.fn(),
   logOut: vi.fn(),
+  resetPassword: vi.fn(),
+  updatePassword: vi.fn(),
 }))
 
 // A tiny component that shows what useAuth() returns, so the tests can read it.

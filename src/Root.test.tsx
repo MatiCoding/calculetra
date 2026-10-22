@@ -10,6 +10,8 @@ vi.mock('./auth/api/auth', () => ({
   signUp: vi.fn(),
   logIn: vi.fn(),
   logOut: vi.fn(),
+  resetPassword: vi.fn(),
+  updatePassword: vi.fn(),
 }));
 
 async function renderRoot(flag: string | undefined) {

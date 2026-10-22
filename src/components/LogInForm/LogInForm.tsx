@@ -58,6 +58,7 @@ function LogInForm() {
                 {error && <p role="alert" className={styles.error}>{error}</p>}
                 <button type="submit" disabled={submitting}>Iniciar sesión</button>
             </form>
+            <p><Link to="/forgot-password">¿Has olvidado tu contraseña?</Link></p>
             <p>¿No tienes cuenta? <Link to="/signup">Crea una</Link></p>
         </>
     );

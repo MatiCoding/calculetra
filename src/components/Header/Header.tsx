@@ -15,7 +15,7 @@ function Header() {
                 "Iniciar sesión" does not flash before the user's email. */}
             {!loading && (user ? (
                 <div className={styles.authLink}>
-                    <span>{user.email}</span>
+                    <Link to="/account">{user.email}</Link>
                     {/* No navigate or setUser here: onAuthChange tells the
                         AuthProvider and the header updates by itself. */}
                     <button type="button" onClick={() => logOut()}>Cerrar sesión</button>

@@ -68,4 +68,11 @@ describe('Header', () => {
 
         expect(auth.logOut).toHaveBeenCalledOnce();
     });
+
+    it('links the email to the account page', () => {
+        auth.user = { id: '1', email: 'ana@example.com' };
+        renderHeader();
+
+        expect(screen.getByRole('link', { name: 'ana@example.com' }).getAttribute('href')).toBe('/account');
+    });
 });
