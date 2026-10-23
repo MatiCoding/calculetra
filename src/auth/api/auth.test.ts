@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { getCurrentUser, logIn, onAuthChange, signUp, logOut, resetPassword, updatePassword } from './auth'
+import { getCurrentUser, logIn, onAuthChange, signUp, logOut, resetPassword, updatePassword, changeEmail } from './auth'
 import { supabase } from './supabaseClient'
 import { AuthSessionMissingError } from '@supabase/supabase-js'
 
@@ -253,5 +253,37 @@ describe('updatePassword', () => {
     } as never)
 
     await expect(updatePassword('secret123')).rejects.toThrow('New password should be different')
+  })
+})
+
+describe('changeEmail', () => {
+  beforeEach(() => {
+    vi.stubGlobal('window', { location: { origin: 'https://calculetra.test' } })
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('asks Supabase to send a confirmation link that opens /account on this site', async () => {
+    vi.mocked(supabase.auth.updateUser).mockResolvedValue({
+      data: { user: supabaseUser },
+      error: null,
+    } as never)
+
+    await expect(changeEmail('new@b.com')).resolves.toBeUndefined()
+    expect(supabase.auth.updateUser).toHaveBeenCalledWith(
+      { email: 'new@b.com' },
+      { emailRedirectTo: 'https://calculetra.test/account' },
+    )
+  })
+
+  it('throws the Supabase error', async () => {
+    vi.mocked(supabase.auth.updateUser).mockResolvedValue({
+      data: { user: null },
+      error: new Error('Email address already registered'),
+    } as never)
+
+    await expect(changeEmail('new@b.com')).rejects.toThrow('Email address already registered')
   })
 })

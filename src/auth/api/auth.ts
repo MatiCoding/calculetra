@@ -52,6 +52,14 @@ export async function updatePassword(password: string, currentPassword?: string)
   if (error) throw error
 }
 
+export async function changeEmail(email: string) : Promise<void> {
+  const{error} = await supabase.auth.updateUser({email}, {
+    emailRedirectTo: `${window.location.origin}/account`,
+  })
+
+  if (error) throw error
+}
+
 // Asks the server if the saved session is still valid, instead of
 // trusting what is stored in the browser.
 export async function getCurrentUser(): Promise<AuthUser | null> {
