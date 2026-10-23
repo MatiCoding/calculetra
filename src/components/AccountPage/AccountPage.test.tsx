@@ -12,6 +12,7 @@ vi.mock('../../auth/context/useAuth', () => ({
         logOut: vi.fn(),
         resetPassword: vi.fn(),
         updatePassword: vi.fn(),
+        changeEmail: vi.fn(),
     }),
 }));
 
