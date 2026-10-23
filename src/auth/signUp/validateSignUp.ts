@@ -1,6 +1,5 @@
+import { EMAIL_PATTERN } from '../email/validateNewEmail'
 import { validateNewPassword } from '../password/validateNewPassword'
-
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export function validateSignUp(email: string, password: string, confirmPassword: string): string | null {
   if (!EMAIL_PATTERN.test(email.trim())) {
