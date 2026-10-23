@@ -10,6 +10,7 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - An account page, opened from your email in the header. Changing your password, changing your email and deleting your account will live there.
 - Password reset: "¿Has olvidado tu contraseña?" in the login form sends an email with a link to choose a new password.
 - Change password from the account page. You have to type your current password, and Supabase checks it.
+- Change email from the account page. The email only changes after you open the confirmation links sent to your current and your new email.
 
 ## [0.1.3] - 2026-10-21
 
