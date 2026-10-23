@@ -41,4 +41,11 @@ describe('AccountPage', () => {
         expect(screen.getByLabelText('Repite la nueva contraseña')).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Guardar contraseña' })).toBeTruthy();
     });
+    
+    it('shows the change email form', () => {
+        render(<AccountPage />);
+
+        expect(screen.getByLabelText('Correo nuevo')).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'Cambiar correo' })).toBeTruthy();
+    });
 });
