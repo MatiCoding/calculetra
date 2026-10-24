@@ -5,6 +5,9 @@ import {useAuth} from '../../auth/context/useAuth';
 import {getSignUpErrorMessage} from '../../auth/signUp/signUpErrors';
 
 import styles from '../AuthForm.module.css';
+import PasswordInput from '../PasswordInput/PasswordInput';
+
+import  {MIN_PASSWORD_LENGTH} from '../../auth/password/validateNewPassword.ts';
 
 function SignUpForm() {
     const navigate = useNavigate();
@@ -65,18 +68,17 @@ function SignUpForm() {
                 />
 
                 <label htmlFor="signup-password">Contraseña</label>
-                <input
+                <PasswordInput
                     id="signup-password"
-                    type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     autoComplete="new-password"
                 />
+                <p id="signup-password-hint" className={styles.hint}>Mínimo {MIN_PASSWORD_LENGTH} caracteres</p>
 
                 <label htmlFor="signup-confirm-password">Repite la contraseña</label>
-                <input
+                <PasswordInput
                     id="signup-confirm-password"
-                    type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     autoComplete="new-password"

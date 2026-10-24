@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router';
 import { useAuth } from '../../auth/context/useAuth';
 import { getLogInErrorMessage } from '../../auth/logIn/logInErrors';
 
+import PasswordInput from '../PasswordInput/PasswordInput';
+
 import styles from '../AuthForm.module.css';
 
 function LogInForm() {
@@ -48,9 +50,8 @@ function LogInForm() {
                 />
 
                 <label htmlFor="login-password">Contraseña</label>
-                <input
+                <PasswordInput
                     id="login-password"
-                    type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     autoComplete="current-password"
