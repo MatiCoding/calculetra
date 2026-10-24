@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
+import { fakeDialog } from './test/fakeDialog';
 import App from './App';
 
 // SignUpForm uses useAuth, but these tests only check navigation,
@@ -21,6 +22,7 @@ function renderAt(path: string) {
 }
 
 describe('App routes', () => {
+  beforeAll(fakeDialog);
   afterEach(cleanup);
 
   it('shows the game on /', () => {
@@ -80,7 +82,7 @@ describe('App routes', () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByRole('status').textContent).toContain('Tu cuenta se ha eliminado.');
+    expect(screen.getByRole('dialog', { name: 'Tu cuenta se ha eliminado.' })).toBeTruthy();
     expect(screen.getByText(/Objetivo/)).toBeTruthy();
   });
 

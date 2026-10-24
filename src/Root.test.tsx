@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import type { AuthUser } from './auth/api/auth';
+import { fakeDialog } from './test/fakeDialog';
 
 // The game is wrapped in AuthProvider, which would create the real Supabase
 // client. CI has no .env, so we replace the auth module with a fake one.
@@ -53,6 +54,7 @@ describe('Root', () => {
   });
 });
 describe('Root, deleting the account', () => {
+  beforeAll(fakeDialog);
   afterEach(() => {
     cleanup();
     vi.unstubAllEnvs();
@@ -83,7 +85,7 @@ describe('Root, deleting the account', () => {
     fireEvent.change(screen.getByLabelText('Tu correo'), { target: { value: 'ana@example.com' } });
     fireEvent.click(screen.getByRole('button', { name: 'Eliminar definitivamente' }));
 
-    expect((await screen.findByRole('status')).textContent).toContain('Tu cuenta se ha eliminado.');
+    expect((await screen.findByRole('dialog')).textContent).toContain('Tu cuenta se ha eliminado.');
     expect(window.location.pathname).toBe('/');
     expect(screen.getByText(/Objetivo/)).toBeTruthy();
     expect(screen.getByRole('link', { name: 'Iniciar sesión' })).toBeTruthy();

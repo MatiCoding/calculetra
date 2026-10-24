@@ -80,7 +80,7 @@ flowchart TD
 | Block | Responsibility | Depends on |
 | --- | --- | --- |
 | `main.tsx`, `Root.tsx`, `App.tsx` | Start React, choose between the "under construction" page and the app, set up the router and the `AuthProvider`, and define the routes (`/`, `/signup`, `/login`, `/account`, `/forgot-password`, `/reset-password`, 404). | `components`, `auth/context`, `config`, `types` |
-| `components/` | One folder per component with its `.tsx`, CSS Module and test. `NumbersGame` is the game; `Header`, `SignUpForm`, `LogInForm`, `AccountPage`, `ForgotPasswordForm`, `ResetPasswordPage`, `NewPasswordForm`, `ChangeEmailForm` and `DeleteAccountForm` use the account; `Notice` shows a message left by another page; `LettersGame` is a placeholder. | `domain`, `auth`, `types` |
+| `components/` | One folder per component with its `.tsx`, CSS Module and test. `NumbersGame` is the game; `Header`, `SignUpForm`, `LogInForm`, `AccountPage`, `ForgotPasswordForm`, `ResetPasswordPage`, `NewPasswordForm`, `ChangeEmailForm` and `DeleteAccountForm` use the account; `NoticeDialog` shows, in a dialog, a message left by another page; `LettersGame` is a placeholder. | `domain`, `auth`, `types` |
 | `domain/cifras/` | Challenge generation, seeded random, operations, game reducer and score. | Nothing outside itself |
 | `auth/api/` | The Supabase client and the functions `signUp`, `logIn`, `logOut`, `resetPassword`, `updatePassword`, `changeEmail`, `deleteAccount`, `getCurrentUser` and `onAuthChange`. Turns Supabase's user into `AuthUser`. | `@supabase/supabase-js` |
 | `auth/context/` | `AuthProvider` keeps the current user and `useAuth()` gives it to components. | `auth/api` |
