@@ -156,3 +156,48 @@ so you never see one jump over the other. */
 .animate .spine {
     transition: clip-path calc(var(--dur) * 0.5) var(--ease) calc(var(--dur) * 0.25);
 }
+
+/* --------- TILES --------- */
+.word {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 28px;
+    perspective: 600px;
+}
+
+/* Each tile is a little card with two faces */
+.tile {
+    position: relative;
+    width: 52px;
+    height: 52px;
+    transform-style: preserve-3d;
+}
+
+.tileFront, .tileBack {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    font-weight: 800;
+    font-size: 1.6rem;
+    backface-visibility: hidden;
+}
+
+.tileFront {
+    background: var(--color-letter);
+    color: #fff;
+    box-shadow: 0 5px 0 #154483;
+}
+
+.tileBack {
+    background: var(--color-number);
+    color: var(--color-text);
+    box-shadow: 0 -5px 0 #b57d0c;
+    transform: rotateX(180deg);
+}
+
+.showSignUp .tile {transform: rotateX(180deg);}
+
+.animate .tile {transition: transform 0.5s ease-in-out;}

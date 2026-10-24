@@ -18,14 +18,30 @@ function AuthPage() {
         setAnimate(true)
     }
 
+    const LOG_IN_WORD = 'ENTRA'
+    const SIGN_UP_WORD = 'ÚNETE'
+
     return (
-        <main className={styles.page}>
+        <main className={[
+                styles.page,
+                front === 'signup' && styles.showSignUp,
+                animate && styles.animate,
+            ].filter(Boolean).join(' ')}>
             <Link to="/" className={styles.brand}>Calculetra</Link>
-            <div className={[
-                    styles.deck,
-                    front === 'signup' && styles.showSignUp,
-                    animate && styles.animate,
-                ].filter(Boolean).join(' ')}>
+            <div aria-hidden="true" className={styles.word}>
+                {[...LOG_IN_WORD].map((letter, i) => (
+                    <span key={i} className={styles.tile} style={{ transitionDelay: `${i * 70}ms` }}>
+
+                        <span className={styles.tileFront}>
+                            {letter}
+                        </span>
+                        <span className={styles.tileBack}>
+                            {SIGN_UP_WORD[i]}
+                        </span>
+                    </span>
+                ))}
+            </div>
+            <div className={styles.deck}>
                 <section className={`${styles.card} ${styles.logInCard}`}>
                     <div inert={front !== 'login'}>
                         <LogInForm />

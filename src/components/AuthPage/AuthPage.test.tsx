@@ -107,6 +107,13 @@ describe('AuthPage', () => {
     expect(screen.getByRole('button', { name: 'Ir a iniciar sesión' }).hasAttribute('inert')).toBe(true);
   });
 
+  it('hides the word tiles from screen readers', () => {
+    renderAt('/login');
+
+    // getAllByText also finds aria-hidden text, so we can look for its container.
+    expect(screen.getAllByText('E')[0].closest('[aria-hidden="true"]')).not.toBeNull();
+  });
+
   it('links back to the game from the title', () => {
     renderAt('/login');
 
