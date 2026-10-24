@@ -6,8 +6,9 @@ import {getSignUpErrorMessage} from '../../auth/signUp/signUpErrors';
 
 import styles from '../AuthForm.module.css';
 import PasswordInput from '../PasswordInput/PasswordInput';
+import SocialButtons from '../SocialButtons/SocialButtons';
 
-import  {MIN_PASSWORD_LENGTH} from '../../auth/password/validateNewPassword.ts';
+import  {MIN_PASSWORD_LENGTH} from '../../auth/password/validateNewPassword';
 
 function SignUpForm() {
     const navigate = useNavigate();
@@ -57,6 +58,7 @@ function SignUpForm() {
         <>
             <h2>Crea tu cuenta</h2>
             <p>Regístrate con tu cuenta de siempre o con un email</p>
+            <SocialButtons dividerText="o regístrate con tu email"/>
             <form onSubmit={handleSubmit} className={styles.form}>
                 <label htmlFor="signup-email">Email</label>
                 <input

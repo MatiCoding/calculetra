@@ -4,6 +4,7 @@ import { useAuth } from '../../auth/context/useAuth';
 import { getLogInErrorMessage } from '../../auth/logIn/logInErrors';
 
 import PasswordInput from '../PasswordInput/PasswordInput';
+import SocialButtons from '../SocialButtons/SocialButtons';
 
 import styles from '../AuthForm.module.css';
 
@@ -39,6 +40,7 @@ function LogInForm() {
         <>
             <h2>Hola de nuevo</h2>
             <p>Inicia sesión para jugar al reto de hoy.</p>
+            <SocialButtons dividerText="o entra con tu email"/>
             <form onSubmit={handleSubmit} className={styles.form}>
                 <label htmlFor="login-email">Email</label>
                 <input

@@ -1,0 +1,44 @@
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px;
+    border: 1px solid rgba(31, 36, 48, 0.14);
+    border-radius: 12px;
+    background: #fff;
+    color: var(--color-text);
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: not-allowed;
+}
+
+.button svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* A line on each side of the text: "—— o entra con tu email ——". */
+.divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 16px 0;
+    color: var(--color-muted);
+    font-size: 0.8rem;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(31, 36, 48, 0.14);
+}
