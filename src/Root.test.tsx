@@ -13,6 +13,7 @@ vi.mock('./auth/api/auth', () => ({
   resetPassword: vi.fn(),
   updatePassword: vi.fn(),
   changeEmail: vi.fn(),
+  deleteAccount: vi.fn(),
 }));
 
 async function renderRoot(flag: string | undefined) {
