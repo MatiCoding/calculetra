@@ -35,7 +35,8 @@ function LogInForm() {
 
     return (
         <>
-            <h2>Iniciar sesión</h2>
+            <h2>Hola de nuevo</h2>
+            <p>Inicia sesión para jugar al reto de hoy.</p>
             <form onSubmit={handleSubmit} className={styles.form}>
                 <label htmlFor="login-email">Email</label>
                 <input
@@ -59,7 +60,7 @@ function LogInForm() {
                 <button type="submit" disabled={submitting}>Iniciar sesión</button>
             </form>
             <p><Link to="/forgot-password">¿Has olvidado tu contraseña?</Link></p>
-            <p>¿No tienes cuenta? <Link to="/signup">Crea una</Link></p>
+            <p>¿No tienes cuenta? <Link to="/signup">Crear cuenta</Link></p>
         </>
     );
 }

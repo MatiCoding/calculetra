@@ -38,15 +38,15 @@ describe('AuthPage', () => {
   it('puts log in in front on /login', () => {
     renderAt('/login');
 
-    expect(isInFront('Iniciar sesión')).toBe(true);
-    expect(isInFront('Crear cuenta')).toBe(false);
+    expect(isInFront('Hola de nuevo')).toBe(true);
+    expect(isInFront('Crea tu cuenta')).toBe(false);
   });
 
   it('puts sign up in front on /signup', () => {
     renderAt('/signup');
 
-    expect(isInFront('Crear cuenta')).toBe(true);
-    expect(isInFront('Iniciar sesión')).toBe(false);
+    expect(isInFront('Crea tu cuenta')).toBe(true);
+    expect(isInFront('Hola de nuevo')).toBe(false);
   });
 
   it('switches to sign up from the spine and updates the URL', () => {
@@ -54,8 +54,8 @@ describe('AuthPage', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Ir a crear cuenta' }));
 
-    expect(isInFront('Crear cuenta')).toBe(true);
-    expect(isInFront('Iniciar sesión')).toBe(false);
+    expect(isInFront('Crea tu cuenta')).toBe(true);
+    expect(isInFront('Hola de nuevo')).toBe(false);
     expect(screen.getByTestId('path').textContent).toBe('/signup');
   });
 
@@ -64,8 +64,40 @@ describe('AuthPage', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Ir a iniciar sesión' }));
 
-    expect(isInFront('Iniciar sesión')).toBe(true);
+    expect(isInFront('Hola de nuevo')).toBe(true);
     expect(screen.getByTestId('path').textContent).toBe('/login');
+  });
+
+  it('switches to sign up from the link under the log in form', () => {
+    renderAt('/login');
+
+    fireEvent.click(screen.getByRole('link', { name: 'Crear cuenta' }));
+
+    expect(isInFront('Crea tu cuenta')).toBe(true);
+    expect(screen.getByTestId('path').textContent).toBe('/signup');
+  });
+
+  it('switches to log in from the link under the sign up form', () => {
+    renderAt('/signup');
+
+    fireEvent.click(screen.getByRole('link', { name: 'Iniciar sesión' }));
+
+    expect(isInFront('Hola de nuevo')).toBe(true);
+    expect(screen.getByTestId('path').textContent).toBe('/login');
+  });
+
+  // /login and /signup draw the same AuthPage in the same place, so React
+  // keeps it mounted and the forms keep their state when switching.
+  it('keeps what you typed when switching cards', () => {
+    renderAt('/login');
+    const email = screen.getByLabelText('Email', { selector: '#login-email' }) as HTMLInputElement;
+    fireEvent.change(email, { target: { value: 'ana@example.com' } });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Ir a crear cuenta' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Ir a iniciar sesión' }));
+
+    expect(email.value).toBe('ana@example.com');
+    expect(email.isConnected).toBe(true);
   });
 
   it('makes only the back card spine usable', () => {

@@ -34,7 +34,7 @@ describe('App routes', () => {
   it('shows the sign up page on /signup', () => {
     renderAt('/signup');
 
-    expect(screen.getByRole('heading', { name: 'Crear cuenta' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Crea tu cuenta' })).toBeTruthy();
     expect(screen.queryByText(/Objetivo/)).toBeNull();
   });
 
@@ -43,19 +43,19 @@ describe('App routes', () => {
 
     fireEvent.click(screen.getByRole('link', { name: 'Iniciar sesión' }));
 
-    expect(screen.getByRole('heading', { name: 'Iniciar sesión' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Hola de nuevo' })).toBeTruthy();
   });
 
   it('goes to the sign up page from the log in page', () => {
     renderAt('/login');
 
-    fireEvent.click(screen.getByRole('link', { name: 'Crea una' }));
+    fireEvent.click(screen.getByRole('link', { name: 'Crear cuenta' }));
 
-    expect(screen.getByRole('heading', { name: 'Crear cuenta' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Crea tu cuenta' })).toBeTruthy();
   });
 
   it('goes back to the game from the title link', () => {
-    renderAt('/signup');
+    renderAt('/forgot-password');
 
     fireEvent.click(screen.getByRole('link', { name: 'Calculetra' }));
 
@@ -86,13 +86,13 @@ describe('App routes', () => {
     expect(screen.queryByRole('heading', { name: 'Esta página no existe' })).toBeNull();
   });
 
-    it.each(['/login', '/signup'])('does not show the site header on %s', (path) => {
+  it.each(['/login', '/signup', '/esto-no-existe'])('does not show the site header on %s', (path) => {
     renderAt(path);
 
     expect(screen.queryByRole('banner')).toBeNull();
   });
 
-  it.each(['/', '/forgot-password', '/esto-no-existe'])('shows the site header on %s', (path) => {
+  it.each(['/', '/forgot-password'])('shows the site header on %s', (path) => {
     renderAt(path);
 
     expect(screen.getByRole('banner')).toBeTruthy();

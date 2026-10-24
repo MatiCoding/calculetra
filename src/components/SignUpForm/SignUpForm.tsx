@@ -52,7 +52,8 @@ function SignUpForm() {
 
     return (
         <>
-            <h2>Crear cuenta</h2>
+            <h2>Crea tu cuenta</h2>
+            <p>Regístrate con tu cuenta de siempre o con un email</p>
             <form onSubmit={handleSubmit} className={styles.form}>
                 <label htmlFor="signup-email">Email</label>
                 <input
@@ -83,7 +84,7 @@ function SignUpForm() {
                 {error && <p role="alert" className={styles.error}>{error}</p>}
                 <button type="submit" disabled={submitting}>Crear cuenta</button>
             </form>
-            <p>¿Ya tienes cuenta? <Link to="/login">Inicia sesión</Link></p>
+            <p>¿Ya tienes cuenta? <Link to="/login">Iniciar sesión</Link></p>
         </>
     );
 }

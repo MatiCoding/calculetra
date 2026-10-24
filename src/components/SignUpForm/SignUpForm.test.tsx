@@ -115,4 +115,16 @@ describe('SignUpForm', () => {
         finish(null);
         await screen.findByRole('status');
     });
+
+    it('shows its title', () => {
+        renderForm();
+
+        expect(screen.getByRole('heading', { name: 'Crea tu cuenta' })).toBeTruthy();
+    });
+
+    it('links to the log in page', () => {
+        renderForm();
+
+        expect(screen.getByRole('link', { name: 'Iniciar sesión' }).getAttribute('href')).toBe('/login');
+    });
 });
