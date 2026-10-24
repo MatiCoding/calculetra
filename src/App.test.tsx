@@ -69,12 +69,6 @@ describe('App routes', () => {
     expect(screen.queryByText(/Objetivo/)).toBeNull();
   });
 
-  it('keeps the header on the 404 page', () => {
-    renderAt('/esto-no-existe');
-
-    expect(screen.getByRole('link', { name: 'Calculetra' })).toBeTruthy();
-  });
-
   it('shows the notice left by another page on /', () => {
     render(
       <MemoryRouter initialEntries={[{ pathname: '/', state: { notice: 'Tu cuenta se ha eliminado.' } }]}>
@@ -90,5 +84,17 @@ describe('App routes', () => {
     renderAt(path);
 
     expect(screen.queryByRole('heading', { name: 'Esta página no existe' })).toBeNull();
+  });
+
+    it.each(['/login', '/signup'])('does not show the site header on %s', (path) => {
+    renderAt(path);
+
+    expect(screen.queryByRole('banner')).toBeNull();
+  });
+
+  it.each(['/', '/forgot-password', '/esto-no-existe'])('shows the site header on %s', (path) => {
+    renderAt(path);
+
+    expect(screen.getByRole('banner')).toBeTruthy();
   });
 });
