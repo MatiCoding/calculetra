@@ -14,6 +14,7 @@ import RequireAuth from './components/RequireAuth/RequireAuth'
 import AccountPage from './components/AccountPage/AccountPage'
 import ForgotPasswordForm from './components/ForgotPasswordForm/ForgotPasswordForm'
 import ResetPasswordPage from './components/ResetPasswordPage/ResetPasswordPage'
+import Notice from './components/Notice/Notice'
 
 function App() {
   const [gameMode, setGameMode] = useState<GameType>('numbers')
@@ -25,6 +26,7 @@ function App() {
           path="/"
           element={
             <>
+              <Notice />
               <ModeSwitch gameMode = {gameMode} setGameMode = {setGameMode} />
               <main>
                 { gameMode === 'numbers' ? <NumbersGame /> : <LettersGame /> }

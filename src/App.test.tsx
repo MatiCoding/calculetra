@@ -73,6 +73,17 @@ describe('App routes', () => {
     expect(screen.getByRole('link', { name: 'Calculetra' })).toBeTruthy();
   });
 
+  it('shows the notice left by another page on /', () => {
+    render(
+      <MemoryRouter initialEntries={[{ pathname: '/', state: { notice: 'Tu cuenta se ha eliminado.' } }]}>
+        <App />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole('status').textContent).toContain('Tu cuenta se ha eliminado.');
+    expect(screen.getByText(/Objetivo/)).toBeTruthy();
+  });
+
   it.each(['/', '/signup', '/login'])('does not show the 404 page on %s', (path) => {
     renderAt(path);
 
