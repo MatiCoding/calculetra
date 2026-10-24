@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import AccountPage from './AccountPage';
 
@@ -12,20 +13,31 @@ vi.mock('../../auth/context/useAuth', () => ({
         logOut: vi.fn(),
         resetPassword: vi.fn(),
         updatePassword: vi.fn(),
+        changeEmail: vi.fn(),
+        deleteAccount: vi.fn(),
     }),
 }));
+
+// DeleteAccountForm uses useNavigate, which needs a router.
+function renderPage() {
+    render(
+        <MemoryRouter>
+            <AccountPage />
+        </MemoryRouter>,
+    );
+}
 
 describe('AccountPage', () => {
     afterEach(cleanup);
 
     it("shows the user's email", () => {
-        render(<AccountPage />);
+        renderPage();
 
         expect(screen.getByText(/ana@example\.com/)).toBeTruthy();
     });
 
     it('shows the three sections', () => {
-        render(<AccountPage />);
+        renderPage();
 
         expect(screen.getByRole('heading', { name: 'Cambiar contraseña' })).toBeTruthy();
         expect(screen.getByRole('heading', { name: 'Cambiar correo' })).toBeTruthy();
@@ -33,11 +45,24 @@ describe('AccountPage', () => {
     });
 
     it('shows the change password form', () => {
-        render(<AccountPage />);
+        renderPage();
 
         expect(screen.getByLabelText('Contraseña actual')).toBeTruthy();
         expect(screen.getByLabelText('Nueva contraseña')).toBeTruthy();
         expect(screen.getByLabelText('Repite la nueva contraseña')).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Guardar contraseña' })).toBeTruthy();
+    });
+
+    it('shows the change email form', () => {
+        renderPage();
+
+        expect(screen.getByLabelText('Correo nuevo')).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'Cambiar correo' })).toBeTruthy();
+    });
+
+    it('shows the delete account button', () => {
+        renderPage();
+
+        expect(screen.getByRole('button', { name: 'Eliminar cuenta' })).toBeTruthy();
     });
 });

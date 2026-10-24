@@ -61,3 +61,4 @@ What becomes easier or harder, risks, and follow-up work.
 | 0003 | [Deploy to production when a release is published](0003-deploy-on-release.md) | Accepted |
 | 0004 | [Keep the session in localStorage and reduce the risk](0004-session-storage.md) | Accepted |
 | 0005 | [Merge into main without making a release](0005-merge-without-release.md) | Accepted |
+| 0006 | [Delete accounts with a database function](0006-delete-account.md) | Accepted |

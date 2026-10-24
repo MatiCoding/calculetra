@@ -24,12 +24,13 @@ flowchart LR
     browser["Calculetra<br/>React app in the browser"]
     vercel["Vercel<br/>static hosting"]
     supabase[("Supabase Auth")]
-    db[("Supabase database<br/>results and leaderboard")]
+    db[("Supabase database<br/>delete_account function<br/>results and leaderboard (planned)")]
 
     player -->|plays and logs in| browser
     vercel -->|HTML, JS and CSS| browser
     browser -->|sign up, log in, log out, session, password reset| supabase
-    browser -.->|planned| db
+    browser -->|delete account| db
+    browser -.->|planned: results| db
 ```
 
 | Partner | What goes between it and the app |
@@ -37,7 +38,7 @@ flowchart LR
 | Player | Uses the app in a browser. The game works without an account. |
 | Vercel | Serves the static build (`dist/`). Every page, including `/login` or `/signup`, is answered with `index.html` (see `vercel.json`) so the router in the browser can handle it. Each published release is deployed by the Deploy workflow (see [ADR 0003](decisions/0003-deploy-on-release.md)); merges into main are not deployed on their own. |
 | Supabase Auth | Accounts with email and password, called directly from the browser through `@supabase/supabase-js`. See [ADR 0001](decisions/0001-backend-supabase.md). |
-| Supabase database | **Planned.** Game results, the daily leaderboard and stats are not stored yet. |
+| Supabase database | Has one function, `delete_account()`, that lets a logged-in user delete their own account, because the browser key cannot delete users. The SQL is in `supabase/migrations/` and is run by hand in the Supabase SQL Editor. See [ADR 0006](decisions/0006-delete-account.md). Game results, the daily leaderboard and stats are **planned** and not stored yet. |
 
 The daily challenge does not come from any server: see the seeded random in section 4.
 
@@ -79,9 +80,9 @@ flowchart TD
 | Block | Responsibility | Depends on |
 | --- | --- | --- |
 | `main.tsx`, `Root.tsx`, `App.tsx` | Start React, choose between the "under construction" page and the app, set up the router and the `AuthProvider`, and define the routes (`/`, `/signup`, `/login`, `/account`, `/forgot-password`, `/reset-password`, 404). | `components`, `auth/context`, `config`, `types` |
-| `components/` | One folder per component with its `.tsx`, CSS Module and test. `NumbersGame` is the game; `Header`, `SignUpForm`, `LogInForm`, `AccountPage`, `ForgotPasswordForm`, `ResetPasswordPage` and `NewPasswordForm` use the account; `LettersGame` is a placeholder. | `domain`, `auth`, `types` |
+| `components/` | One folder per component with its `.tsx`, CSS Module and test. `NumbersGame` is the game; `Header`, `SignUpForm`, `LogInForm`, `AccountPage`, `ForgotPasswordForm`, `ResetPasswordPage`, `NewPasswordForm`, `ChangeEmailForm` and `DeleteAccountForm` use the account; `NoticeDialog` shows, in a dialog, a message left by another page; `LettersGame` is a placeholder. | `domain`, `auth`, `types` |
 | `domain/cifras/` | Challenge generation, seeded random, operations, game reducer and score. | Nothing outside itself |
-| `auth/api/` | The Supabase client and the functions `logOut`, `resetPassword`, `updatePassword`, `getCurrentUser` and `onAuthChange`. Turns Supabase's user into `AuthUser`. | `@supabase/supabase-js` |
+| `auth/api/` | The Supabase client and the functions `signUp`, `logIn`, `logOut`, `resetPassword`, `updatePassword`, `changeEmail`, `deleteAccount`, `getCurrentUser` and `onAuthChange`. Turns Supabase's user into `AuthUser`. | `@supabase/supabase-js` |
 | `auth/context/` | `AuthProvider` keeps the current user and `useAuth()` gives it to components. | `auth/api` |
 | `auth/signUp/`, `auth/logIn/`, `auth/password/` | Form validation and translating Supabase errors into messages in Spanish. | `@supabase/supabase-js` (only its error helpers) |
 | `config/` | Feature flags read from environment variables. | Nothing |
@@ -132,3 +133,4 @@ Decisions are recorded as ADRs in [`docs/decisions/`](decisions/README.md).
 | # | Decision | Status |
 | --- | --- | --- |
 | 0001 | [Use Supabase as the backend](decisions/0001-backend-supabase.md) | Accepted |
+| 0006 | [Delete accounts with a database function](decisions/0006-delete-account.md) | Accepted |

@@ -1,6 +1,8 @@
 import {useAuth} from '../../auth/context/useAuth';
 import styles from './AccountPage.module.css';
 import NewPasswordForm from '../NewPasswordForm/NewPasswordForm';
+import ChangeEmailForm from '../ChangeEmailForm/ChangeEmailForm';
+import DeleteAccountForm from '../DeleteAccountForm/DeleteAccountForm';
 
 function AccountPage() {
     // RequireAuth only shows this page when there is a user but TypeScript does not know that,
@@ -19,12 +21,12 @@ function AccountPage() {
 
             <section className={styles.section}>
                 <h3>Cambiar correo</h3>
-                <p className={styles.soon}>Próximamente</p>
+                <ChangeEmailForm />
             </section>
 
             <section className={styles.section}>
                 <h3>Eliminar cuenta</h3>
-                <p className={styles.soon}>Próximamente</p>
+                <DeleteAccountForm />
             </section>
         </div>
     );
