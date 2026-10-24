@@ -1,4 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router'
+import { useState } from 'react'
 import LogInForm from '../LogInForm/LogInForm'
 import SignUpForm from '../SignUpForm/SignUpForm'
 import styles from './AuthPage.module.css'
@@ -10,12 +11,23 @@ function AuthPage() {
     // and the RequireAuth redirect to /login just work.
     const front = pathname === '/signup' ? 'signup' : 'login'
 
+    const [prevFront, setPrevFront] = useState(front)
+    const [animate, setAnimate] = useState(false)
+    if (front !== prevFront) {
+        setPrevFront(front)
+        setAnimate(true)
+    }
+
     return (
         <main className={styles.page}>
             <Link to="/" className={styles.brand}>Calculetra</Link>
-            <div className={`${styles.deck} ${front === 'signup' ? styles.showSignUp : ''}`}>
+            <div className={[
+                    styles.deck,
+                    front === 'signup' && styles.showSignUp,
+                    animate && styles.animate,
+                ].filter(Boolean).join(' ')}>
                 <section className={`${styles.card} ${styles.logInCard}`}>
-                    <div inert={front !== 'login'} className={styles.face}>
+                    <div inert={front !== 'login'}>
                         <LogInForm />
                     </div>
                     <button 
@@ -30,7 +42,7 @@ function AuthPage() {
                 </section>
 
                 <section className={`${styles.card} ${styles.signUpCard}`}>
-                    <div inert={front !== 'signup'} className={styles.face}>
+                    <div inert={front !== 'signup'}>
                         <SignUpForm />
                     </div>
                     <button 

@@ -29,6 +29,9 @@
     width: 100%;
     max-width: 440px;
     height: 650px;
+
+    --dur: 0.8s;
+    --ease: cubic-bezier(0.45, 0, 0.25, 1);
 }
 
 .card {
@@ -40,10 +43,12 @@
     padding: 34px 34px 30px;
     border-radius: 22px;
     background: var(--color-card);
-    box-shadow: 0 1px 0 rgba(31, 36, 48, 0.14), 0 24px 50px -24px rgba(31, 36, 48, 0.3);
+    box-shadow: 0 0 0 1px rgba(31, 36, 48, 0.1), 0 24px 50px -24px rgba(31, 36, 48, 0.3);
     text-align: left;
     --front: none;
     --back: translateX(52px) rotate(3deg) scale(0.97);
+    --outLeft: translateX(-58%) rotate(-6deg);
+    --outRight: translateX(58%) rotate(7deg);
 }
 
 .card::before {
@@ -75,18 +80,13 @@
 .showSignUp .logInCard {transform: var(--back); z-index: 1;}
 .showSignUp .signUpCard {transform: var(--front); z-index: 2;}
 
-/* Front card: form visible, spine hidden. Back card: the opposite. */ 
-.face {opacity: 1;}
-.spine {opacity: 0; pointer-events: none;}
-
-.signUpCard .face,
-.showSignUp .logInCard .face {opacity: 0;}
-
+/* Both forms are always visible: the back one is hidden behind the front
+   card. The back card shows its spine; on the front card the spine is
+   folded away to the right edge. */
+.spine { clip-path: inset(0 0 0 100%); pointer-events: none; }
 .signUpCard .spine,
-.showSignUp .logInCard .spine { opacity: 1; pointer-events: auto; }
- 
-.showSignUp .signUpCard .face { opacity: 1; }
-.showSignUp .signUpCard .spine { opacity: 0; pointer-events: none; }
+.showSignUp .logInCard .spine { clip-path: inset(0); pointer-events: auto; }
+.showSignUp .signUpCard .spine { clip-path: inset(0 0 0 100%); pointer-events: none; }
 
 /* -- Spine -- */
 
@@ -111,4 +111,48 @@
 .spine span {
     writing-mode: vertical-rl;
     letter-spacing: 0.04em;
+}
+
+/* --- Shuffle animation --- */
+
+.animate .logInCard { animation: logInToFront var(--dur) var(--ease) both;}
+.animate .signUpCard {animation: signUpToBack var(--dur) var(--ease) both;}
+
+.animate.showSignUp .logInCard {animation-name: logInToBack;}
+.animate.showSignUp .signUpCard {animation-name: signUpToFront;}
+
+/* Log in always leaves to the left and sign Up to the right. When they are apart, the z-index swaps
+so you never see one jump over the other. */
+
+@keyframes logInToBack{
+    0% { transform: var(--front); z-index: 2; }
+    50% { transform: var(--outLeft); z-index: 2; }
+    50.01% { z-index: 1; }
+    100% { transform: var(--back); z-index: 1; }
+}
+
+@keyframes logInToFront {
+    0% { transform: var(--back); z-index: 1; }
+    50% { transform: var(--outLeft); z-index: 1; }
+    50.01% { z-index: 2; }
+    100% { transform: var(--front); z-index: 2; }
+}
+
+@keyframes signUpToBack {
+    0% { transform: var(--front); z-index: 2; }
+    50% { transform: var(--outRight); z-index: 2; }
+    50.01% { z-index: 1; }
+    100% { transform: var(--back); z-index: 1; }
+}
+ 
+@keyframes signUpToFront {
+    0% { transform: var(--back); z-index: 1; }
+    50% { transform: var(--outRight); z-index: 1; }
+    50.01% { z-index: 2; }
+    100% { transform: var(--front); z-index: 2; }
+}
+
+/* The form and the spine cross-fade in the middle of the move. */
+.animate .spine {
+    transition: clip-path calc(var(--dur) * 0.5) var(--ease) calc(var(--dur) * 0.25);
 }
