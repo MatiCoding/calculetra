@@ -60,6 +60,11 @@ export async function changeEmail(email: string) : Promise<void> {
   if (error) throw error
 }
 
+export async function deleteAccount(): Promise<void> {
+  const { error } = await supabase.rpc('delete_account')
+  if (error) throw error
+}
+
 // Asks the server if the saved session is still valid, instead of
 // trusting what is stored in the browser.
 export async function getCurrentUser(): Promise<AuthUser | null> {

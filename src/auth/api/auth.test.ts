@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { getCurrentUser, logIn, onAuthChange, signUp, logOut, resetPassword, updatePassword, changeEmail } from './auth'
+import { getCurrentUser, logIn, onAuthChange, signUp, logOut, resetPassword, updatePassword, changeEmail, deleteAccount } from './auth'
 import { supabase } from './supabaseClient'
 import { AuthSessionMissingError } from '@supabase/supabase-js'
 
@@ -16,6 +16,7 @@ vi.mock('./supabaseClient', () => ({
       resetPasswordForEmail: vi.fn(),
       updateUser: vi.fn(),
     },
+    rpc: vi.fn(),
   },
 }))
 
@@ -285,5 +286,23 @@ describe('changeEmail', () => {
     } as never)
 
     await expect(changeEmail('new@b.com')).rejects.toThrow('Email address already registered')
+  })
+})
+
+describe('deleteAccount', () => {
+  it('calls the delete_account function in the database', async () => {
+    vi.mocked(supabase.rpc).mockResolvedValue({ data: null, error: null } as never)
+
+    await expect(deleteAccount()).resolves.toBeUndefined()
+    expect(supabase.rpc).toHaveBeenCalledWith('delete_account')
+  })
+
+  it('throws the error when the account was not deleted', async () => {
+    vi.mocked(supabase.rpc).mockResolvedValue({
+      data: null,
+      error: new Error('Could not find the function public.delete_account'),
+    } as never)
+
+    await expect(deleteAccount()).rejects.toThrow('Could not find the function')
   })
 })
