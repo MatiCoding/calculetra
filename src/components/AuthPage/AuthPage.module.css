@@ -65,11 +65,13 @@
 .logInCard{
     --card-color: var(--color-letter);
     --card-text: #fff;
+    --card-shadow: #154483;
 }
 
 .signUpCard {
     --card-color: var(--color-number);
     --card-text: var(--color-text);
+    --card-shadow: #b57d0c;
 }
 
 /* Log in in front by default */
@@ -201,3 +203,98 @@ so you never see one jump over the other. */
 .showSignUp .tile {transform: rotateX(180deg);}
 
 .animate .tile {transition: transform 0.5s ease-in-out;}
+
+/* -- Forms inside the cards -- */
+.card h2 {
+    margin: 0 0 4px;
+    font-size: 1.5rem;
+    letter-spacing: -0.02em;
+}
+
+.card h2 + p {
+    margin: 0 0 18px;
+    color: var(--color-muted);
+}
+
+.card form {
+    max-width: none;
+    padding: 0;
+    gap: 6px;
+}
+
+.card label {
+    margin-top: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.card input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 11px 14px 11px 42px;
+    border: 1px solid rgba(31, 36, 48, 0.14);
+    border-radius: 12px;
+    background: #fff no-repeat 14px center / 18px;
+    font: inherit;
+}
+
+.card input:focus{
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(30, 90, 168, 0.18);
+}
+
+.card input[type="email"]{
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235c6370' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='5' width='18' height='14' rx='2'/%3E%3Cpath d='m3 7 9 6 9-6'/%3E%3C/svg%3E");
+}
+
+.card input[autocomplete$="password"] {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235c6370' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='4' y='11' width='16' height='10' rx='2'/%3E%3Cpath d='M8 11V7a4 4 0 0 1 8 0v4'/%3E%3C/svg%3E");
+}
+
+/* Same tile shadow as the 404 page buttons, in the card's colour. */
+.card button[type="submit"] {
+    margin-top: 14px;
+    padding: 13px;
+    border: 0;
+    border-radius: 12px;
+    background: var(--card-color);
+    color: var(--card-text);
+    box-shadow: 0 4px 0 var(--card-shadow);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.card button[type="subtmit"]:active {
+    translate: 0 2px;
+    box-shadow: 0 2px 0 var(--card-shadow);
+}
+
+.card button[type="submit"]:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+.card [role="alert"] {
+    margin: 4px 0 0;
+    color: var(--color-danger);
+    font-size: 0.875rem; 
+}
+
+.card form ~ p{
+    margin: 12px 0 0;
+    color: var(--color-muted);
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+.card a {
+    color: var(--color-accent);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.card a:hover{
+    text-decoration: underline;
+}
