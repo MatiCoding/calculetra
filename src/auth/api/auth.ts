@@ -18,7 +18,9 @@ function toAuthUser(user: User): AuthUser {
   return { 
     id: user.id, 
     email: user.email ?? '', 
-    hasPassword: user.identities?.some((identity) => identity.provider === 'email') ?? false,
+    // The providers the user can log in with, the same list the Supabase
+    // dashboard shows. "email" means they have a password.
+    hasPassword: user.app_metadata.providers?.includes('email') ?? false,
   }
 }
 
