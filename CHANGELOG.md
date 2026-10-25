@@ -13,6 +13,9 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - Change email from the account page. The email only changes after you open the confirmation links sent to your current and your new email.
 - Delete your account from the account page. You have to type your email to confirm, and then you are logged out and taken to the home page, where a dialog tells you the account was deleted.
 
+### Changed
+- Log in and sign up are now one designed page: two stacked cards that suffle when you switch, with ENTRA / ÚNETE letter tiles, a show/hide password button and Google, Facebook, GitHub and LinkedIn buttons (coming soon).
+
 ## [0.1.3] - 2026-10-21
 
 ### Security
