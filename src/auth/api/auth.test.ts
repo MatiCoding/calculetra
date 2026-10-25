@@ -21,7 +21,7 @@ vi.mock('./supabaseClient', () => ({
   },
 }))
 
-const supabaseUser = { id: '1', email: 'a@b.com' }
+const supabaseUser = { id: '1', email: 'a@b.com', app_metadata: {} }
 const authUser = { id: '1', email: 'a@b.com', hasPassword: false }
 
 beforeEach(() => {
@@ -116,9 +116,9 @@ describe('getCurrentUser', () => {
     await expect(getCurrentUser()).rejects.toThrow('Network error')
   })
 
-  it('says that the user has a password when they have an email identity', async () => {
+  it('says that the user has a password when email is one of their providers', async () => {
     vi.mocked(supabase.auth.getUser).mockResolvedValue({
-      data: { user: { ...supabaseUser, identities: [{ provider: 'email' }, { provider: 'google' }] } },
+      data: { user: { ...supabaseUser, app_metadata: { providers: ['email', 'google'] } } },
       error: null,
     } as never)
 
@@ -127,7 +127,7 @@ describe('getCurrentUser', () => {
 
   it('says that the user has no password when they only log in with providers', async () => {
     vi.mocked(supabase.auth.getUser).mockResolvedValue({
-      data: { user: { ...supabaseUser, identities: [{ provider: 'github' }] } },
+      data: { user: { ...supabaseUser, app_metadata: { providers: ['github'] } } },
       error: null,
     } as never)
 
