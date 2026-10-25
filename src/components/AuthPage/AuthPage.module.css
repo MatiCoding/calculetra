@@ -47,7 +47,7 @@
     box-shadow: 0 0 0 1px rgba(31, 36, 48, 0.1), 0 24px 50px -24px rgba(31, 36, 48, 0.3);
     text-align: left;
     --front: none;
-    --back: translateX(52px) rotate(3deg) scale(0.97);
+    --back: translateX(52px) rotate(3deg) scale(0.95);
     --outLeft: translateX(-58%) rotate(-6deg);
     --outRight: translateX(58%) rotate(7deg);
 }
