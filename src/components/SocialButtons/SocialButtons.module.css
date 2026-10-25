@@ -20,6 +20,11 @@
     cursor: not-allowed;
 }
 
+.button:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
 .button svg {
     width: 18px;
     height: 18px;

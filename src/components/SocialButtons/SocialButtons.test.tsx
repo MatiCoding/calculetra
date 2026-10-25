@@ -38,4 +38,28 @@ describe('SocialButtons', () => {
 
         expect(screen.getByText('o regístrate con tu email')).toBeTruthy();
     });
+        it('disables every button while it goes to the provider', () => {
+        // A promise that never ends, like the real one: the browser leaves the page.
+        auth.logInWithProvider = vi.fn(() => new Promise<void>(() => {}));
+        render(<SocialButtons dividerText="o entra con tu email" />);
+
+        fireEvent.click(screen.getByRole('button', { name: 'Continuar con GitHub' }));
+
+        for (const button of screen.getAllByRole('button')) {
+            expect((button as HTMLButtonElement).disabled).toBe(true);
+        }
+    });
+
+    it('shows an error and enables the buttons again if it can not go to the provider', async () => {
+        auth.logInWithProvider = vi.fn().mockRejectedValue(new Error('Network error'));
+        render(<SocialButtons dividerText="o entra con tu email" />);
+
+        fireEvent.click(screen.getByRole('button', { name: 'Continuar con GitHub' }));
+
+        expect((await screen.findByRole('alert')).textContent).toBe(
+            'No se ha podido abrir el inicio de sesión. Revisa tu conexión y vuelve a intentarlo.',
+        );
+        const button = screen.getByRole('button', { name: 'Continuar con GitHub' }) as HTMLButtonElement;
+        expect(button.disabled).toBe(false);
+    });
 });
