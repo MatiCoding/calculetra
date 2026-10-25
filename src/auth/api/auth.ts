@@ -8,6 +8,8 @@ export type AuthUser = {
   email: string
 }
 
+export type OAuthProvider = 'google' | 'facebook' | 'github' | 'linkedin_oidc'
+
 function toAuthUser(user: User): AuthUser {
   // Supabase allows users without email (phone login). We only use email,
   // so an empty string is enough here.
@@ -83,4 +85,14 @@ export function onAuthChange(callback: (user: AuthUser | null) => void): () => v
     callback(session ? toAuthUser(session.user) : null)
   })
   return () => data.subscription.unsubscribe()
+}
+
+// Sends the browser to the provider's login page.
+// When the user finishes, the provider sends them back to the home page already logged in and onAuthChange tells the app, so this method never returns a user.
+export async function logInWithProvider(provider: OAuthProvider): Promise<void> {
+  const {error} = await supabase.auth.signInWithOAuth({
+    provider,
+    options: {redirectTo: `${window.location.origin}/` },
+  })
+  if (error) throw error
 }
