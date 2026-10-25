@@ -52,7 +52,7 @@ describe('Header', () => {
     });
 
     it('shows the email and "Cerrar sesión" when someone is logged in', () => {
-        auth.user = { id: '1', email: 'ana@example.com' };
+        auth.user = { id: '1', email: 'ana@example.com', hasPassword: true };
         renderHeader();
 
         expect(screen.getByText('ana@example.com')).toBeTruthy();
@@ -61,7 +61,7 @@ describe('Header', () => {
     });
 
     it('calls logOut when "Cerrar sesión" is clicked', () => {
-        auth.user = { id: '1', email: 'ana@example.com' };
+        auth.user = { id: '1', email: 'ana@example.com', hasPassword: true };
         renderHeader();
 
         fireEvent.click(screen.getByRole('button', { name: 'Cerrar sesión' }));
@@ -70,7 +70,7 @@ describe('Header', () => {
     });
 
     it('links the email to the account page', () => {
-        auth.user = { id: '1', email: 'ana@example.com' };
+        auth.user = { id: '1', email: 'ana@example.com', hasPassword: true };
         renderHeader();
 
         expect(screen.getByRole('link', { name: 'ana@example.com' }).getAttribute('href')).toBe('/account');

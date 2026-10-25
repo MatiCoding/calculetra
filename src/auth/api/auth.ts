@@ -6,6 +6,8 @@ import { supabase } from './supabaseClient'
 export type AuthUser = {
   id: string
   email: string
+    // false for users who only log in with Google or GitHub.
+  hasPassword: boolean
 }
 
 export type OAuthProvider = 'google' | 'github'
@@ -13,7 +15,11 @@ export type OAuthProvider = 'google' | 'github'
 function toAuthUser(user: User): AuthUser {
   // Supabase allows users without email (phone login). We only use email,
   // so an empty string is enough here.
-  return { id: user.id, email: user.email ?? '' }
+  return { 
+    id: user.id, 
+    email: user.email ?? '', 
+    hasPassword: user.identities?.some((identity) => identity.provider === 'email') ?? false,
+  }
 }
 
 export async function logIn(email: string, password: string): Promise<AuthUser> {

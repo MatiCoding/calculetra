@@ -25,7 +25,7 @@ function ShowUser() {
   return <p>{user ? user.email : 'nobody'}</p>
 }
 
-const userT: AuthUser = { id: '1', email: 'userT@example.com' }
+const userT: AuthUser = { id: '1', email: 'userT@example.com', hasPassword: true }
 
 describe('AuthProvider', () => {
   beforeEach(() => {
