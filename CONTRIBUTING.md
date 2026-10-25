@@ -175,3 +175,53 @@ Accounts use [Supabase](https://supabase.com), which needs two environment varia
 - **`npm run dev` needs keys.** The Supabase client throws an error when it loads if the variables are missing, so the app does not start.
 
 To run the app locally, create a free Supabase project, copy `.env.example` to `.env` and fill in the URL and the publishable key from your project settings. Never commit your `.env` file (it is already in `.gitignore`).
+
+## Setting up log in with Google and GitHub
+
+Log in with Google and GitHub goes through Supabase Auth: the browser only ever talks to Supabase, and the provider's client secret is stored in Supabase, never in `.env` or in the repository. You only need this if you want to try these buttons with your own Supabase project; email and password work without it.
+
+There are two redirects, and each one is configured in a different place:
+
+1. **Provider → Supabase.** The provider sends the user back to your project's callback URL, `https://<your-project>.supabase.co/auth/v1/callback`. You find it in Supabase under **Authentication → Sign In / Providers → (provider)**. It is the same for local development and production.
+2. **Supabase → the app.** Supabase sends the user to the `redirectTo` that the app asks for (the home page of the current site), but only if it is in its allow list. If it is not, Supabase sends them to the Site URL instead.
+
+### 1. Allowed redirect URLs (Supabase)
+
+In **Authentication → URL Configuration**:
+
+- **Site URL:** `https://calculetra.vercel.app` (or your own deployment).
+- **Redirect URLs:** `https://calculetra.vercel.app/**` and `http://localhost:5173/**`.
+
+### 2. GitHub
+
+1. GitHub → **Settings → Developer settings → OAuth Apps → New OAuth App**.
+2. Application name `Calculetra`, homepage URL `https://calculetra.vercel.app`, and as **Redirect URI** the Supabase callback URL. Leave wildcard matching and device flow off.
+3. Copy the **Client ID**, generate a **client secret** and copy it.
+4. Supabase → **Authentication → Sign In / Providers → GitHub**: enable it and paste both.
+
+GitHub apps work for every user straight away, with no review.
+
+### 3. Google
+
+1. In [Google Cloud](https://console.cloud.google.com), create a project called `Calculetra`.
+2. **Google Auth Platform → Get started**: app name `Calculetra`, your support email, audience **External**, your contact email.
+3. **Data access**: add the scopes `openid`, `.../auth/userinfo.email` and `.../auth/userinfo.profile`. They are non-sensitive, so they need no verification.
+4. **Branding**: homepage `https://calculetra.vercel.app`, and as authorized domains `calculetra.vercel.app` and `<your-project>.supabase.co`. Do not upload a logo yet: a logo makes Google ask for verification.
+5. **Clients → Create client**: type **Web application**, JavaScript origins `https://calculetra.vercel.app` and `http://localhost:5173`, and as redirect URI the Supabase callback URL. Copy the client ID and the client secret.
+6. Supabase → **Authentication → Sign In / Providers → Google**: enable it and paste both.
+7. While the app is in **Testing**, only the users listed in **Audience → Test users** can log in. To open it to everyone, press **Publish app** in **Audience** (see the requirements below).
+
+### Before it works for everyone
+
+- **GitHub:** nothing else.
+- **Google:** the app must be published (**Audience → Publish app**). With only the basic scopes no verification is needed, but Google asks for a privacy policy link on the branding page before publishing, and uploading a logo needs brand verification.
+- Google's screen says "Iniciar sesión en `<your-project>.supabase.co`", because Google shows the domain of the redirect URI. Showing "Calculetra" needs a Supabase custom domain (paid) or Google's own sign-in button (see the issue about it).
+
+### Adding another provider
+
+`logInWithProvider` takes the provider as a parameter, so a new provider needs no new auth logic:
+
+1. Add its Supabase name to `OAuthProvider` in `src/auth/api/auth.ts`.
+2. Add its name, colour and logo to `src/components/SocialButtons/socialProviders.ts`.
+3. Add it to the `it.each` tests in `auth.test.ts` and `SocialButtons.test.tsx`.
+4. Set it up in its developer console and in Supabase, as above, and check that it gives a verified email (see [ADR 0007](docs/decisions/0007-one-account-per-email.md)).
