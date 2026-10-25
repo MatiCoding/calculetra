@@ -14,6 +14,7 @@ import AccountPage from './components/AccountPage/AccountPage'
 import ForgotPasswordForm from './components/ForgotPasswordForm/ForgotPasswordForm'
 import ResetPasswordPage from './components/ResetPasswordPage/ResetPasswordPage'
 import NoticeDialog from './components/NoticeDialog/NoticeDialog'
+import OAuthReturnNotice from './components/OAuthReturnNotice/OAuthReturnNotice'
 
 function WithHeader() {
   return (
@@ -35,6 +36,7 @@ function App() {
             path="/"
             element={
               <>
+                <OAuthReturnNotice />
                 <NoticeDialog />
                 <ModeSwitch gameMode = {gameMode} setGameMode = {setGameMode} />
                 <main>
