@@ -4,6 +4,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { MemoryRouter, Route, Routes } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import SignUpForm from './SignUpForm';
+import { MIN_PASSWORD_LENGTH } from '../../auth/password/validateNewPassword';
 
 // vi.mock is moved to the top of the file before anything else runs, so the
 // fake signUp has to be created with vi.hoisted to exist by then.
@@ -126,5 +127,18 @@ describe('SignUpForm', () => {
         renderForm();
 
         expect(screen.getByRole('link', { name: 'Iniciar sesión' }).getAttribute('href')).toBe('/login');
+    });
+
+    it('tells the user the minimum password length', () => {
+        renderForm();
+
+        const hint = screen.getByText(`Mínimo ${MIN_PASSWORD_LENGTH} caracteres`);
+        expect(screen.getByLabelText('Contraseña').getAttribute('aria-describedby')).toBe(hint.id);
+    });
+
+    it('can show both passwords', () => {
+        renderForm();
+
+        expect(screen.getAllByRole('button', { name: 'Mostrar contraseña' })).toHaveLength(2);
     });
 });

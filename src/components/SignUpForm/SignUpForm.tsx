@@ -75,6 +75,7 @@ function SignUpForm() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     autoComplete="new-password"
+                    aria-describedby="signup-password-hint"
                 />
                 <p id="signup-password-hint" className={styles.hint}>Mínimo {MIN_PASSWORD_LENGTH} caracteres</p>
 

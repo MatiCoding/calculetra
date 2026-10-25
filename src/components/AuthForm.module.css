@@ -20,5 +20,5 @@
 .hint {
     margin: 0;
     font-size: 0.8rem;
-    color: (--color-muted);
+    color: var(--color-muted);
 }
