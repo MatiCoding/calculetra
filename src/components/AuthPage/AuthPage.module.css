@@ -5,7 +5,8 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 24px 16px 8px;
+    padding: 16px 16px 8px;
+    overflow-x: clip;
     background: var(--color-bg);
     color: var(--color-text);
     font-family: 'Inter Variable', sans-serif;
@@ -28,19 +29,19 @@
     position: relative;
     width: 100%;
     max-width: 440px;
-    height: 650px;
+    display: grid;
 
     --dur: 0.8s;
     --ease: cubic-bezier(0.45, 0, 0.25, 1);
 }
 
 .card {
-    position: absolute;
-    inset: 0;
+    position: relative;
+    grid-area: 1 / 1;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 34px 34px 30px;
+    padding: 28px 34px 24px;
     border-radius: 22px;
     background: var(--color-card);
     box-shadow: 0 0 0 1px rgba(31, 36, 48, 0.1), 0 24px 50px -24px rgba(31, 36, 48, 0.3);
@@ -163,7 +164,7 @@ so you never see one jump over the other. */
 .word {
     display: flex;
     gap: 8px;
-    margin-bottom: 28px;
+    margin-bottom: 20px;
     perspective: 600px;
 }
 
@@ -297,4 +298,62 @@ so you never see one jump over the other. */
 
 .card a:hover{
     text-decoration: underline;
+}
+
+/* -- Mobile -- */
+@media (max-width: 600px) {
+    .brand{
+        position: static;
+        margin-bottom: 16px;
+    }
+
+    .page {
+        justify-content: flex-start;
+    }
+
+    .word {
+        gap: 6px;
+    }
+
+    .tile {
+        width: 44px;
+        height: 44px;
+    }
+
+    .tileFront, .tileBack {
+        font-size: 1.35rem;
+    }
+
+    /* Leave room on the right for the back card, wich peeks out less. */
+    .deck {
+        width: calc(100% - 14px);
+        margin-right: 14px;
+    }
+
+    .card {
+        padding: 24px 20px 22px;
+        --back: translateX(12px) rotate(1.5deg) scale(0.97);
+        --outLeft: translateX(-70%) rotate(-5deg);
+        --outRight: translateX(70%) rotate(5deg);
+    }
+
+    /* The spine becomes a thin strip: you switch with the link under the form. */
+    .spine {
+        width: 22px;
+    }
+
+    .spine span {
+        display: none;
+    }
+}
+
+/* -- Reducend motion -- */
+@media (prefers-reduced-motion: reduce){
+    .deck{
+        --dur: 0s;
+    }
+
+    .animate .tile {
+        transition: none;
+    }
 }
