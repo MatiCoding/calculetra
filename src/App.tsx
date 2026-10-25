@@ -15,6 +15,7 @@ import ForgotPasswordForm from './components/ForgotPasswordForm/ForgotPasswordFo
 import ResetPasswordPage from './components/ResetPasswordPage/ResetPasswordPage'
 import NoticeDialog from './components/NoticeDialog/NoticeDialog'
 import OAuthReturnNotice from './components/OAuthReturnNotice/OAuthReturnNotice'
+import PrivacyPage from './components/PrivacyPage/PrivacyPage'
 
 function WithHeader() {
   return (
@@ -48,6 +49,7 @@ function App() {
           <Route path="/account" element={<main><RequireAuth><AccountPage /></RequireAuth></main>} />
           <Route path="/forgot-password" element={<main><ForgotPasswordForm /></main>} />
           <Route path="/reset-password" element={<main><ResetPasswordPage /></main>} />
+          <Route path="/privacy" element={<PrivacyPage />} />
         </Route>
 
         <Route path="/signup" element={<AuthPage />} />

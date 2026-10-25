@@ -1,0 +1,160 @@
+.privacy {
+    flex: 1;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 32px 16px 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    text-align: left;
+    color: var(--color-text);
+    font-family: 'Inter Variable', sans-serif;
+    counter-reset: section;
+}
+
+/* -- Intro --*/
+.intro {
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.badge {
+    display: inline-block;
+    margin: 0 0 20px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(31, 36, 48, 0.15);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-muted);
+}
+
+.tiles {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 24px;
+}
+
+.letterTile {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 56px;
+    height: 66px;
+    border-radius: 12px;
+    background-color: var(--color-letter);
+    color: white;
+    font-size: 2.2rem;
+    font-weight: 800;
+    line-height: 1;
+    box-shadow: 0 6px 0 rgba(0, 0, 0, 0.2);
+}
+
+/* A little out of line, like tiles dropped on a table. */
+.letterTile:nth-child(2) {transform: translateY(-6px) rotate(-4deg);}
+.letterTile:nth-child(4) {transform: translateY(4px) rotate(5deg);}
+
+.title {
+    margin: 0;
+    font-size: 2.25rem;
+    letter-spacing: -0.02em;
+}
+
+.updated {
+    margin: 8px 0 0;
+    color: var(--color-muted);
+}
+
+/* --- Sections ---*/
+
+.section {
+    position: relative;
+    padding: 22px 24px 20px;
+    border-radius: 22px;
+    background: var(--color-card);
+    box-shadow: 0 0 0 1px rgba(31, 36, 48, 0.1), 0 24px 50px -24px rgba(31, 36, 48, 0.3);
+}
+
+.section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 24px;
+    right: 24px;
+    height: 5px;
+    border-radius: 0 0 6px 6px;
+    background: var(--color-number);
+}
+ 
+.section:nth-of-type(even)::before {
+    background: var(--color-letter);
+}
+ 
+.section h2 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 10px;
+    font-size: 1.15rem;
+}
+
+.section h2::before {
+    counter-increment: section;
+    content: counter(section);
+    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: var(--color-number);
+    color: var(--color-text);
+    font-weight: 800;
+    box-shadow: 0 3px 0 rgba(0, 0, 0, 0.2);
+}
+
+.section p {
+    margin: 0;
+    line-height: 1.6;
+    color: var(--color-muted);
+}
+ 
+.section a {
+    color: var(--color-accent);
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+ 
+.section a:focus-visible {
+    outline: 3px solid var(--color-number);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+@media (max-width: 480px) {
+    .letterTile {
+        width: 44px;
+        height: 52px;
+        border-radius: 10px;
+        font-size: 1.7rem;
+        box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
+    }
+ 
+    .tiles {
+        gap: 8px;
+    }
+ 
+    .title {
+        font-size: 1.6rem;
+    }
+ 
+    .section {
+        padding: 20px 18px 18px;
+    }
+}
