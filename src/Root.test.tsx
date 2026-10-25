@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
-import type { AuthUser } from './auth/api/auth';
+import { logInWithProvider, type AuthUser } from './auth/api/auth';
 import { fakeDialog } from './test/fakeDialog';
 
 // The game is wrapped in AuthProvider, which would create the real Supabase
@@ -16,6 +16,7 @@ vi.mock('./auth/api/auth', () => ({
   updatePassword: vi.fn(),
   changeEmail: vi.fn(),
   deleteAccount: vi.fn(),
+  logInWithProvider: vi.fn(),
 }));
 
 async function renderRoot(flag: string | undefined) {

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { act, cleanup, render, renderHook, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { getCurrentUser, onAuthChange, type AuthUser } from '../api/auth'
+import { getCurrentUser, onAuthChange, logInWithProvider, type AuthUser } from '../api/auth'
 import { AuthProvider } from './AuthProvider'
 import { useAuth } from './useAuth'
 
@@ -15,6 +15,7 @@ vi.mock('../api/auth', () => ({
   updatePassword: vi.fn(),
   changeEmail: vi.fn(),
   deleteAccount: vi.fn(),
+  logInWithProvider: vi.fn(),
 }))
 
 // A tiny component that shows what useAuth() returns, so the tests can read it.
@@ -100,5 +101,14 @@ describe('useAuth', () => {
     expect(() => renderHook(() => useAuth())).toThrow(
       'useAuth must be used inside an AuthProvider.',
     )
+  })
+
+  it('gives components the function to log in with a provider', async () => {
+    vi.mocked(getCurrentUser).mockResolvedValue(null)
+
+    const { result } = renderHook(() => useAuth(), { wrapper: AuthProvider })
+
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.logInWithProvider).toBe(logInWithProvider)
   })
 })
