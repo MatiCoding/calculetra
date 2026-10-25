@@ -1,14 +1,17 @@
 import { SOCIAL_PROVIDERS } from './socialProviders'
 import styles from './SocialButtons.module.css'
+import {useAuth} from '../../auth/context/useAuth';
 
 type SocialButtonsProps = {
     // The text of the line under the buttons, e.g. "o entra con tu email".
     dividerText: string
 }
 
-// Google, Facebook, GitHub and LinkedIn buttons. Only the UI for now:
-// they are disabled until #53 makes them work.
+// Google, Facebook, GitHub and LinkedIn buttons.
 function SocialButtons({ dividerText }: SocialButtonsProps) {
+    
+    const { logInWithProvider } = useAuth();
+
     return (
         <>
             <div className={styles.grid}>
@@ -17,9 +20,8 @@ function SocialButtons({ dividerText }: SocialButtonsProps) {
                         key={provider.name}
                         type="button"
                         className={styles.button}
-                        disabled
-                        title="Próximamente"
-                        aria-label={`${provider.name}, próximamente`}
+                        aria-label={`Continuar con ${provider.name}`}
+                        onClick={() => {logInWithProvider(provider.id)}}
                     >
                         <svg viewBox="0 0 24 24" aria-hidden="true">
                             <path fill={provider.color} d={provider.path} />
