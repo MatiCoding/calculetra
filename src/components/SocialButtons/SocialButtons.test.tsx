@@ -22,9 +22,7 @@ describe('SocialButtons', () => {
 
     it.each([
         ['Google', 'google'],
-        ['Facebook', 'facebook'],
         ['GitHub', 'github'],
-        ['LinkedIn', 'linkedin_oidc'],
     ])('logs in with %s when its button is clicked', (name, id) => {
         render(<SocialButtons dividerText="o entra con tu email" />);
 

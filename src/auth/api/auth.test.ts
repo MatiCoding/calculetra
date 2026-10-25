@@ -318,7 +318,7 @@ describe('logInWithProvider', () => {
     vi.unstubAllGlobals()
   })
 
-  it.each(['google', 'facebook', 'github', 'linkedin_oidc'] as const)(
+  it.each(['google', 'github'] as const)(
     'sends the user to %s and asks to come back to the home page of this site',
     async (provider) => {
       vi.mocked(supabase.auth.signInWithOAuth).mockResolvedValue({

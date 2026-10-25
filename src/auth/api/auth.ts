@@ -8,7 +8,7 @@ export type AuthUser = {
   email: string
 }
 
-export type OAuthProvider = 'google' | 'facebook' | 'github' | 'linkedin_oidc'
+export type OAuthProvider = 'google' | 'github'
 
 function toAuthUser(user: User): AuthUser {
   // Supabase allows users without email (phone login). We only use email,
