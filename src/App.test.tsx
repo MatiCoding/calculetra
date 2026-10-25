@@ -97,4 +97,18 @@ describe('App routes', () => {
 
     expect(screen.getByRole('banner')).toBeTruthy();
   });
+
+  it('shows the privacy policy on /privacy without logging in', () => {
+    renderAt('/privacy');
+ 
+    expect(screen.getByRole('heading', { level: 1, name: 'Política de privacidad' })).toBeTruthy();
+  });
+ 
+  it('goes to the privacy policy from the footer link', () => {
+    renderAt('/');
+ 
+    fireEvent.click(screen.getByRole('link', { name: 'Privacidad' }));
+ 
+    expect(screen.getByRole('heading', { level: 1, name: 'Política de privacidad' })).toBeTruthy();
+  });
 });
