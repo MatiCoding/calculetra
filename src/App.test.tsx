@@ -34,7 +34,7 @@ describe('App routes', () => {
   it('shows the sign up page on /signup', () => {
     renderAt('/signup');
 
-    expect(screen.getByRole('heading', { name: 'Crear cuenta' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Crea tu cuenta' })).toBeTruthy();
     expect(screen.queryByText(/Objetivo/)).toBeNull();
   });
 
@@ -43,19 +43,19 @@ describe('App routes', () => {
 
     fireEvent.click(screen.getByRole('link', { name: 'Iniciar sesión' }));
 
-    expect(screen.getByRole('heading', { name: 'Iniciar sesión' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Hola de nuevo' })).toBeTruthy();
   });
 
   it('goes to the sign up page from the log in page', () => {
     renderAt('/login');
 
-    fireEvent.click(screen.getByRole('link', { name: 'Crea una' }));
+    fireEvent.click(screen.getByRole('link', { name: 'Crear cuenta' }));
 
-    expect(screen.getByRole('heading', { name: 'Crear cuenta' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Crea tu cuenta' })).toBeTruthy();
   });
 
   it('goes back to the game from the title link', () => {
-    renderAt('/signup');
+    renderAt('/forgot-password');
 
     fireEvent.click(screen.getByRole('link', { name: 'Calculetra' }));
 
@@ -67,12 +67,6 @@ describe('App routes', () => {
 
     expect(screen.getByRole('heading', { name: 'Esta página no existe' })).toBeTruthy();
     expect(screen.queryByText(/Objetivo/)).toBeNull();
-  });
-
-  it('keeps the header on the 404 page', () => {
-    renderAt('/esto-no-existe');
-
-    expect(screen.getByRole('link', { name: 'Calculetra' })).toBeTruthy();
   });
 
   it('shows the notice left by another page on /', () => {
@@ -90,5 +84,17 @@ describe('App routes', () => {
     renderAt(path);
 
     expect(screen.queryByRole('heading', { name: 'Esta página no existe' })).toBeNull();
+  });
+
+  it.each(['/login', '/signup', '/esto-no-existe'])('does not show the site header on %s', (path) => {
+    renderAt(path);
+
+    expect(screen.queryByRole('banner')).toBeNull();
+  });
+
+  it.each(['/', '/forgot-password'])('shows the site header on %s', (path) => {
+    renderAt(path);
+
+    expect(screen.getByRole('banner')).toBeTruthy();
   });
 });

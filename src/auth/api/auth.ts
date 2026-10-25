@@ -6,12 +6,22 @@ import { supabase } from './supabaseClient'
 export type AuthUser = {
   id: string
   email: string
+    // false for users who only log in with Google or GitHub.
+  hasPassword: boolean
 }
+
+export type OAuthProvider = 'google' | 'github'
 
 function toAuthUser(user: User): AuthUser {
   // Supabase allows users without email (phone login). We only use email,
   // so an empty string is enough here.
-  return { id: user.id, email: user.email ?? '' }
+  return { 
+    id: user.id, 
+    email: user.email ?? '', 
+    // The providers the user can log in with, the same list the Supabase
+    // dashboard shows. "email" means they have a password.
+    hasPassword: user.app_metadata.providers?.includes('email') ?? false,
+  }
 }
 
 export async function logIn(email: string, password: string): Promise<AuthUser> {
@@ -83,4 +93,14 @@ export function onAuthChange(callback: (user: AuthUser | null) => void): () => v
     callback(session ? toAuthUser(session.user) : null)
   })
   return () => data.subscription.unsubscribe()
+}
+
+// Sends the browser to the provider's login page.
+// When the user finishes, the provider sends them back to the home page already logged in and onAuthChange tells the app, so this method never returns a user.
+export async function logInWithProvider(provider: OAuthProvider): Promise<void> {
+  const {error} = await supabase.auth.signInWithOAuth({
+    provider,
+    options: {redirectTo: `${window.location.origin}/` },
+  })
+  if (error) throw error
 }

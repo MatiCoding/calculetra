@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { getCurrentUser, logIn, onAuthChange, signUp, logOut, resetPassword, updatePassword, changeEmail, deleteAccount } from './auth'
+import { getCurrentUser, logIn, onAuthChange, signUp, logOut, resetPassword, updatePassword, changeEmail, deleteAccount, logInWithProvider } from './auth'
 import { supabase } from './supabaseClient'
 import { AuthSessionMissingError } from '@supabase/supabase-js'
 
@@ -15,13 +15,14 @@ vi.mock('./supabaseClient', () => ({
       signOut: vi.fn(),
       resetPasswordForEmail: vi.fn(),
       updateUser: vi.fn(),
+      signInWithOAuth: vi.fn(),
     },
     rpc: vi.fn(),
   },
 }))
 
-const supabaseUser = { id: '1', email: 'a@b.com' }
-const authUser = { id: '1', email: 'a@b.com' }
+const supabaseUser = { id: '1', email: 'a@b.com', app_metadata: {} }
+const authUser = { id: '1', email: 'a@b.com', hasPassword: false }
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -113,6 +114,24 @@ describe('getCurrentUser', () => {
     } as never)
 
     await expect(getCurrentUser()).rejects.toThrow('Network error')
+  })
+
+  it('says that the user has a password when email is one of their providers', async () => {
+    vi.mocked(supabase.auth.getUser).mockResolvedValue({
+      data: { user: { ...supabaseUser, app_metadata: { providers: ['email', 'google'] } } },
+      error: null,
+    } as never)
+
+    await expect(getCurrentUser()).resolves.toEqual({ ...authUser, hasPassword: true })
+  })
+
+  it('says that the user has no password when they only log in with providers', async () => {
+    vi.mocked(supabase.auth.getUser).mockResolvedValue({
+      data: { user: { ...supabaseUser, app_metadata: { providers: ['github'] } } },
+      error: null,
+    } as never)
+
+    await expect(getCurrentUser()).resolves.toEqual({ ...authUser, hasPassword: false })
   })
 })
 
@@ -304,5 +323,41 @@ describe('deleteAccount', () => {
     } as never)
 
     await expect(deleteAccount()).rejects.toThrow('Could not find the function')
+  })
+})
+
+describe('logInWithProvider', () => {
+  beforeEach(() => {
+    // These tests run in Node, where there is no window. Fake the part we use.
+    vi.stubGlobal('window', { location: { origin: 'https://calculetra.test' } })
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it.each(['google', 'github'] as const)(
+    'sends the user to %s and asks to come back to the home page of this site',
+    async (provider) => {
+      vi.mocked(supabase.auth.signInWithOAuth).mockResolvedValue({
+        data: { provider, url: 'https://provider.test/authorize' },
+        error: null,
+      } as never)
+
+      await expect(logInWithProvider(provider)).resolves.toBeUndefined()
+      expect(supabase.auth.signInWithOAuth).toHaveBeenCalledWith({
+        provider,
+        options: { redirectTo: 'https://calculetra.test/' },
+      })
+    },
+  )
+
+  it('throws the Supabase error', async () => {
+    vi.mocked(supabase.auth.signInWithOAuth).mockResolvedValue({
+      data: { provider: 'github', url: null },
+      error: new Error('Unsupported provider: provider is not enabled'),
+    } as never)
+
+    await expect(logInWithProvider('github')).rejects.toThrow('provider is not enabled')
   })
 })

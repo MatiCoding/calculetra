@@ -55,7 +55,7 @@ describe('RequireAuth', () => {
     });
 
     it('shows the page to a logged-in user', () => {
-        auth.user = { id: '1', email: 'ana@example.com' };
+        auth.user = { id: '1', email: 'ana@example.com', hasPassword: true };
 
         renderAccount();
 

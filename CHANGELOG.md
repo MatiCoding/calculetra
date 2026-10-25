@@ -12,6 +12,11 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - Change password from the account page. You have to type your current password, and Supabase checks it.
 - Change email from the account page. The email only changes after you open the confirmation links sent to your current and your new email.
 - Delete your account from the account page. You have to type your email to confirm, and then you are logged out and taken to the home page, where a dialog tells you the account was deleted.
+- Log in and sign up with Google or GitHub. Logging in with a provider using an email that already has an account logs into that same account.
+- On the account page, players who only log in with Google or GitHub see a note instead of the change password and change email forms.
+
+### Changed
+- Log in and sign up are now one designed page: two stacked cards that suffle when you switch, with ENTRA / ÚNETE letter tiles, a show/hide password button and Google and GitHub buttons.
 
 ## [0.1.3] - 2026-10-21
 

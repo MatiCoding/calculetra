@@ -32,7 +32,7 @@ describe('ResetPasswordPage', () => {
     afterEach(cleanup);
 
     it('shows the form when the link has logged the user in', () => {
-        auth.user = { id: '1', email: 'ana@example.com' };
+        auth.user = { id: '1', email: 'ana@example.com', hasPassword: true };
 
         renderPage();
 

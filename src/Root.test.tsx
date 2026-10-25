@@ -16,6 +16,7 @@ vi.mock('./auth/api/auth', () => ({
   updatePassword: vi.fn(),
   changeEmail: vi.fn(),
   deleteAccount: vi.fn(),
+  logInWithProvider: vi.fn(),
 }));
 
 async function renderRoot(flag: string | undefined) {
@@ -69,7 +70,7 @@ describe('Root, deleting the account', () => {
     // After resetModules the fake auth module is created again, so take it now.
     const auth = await import('./auth/api/auth');
     let changeUser: (user: AuthUser | null) => void = () => {};
-    vi.mocked(auth.getCurrentUser).mockResolvedValue({ id: '1', email: 'ana@example.com' });
+    vi.mocked(auth.getCurrentUser).mockResolvedValue({ id: '1', email: 'ana@example.com', hasPassword: true });
     vi.mocked(auth.onAuthChange).mockImplementation((callback) => {
       changeUser = callback;
       return () => {};

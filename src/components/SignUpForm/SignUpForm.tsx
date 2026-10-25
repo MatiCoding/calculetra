@@ -5,6 +5,10 @@ import {useAuth} from '../../auth/context/useAuth';
 import {getSignUpErrorMessage} from '../../auth/signUp/signUpErrors';
 
 import styles from '../AuthForm.module.css';
+import PasswordInput from '../PasswordInput/PasswordInput';
+import SocialButtons from '../SocialButtons/SocialButtons';
+
+import  {MIN_PASSWORD_LENGTH} from '../../auth/password/validateNewPassword';
 
 function SignUpForm() {
     const navigate = useNavigate();
@@ -52,7 +56,9 @@ function SignUpForm() {
 
     return (
         <>
-            <h2>Crear cuenta</h2>
+            <h2>Crea tu cuenta</h2>
+            <p>Regístrate con tu cuenta de siempre o con un email</p>
+            <SocialButtons dividerText="o regístrate con tu email"/>
             <form onSubmit={handleSubmit} className={styles.form}>
                 <label htmlFor="signup-email">Email</label>
                 <input
@@ -64,18 +70,18 @@ function SignUpForm() {
                 />
 
                 <label htmlFor="signup-password">Contraseña</label>
-                <input
+                <PasswordInput
                     id="signup-password"
-                    type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     autoComplete="new-password"
+                    aria-describedby="signup-password-hint"
                 />
+                <p id="signup-password-hint" className={styles.hint}>Mínimo {MIN_PASSWORD_LENGTH} caracteres</p>
 
                 <label htmlFor="signup-confirm-password">Repite la contraseña</label>
-                <input
+                <PasswordInput
                     id="signup-confirm-password"
-                    type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     autoComplete="new-password"
@@ -83,7 +89,7 @@ function SignUpForm() {
                 {error && <p role="alert" className={styles.error}>{error}</p>}
                 <button type="submit" disabled={submitting}>Crear cuenta</button>
             </form>
-            <p>¿Ya tienes cuenta? <Link to="/login">Inicia sesión</Link></p>
+            <p>¿Ya tienes cuenta? <Link to="/login">Iniciar sesión</Link></p>
         </>
     );
 }

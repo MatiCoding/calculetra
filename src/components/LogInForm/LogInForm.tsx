@@ -3,6 +3,9 @@ import { Link, useNavigate } from 'react-router';
 import { useAuth } from '../../auth/context/useAuth';
 import { getLogInErrorMessage } from '../../auth/logIn/logInErrors';
 
+import PasswordInput from '../PasswordInput/PasswordInput';
+import SocialButtons from '../SocialButtons/SocialButtons';
+
 import styles from '../AuthForm.module.css';
 
 function LogInForm() {
@@ -35,7 +38,9 @@ function LogInForm() {
 
     return (
         <>
-            <h2>Iniciar sesión</h2>
+            <h2>Hola de nuevo</h2>
+            <p>Inicia sesión para jugar al reto de hoy.</p>
+            <SocialButtons dividerText="o entra con tu email"/>
             <form onSubmit={handleSubmit} className={styles.form}>
                 <label htmlFor="login-email">Email</label>
                 <input
@@ -47,9 +52,8 @@ function LogInForm() {
                 />
 
                 <label htmlFor="login-password">Contraseña</label>
-                <input
+                <PasswordInput
                     id="login-password"
-                    type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     autoComplete="current-password"
@@ -59,7 +63,7 @@ function LogInForm() {
                 <button type="submit" disabled={submitting}>Iniciar sesión</button>
             </form>
             <p><Link to="/forgot-password">¿Has olvidado tu contraseña?</Link></p>
-            <p>¿No tienes cuenta? <Link to="/signup">Crea una</Link></p>
+            <p>¿No tienes cuenta? <Link to="/signup">Crear cuenta</Link></p>
         </>
     );
 }

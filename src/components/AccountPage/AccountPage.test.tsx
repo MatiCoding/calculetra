@@ -1,21 +1,17 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { AuthContextValue } from '../../auth/context/AuthContext';
 import AccountPage from './AccountPage';
 
+// Each test can change `auth.user` before rendering.
+const { auth } = vi.hoisted(() => ({
+    auth: {} as AuthContextValue,
+}));
+
 vi.mock('../../auth/context/useAuth', () => ({
-    useAuth: () => ({
-        user: { id: '1', email: 'ana@example.com' },
-        loading: false,
-        signUp: vi.fn(),
-        logIn: vi.fn(),
-        logOut: vi.fn(),
-        resetPassword: vi.fn(),
-        updatePassword: vi.fn(),
-        changeEmail: vi.fn(),
-        deleteAccount: vi.fn(),
-    }),
+    useAuth: () => auth,
 }));
 
 // DeleteAccountForm uses useNavigate, which needs a router.
@@ -28,6 +24,15 @@ function renderPage() {
 }
 
 describe('AccountPage', () => {
+    beforeEach(() => {
+        auth.user = { id: '1', email: 'ana@example.com', hasPassword: true };
+        auth.loading = false;
+        auth.updatePassword = vi.fn();
+        auth.changeEmail = vi.fn();
+        auth.deleteAccount = vi.fn();
+        auth.logOut = vi.fn();
+    });
+
     afterEach(cleanup);
 
     it("shows the user's email", () => {
@@ -64,5 +69,30 @@ describe('AccountPage', () => {
         renderPage();
 
         expect(screen.getByRole('button', { name: 'Eliminar cuenta' })).toBeTruthy();
+    });
+
+    describe('for a user who only logs in with a provider', () => {
+        beforeEach(() => {
+            auth.user = { id: '1', email: 'ana@gmail.com', hasPassword: false };
+        });
+
+        it('hides changing the password and the email', () => {
+            renderPage();
+
+            expect(screen.queryByRole('heading', { name: 'Cambiar contraseña' })).toBeNull();
+            expect(screen.queryByRole('heading', { name: 'Cambiar correo' })).toBeNull();
+        });
+
+        it('explains why', () => {
+            renderPage();
+
+            expect(screen.getByText(/no tienes contraseña en Calculetra/)).toBeTruthy();
+        });
+
+        it('still lets them delete the account', () => {
+            renderPage();
+
+            expect(screen.getByRole('button', { name: 'Eliminar cuenta' })).toBeTruthy();
+        });
     });
 });

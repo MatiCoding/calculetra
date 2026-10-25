@@ -104,10 +104,16 @@ describe('LogInForm', () => {
         );
     });
 
+    it('shows its title', () => {
+        renderForm();
+
+        expect(screen.getByRole('heading', { name: 'Hola de nuevo' })).toBeTruthy();
+    });
+
     it('links to the sign up page', () => {
         renderForm();
 
-        expect(screen.getByRole('link', { name: 'Crea una' }).getAttribute('href')).toBe('/signup');
+        expect(screen.getByRole('link', { name: 'Crear cuenta' }).getAttribute('href')).toBe('/signup');
     });
     
     it('links to the password reset page', () => {
