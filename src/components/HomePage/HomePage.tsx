@@ -1,16 +1,36 @@
 import { getChallengeNumber } from "../../domain/cifras/challenge";
 import { useNavigate } from "react-router";
+import { useRef, useState } from "react";
+import { getActiveIndex } from "./carousel";
 import styles from './HomePage.module.css'
 
 function HomePage() {
     const navigate = useNavigate()
 
+    const trackRef = useRef<HTMLDivElement>(null)
+    const [active, setActive] = useState(0)
+
+    // On every scroll, look for the card in the center of the track.
+    function handleScroll(){
+        const track = trackRef.current
+        if (!track) return 
+        const cards = Array.from(track.children as HTMLCollectionOf<HTMLElement>).map((card) => ({
+            left: card.offsetLeft,
+            right: card.offsetWidth,
+        }))
+    }
+
     return (
         <main className={styles.home}>
             <p className={styles.eyebrow}>Reto nº {getChallengeNumber(new Date())} · desliza para elegir</p>
 
-            <div className={styles.track}>
-                <button type="button" className={`${styles.card} ${styles.cifras}`} onClick={() => navigate('/cifras')}>
+            <div className={styles.track} ref={trackRef} onScroll={handleScroll}>
+                <button 
+                    type="button" 
+                    className={`${styles.card} ${styles.cifras}`} 
+                    onClick={() => navigate('/cifras')}
+                    data-active={active === 0}
+                >
                     <div>
                         <span className={styles.kicker}>Juego 1</span>
                         <h2>Cifras</h2>
@@ -24,7 +44,12 @@ function HomePage() {
                     </div>
                 </button>
 
-                <button type="button" className={`${styles.card} ${styles.letras}`} aria-disabled="true">
+                <button 
+                    type="button" 
+                    className={`${styles.card} ${styles.letras}`} 
+                    aria-disabled="true"
+                    data-active={active === 1}
+                >
                     <div>
                         <span className={styles.kicker}>Juego 2</span>
                         <h2>Letras</h2>

@@ -14,9 +14,21 @@
     color: var(--color-muted);
 }
 
+/* The carousel is a row that scrolls and stops witha  card in the center. */
 .track {
+    position: relative;
+    box-sizing: border-box;
+    width: 100%;
     display: flex;
     gap: 18px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 18px calc(50% - min(170px, 39vw));
+    scrollbar-width: none;
+}
+
+.track::-webkit-scrollbar {
+    display: none;
 }
 
 .card {
@@ -26,13 +38,22 @@
     cursor: pointer;
     position: relative;
     overflow: hidden;
-    width: min(340px, 78vw);
+    flex: 0 0 min(340px, 78vw);
+    scroll-snap-align: center;
     height: 400px;
     padding: 26px 24px;
     border-radius: 26px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    scale: 0.88;
+    opacity: 0.55;
+    transition: scale 0.4s ease, opacity 0.4s ease;
+}
+
+.card[data-active="true"] {
+    scale: 1;
+    opacity: 1;
 }
 
 .card h2 {
@@ -96,6 +117,13 @@
 .letras .tiles span{
     border-radius: 14px;
     color: var(--color-letter);
+}
+
+.go {
+    font-weight: 800;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .go b{
