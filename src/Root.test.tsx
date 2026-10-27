@@ -36,21 +36,21 @@ describe('Root', () => {
     await renderRoot('true');
 
     expect(screen.getByText('🚧 En construcción')).toBeTruthy();
-    expect(screen.queryByText(/Objetivo/)).toBeNull();
+    expect(screen.queryByText(/Reto nº \d+/)).toBeNull();
     expect(screen.queryByRole('contentinfo')).toBeNull();
   });
 
-  it('shows the game when the flag is not set', async () => {
+  it('shows the home page when the flag is not set', async () => {
     await renderRoot(undefined);
 
-    expect(screen.getByText(/Objetivo/)).toBeTruthy();
+    expect(screen.getByText(/Reto nº \d+/)).toBeTruthy();
     expect(screen.queryByText('🚧 En construcción')).toBeNull();
   });
 
-  it('shows the game when the flag is "false"', async () => {
+  it('shows the home page when the flag is "false"', async () => {
     await renderRoot('false');
 
-    expect(screen.getByText(/Objetivo/)).toBeTruthy();
+    expect(screen.getByText(/Reto nº \d+/)).toBeTruthy();
     expect(screen.queryByText('🚧 En construcción')).toBeNull();
   });
 });
@@ -88,7 +88,7 @@ describe('Root, deleting the account', () => {
 
     expect((await screen.findByRole('dialog')).textContent).toContain('Tu cuenta se ha eliminado.');
     expect(window.location.pathname).toBe('/');
-    expect(screen.getByText(/Objetivo/)).toBeTruthy();
+    expect(screen.getByText(/Reto nº \d+/)).toBeTruthy();
     expect(screen.getByRole('link', { name: 'Iniciar sesión' })).toBeTruthy();
   });
 });

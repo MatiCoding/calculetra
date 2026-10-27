@@ -25,10 +25,23 @@ describe('App routes', () => {
   beforeAll(fakeDialog);
   afterEach(cleanup);
 
-  it('shows the game on /', () => {
+  it('shows the home page on /, not the game', () => {
     renderAt('/');
 
+    expect(screen.getByText(/Reto nº \d+/)).toBeTruthy();
+    expect(screen.queryByText(/Objetivo/)).toBeNull();
+  });
+
+  it('shows the Cifras game on /cifras', () => {
+    renderAt('/cifras');
+
     expect(screen.getByText(/Objetivo/)).toBeTruthy();
+  });
+
+  it('does not show the button to switch game any more', () => {
+    renderAt('/cifras');
+
+    expect(screen.queryByRole('button', { name: /Cambiar a/ })).toBeNull();
   });
 
   it('shows the sign up page on /signup', () => {
@@ -54,12 +67,13 @@ describe('App routes', () => {
     expect(screen.getByRole('heading', { name: 'Crea tu cuenta' })).toBeTruthy();
   });
 
-  it('goes back to the game from the title link', () => {
-    renderAt('/forgot-password');
+  it('goes back to the home page from the title link', () => {
+    renderAt('/cifras');
 
     fireEvent.click(screen.getByRole('link', { name: 'Calculetra' }));
 
-    expect(screen.getByText(/Objetivo/)).toBeTruthy();
+    expect(screen.getByText(/Reto nº \d+/)).toBeTruthy();
+    expect(screen.queryByText(/Objetivo/)).toBeNull();
   });
 
     it('shows the 404 page on an unknown route', () => {
@@ -77,10 +91,10 @@ describe('App routes', () => {
     );
 
     expect(screen.getByRole('dialog', { name: 'Tu cuenta se ha eliminado.' })).toBeTruthy();
-    expect(screen.getByText(/Objetivo/)).toBeTruthy();
+    expect(screen.getByText(/Reto nº \d+/)).toBeTruthy();
   });
 
-  it.each(['/', '/signup', '/login'])('does not show the 404 page on %s', (path) => {
+  it.each(['/', '/cifras', '/signup', '/login'])('does not show the 404 page on %s', (path) => {
     renderAt(path);
 
     expect(screen.queryByRole('heading', { name: 'Esta página no existe' })).toBeNull();
@@ -92,7 +106,7 @@ describe('App routes', () => {
     expect(screen.queryByRole('banner')).toBeNull();
   });
 
-  it.each(['/', '/forgot-password'])('shows the site header on %s', (path) => {
+  it.each(['/', '/cifras', '/forgot-password'])('shows the site header on %s', (path) => {
     renderAt(path);
 
     expect(screen.getByRole('banner')).toBeTruthy();
