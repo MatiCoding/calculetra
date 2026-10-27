@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { generateChallenge, getDailyChallenge, getDateKey } from './challenge';
+import { generateChallenge, getChallengeNumber, getDailyChallenge, getDateKey } from './challenge';
 import { createRandom } from './random';
 
 const SMALL_NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -108,5 +108,34 @@ describe('getDailyChallenge', () => {
     expect(getDailyChallenge(new Date('2026-10-13T10:00:00Z'))).not.toEqual(
       getDailyChallenge(new Date('2026-10-14T10:00:00Z')),
     );
+  });
+});
+
+describe('getChallengeNumber', () => {
+  it('is 1 on the first day (19 October 2026)', () => {
+    expect(getChallengeNumber(new Date('2026-10-19T10:00:00Z'))).toBe(1);
+  });
+
+  it('goes up by one each day', () => {
+    expect(getChallengeNumber(new Date('2026-10-20T10:00:00Z'))).toBe(2);
+    expect(getChallengeNumber(new Date('2026-10-27T10:00:00Z'))).toBe(9);
+  });
+
+  it('changes at midnight in Madrid, not in UTC', () => {
+    // 23:30 on 19 October in Madrid
+    expect(getChallengeNumber(new Date('2026-10-19T21:30:00Z'))).toBe(1);
+    // 00:30 on 20 October in Madrid, still the 19th in UTC
+    expect(getChallengeNumber(new Date('2026-10-19T22:30:00Z'))).toBe(2);
+  });
+
+  it('does not skip or repeat a number when the clocks change', () => {
+    // The clocks go back on 25 October 2026, so that day has 25 hours.
+    expect(getChallengeNumber(new Date('2026-10-24T22:30:00Z'))).toBe(7);
+    expect(getChallengeNumber(new Date('2026-10-25T23:30:00Z'))).toBe(8);
+  });
+
+  it('keeps counting months later', () => {
+    // 1 January 2027 in Madrid: 13 days of October + 30 + 31 = 74 days later
+    expect(getChallengeNumber(new Date('2027-01-01T10:00:00Z'))).toBe(75);
   });
 });

@@ -3,6 +3,8 @@ import { createRandom, hashString } from "./random";
 
 const bag : Array<number> = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 25, 50, 75, 100];
 const NUMBERS_PER_CHALLENGE = 6;
+const FIRST_DATE_CHALLENGE = "2026-10-19";
+const MS_PER_DAY = 24*60*60*1000;
 
 export function getDateKey(date: Date): string {
     return new Intl.DateTimeFormat("en-CA", {timeZone: "Europe/Madrid"}).format(date)
@@ -33,4 +35,9 @@ export function getDailyChallenge(date: Date): Challenge {
     const seed = hashString(getDateKey(date));
     const random = createRandom(seed);
     return generateChallenge(random);
+}
+
+export function getChallengeNumber(date: Date): number {
+    const ms = Date.parse(getDateKey(date)) - Date.parse(FIRST_DATE_CHALLENGE);
+    return ms/MS_PER_DAY + 1;
 }
