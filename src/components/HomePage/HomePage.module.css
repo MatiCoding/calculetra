@@ -147,3 +147,47 @@
     background: rgba(255,255,255,0.15);
     border: 1px solid rgba(255,255,255,0.35);
 }
+
+/* Arrows under the carousel */
+.nav {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.arrow {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 1px solid rgba(31, 36, 48, 0.14);
+    background: var(--color-card);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.arrow:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.dots {
+    display: flex;
+    gap: 8px;
+}
+
+.dots button {
+    width: 9px;
+    height: 9px;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(31, 36, 38, 0.25);
+    cursor: pointer;
+    transition: width 0.3s ease, backgroun 0.3s ease;
+}
+
+.dots button[aria-current="true"] {
+    width: 26px;
+    bacground: var(--color-text);
+}

@@ -41,7 +41,7 @@ describe('App routes', () => {
   it('opens the Cifras game from its card on the home page', () => {
     renderAt('/');
 
-    fireEvent.click(screen.getByRole('button', { name: /Cifras/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Jugar el reto/ }));
 
     expect(screen.getByText(/Objetivo/)).toBeTruthy();
   });

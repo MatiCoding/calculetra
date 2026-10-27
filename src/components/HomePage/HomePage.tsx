@@ -4,6 +4,8 @@ import { useRef, useState } from "react";
 import { getActiveIndex } from "./carousel";
 import styles from './HomePage.module.css'
 
+const GAMES = ['Cifras', 'Letras']
+
 function HomePage() {
     const navigate = useNavigate()
 
@@ -19,6 +21,12 @@ function HomePage() {
             width: card.offsetWidth,
         }))
         setActive(getActiveIndex(track.scrollLeft, track.clientWidth, cards))
+    }
+
+    // Scrolls the track until the card number index is in the center. The scroll event then updates active.
+    function goTo(index: number){
+        const card = trackRef.current?.children[index]
+        card?.scrollIntoView({behavior: 'smooth', inline:'center', block: 'nearest'})
     }
 
     return (
@@ -63,6 +71,15 @@ function HomePage() {
                         <span className={styles.soon}>Próximamente</span>
                     </div>
                 </button>
+            </div>
+            <div className={styles.nav}>
+                <button type="button" className={styles.arrow} aria-label="Anterior" disabled={active === 0} onClick={() => goTo(active - 1)}>🢀</button>
+                <div className={styles.dots}>
+                    {GAMES.map((game, i) => (
+                        <button key={game} type="button" aria-label={`Ir a ${game}`} aria-current={active === i} onClick={() => goTo(i)} />
+                    ))}
+                </div>
+                <button type="button" className={styles.arrow} aria-label="Siguiente" disabled={active === GAMES.length - 1} onClick={() => goTo(active + 1)}>🢂</button>
             </div>
         </main>
     )
