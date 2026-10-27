@@ -38,6 +38,14 @@ describe('App routes', () => {
     expect(screen.getByText(/Objetivo/)).toBeTruthy();
   });
 
+  it('opens the Cifras game from its card on the home page', () => {
+    renderAt('/');
+
+    fireEvent.click(screen.getByRole('button', { name: /Cifras/ }));
+
+    expect(screen.getByText(/Objetivo/)).toBeTruthy();
+  });
+
   it('does not show the button to switch game any more', () => {
     renderAt('/cifras');
 
