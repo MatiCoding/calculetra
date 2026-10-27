@@ -16,8 +16,9 @@ function HomePage() {
         if (!track) return 
         const cards = Array.from(track.children as HTMLCollectionOf<HTMLElement>).map((card) => ({
             left: card.offsetLeft,
-            right: card.offsetWidth,
+            width: card.offsetWidth,
         }))
+        setActive(getActiveIndex(track.scrollLeft, track.clientWidth, cards))
     }
 
     return (

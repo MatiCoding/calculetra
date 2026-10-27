@@ -16,6 +16,13 @@ function renderHome() {
   );
 }
 
+// Replaces read-only layout properties (clientWidth, offsetLeft...) of one element.
+function fakeSize(element: HTMLElement, sizes: Record<string, number>) {
+  for (const [name, value] of Object.entries(sizes)) {
+    Object.defineProperty(element, name, { value, configurable: true });
+  }
+}
+
 describe('HomePage', () => {
   beforeEach(() => {
     // Only Date is faked, so the challenge number is always the same.
@@ -65,6 +72,31 @@ describe('HomePage', () => {
 
     expect(screen.queryByText('Página de Cifras')).toBeNull();
     expect(screen.getByRole('button', { name: /Letras/ })).toBeTruthy();
+  });
+
+  it('starts with the Cifras card as the active one', () => {
+    renderHome();
+
+    expect(screen.getByRole('button', { name: /Cifras/ }).dataset.active).toBe('true');
+    expect(screen.getByRole('button', { name: /Letras/ }).dataset.active).toBe('false');
+  });
+
+  it('makes the card in the centre the active one when the track scrolls', () => {
+    renderHome();
+    const cifras = screen.getByRole('button', { name: /Cifras/ });
+    const letras = screen.getByRole('button', { name: /Letras/ });
+    const track = cifras.parentElement!;
+
+    // jsdom does not lay out the page, so every size is 0. We give the track
+    // and the cards the sizes they would have in a browser, with the track
+    // scrolled until Letras is in the centre.
+    fakeSize(track, { clientWidth: 400, scrollLeft: 358 });
+    fakeSize(cifras, { offsetLeft: 30, offsetWidth: 340 });
+    fakeSize(letras, { offsetLeft: 388, offsetWidth: 340 });
+    fireEvent.scroll(track);
+
+    expect(letras.dataset.active).toBe('true');
+    expect(cifras.dataset.active).toBe('false');
   });
 
   it('hides the decorative tiles from screen readers', () => {
