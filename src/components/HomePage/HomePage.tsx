@@ -1,12 +1,13 @@
 import { getChallengeNumber } from "../../domain/cifras/challenge";
 import { useNavigate } from "react-router";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useLayoutEffect } from "react";
 import { getActiveIndex } from "./carousel";
 import styles from './HomePage.module.css'
 
 import FloatingTiles from "../FloatingTiles/FloatingTiles";
 
-const GAMES = ['Cifras', 'Letras'] as const
+const GAMES = ['Letras', 'Cifras'] as const // Same order of appareance
+const CIFRAS = GAMES.indexOf('Cifras')
 const CARDS = [...GAMES, 'Más retos']
 
 const GROW_MS = 500
@@ -19,7 +20,7 @@ function HomePage() {
     const navigate = useNavigate()
 
     const trackRef = useRef<HTMLDivElement>(null)
-    const [active, setActive] = useState(0)
+    const [active, setActive] = useState(CIFRAS)
     const [growFrom, setGrowFrom] = useState<DOMRect | null>(null)
     const [pointed, setPointed] = useState<number | null> (null)    // The card under the pointer or with the focus.
 
@@ -49,6 +50,13 @@ function HomePage() {
         if (GAMES[index] === 'Cifras') openCifras()
     }
 
+    useLayoutEffect(() => {
+        const track = trackRef.current
+        const card = track?.children[CIFRAS] as HTMLElement | undefined
+        if (!track || !card) return
+        track.scrollLeft = card.offsetLeft + card.offsetWidth / 2 - track.clientWidth / 2
+    }, [])
+
     useEffect(() => {
         if (!growFrom) return
         const timer = setTimeout(() => navigate('/cifras'), GROW_MS)
@@ -56,7 +64,7 @@ function HomePage() {
     }, [growFrom, navigate])
 
     function openCifras() {
-        const card = trackRef.current?.children[0]
+        const card = trackRef.current?.children[CIFRAS]
         if (prefersReducedMotion() || !card){
             navigate('/cifras')
             return
@@ -70,42 +78,19 @@ function HomePage() {
             <p className={styles.eyebrow}>Reto nº {getChallengeNumber(new Date())} · desliza para elegir</p>
 
             <div className={styles.track} ref={trackRef} onScroll={handleScroll}>
+
                 <button 
                     type="button" 
-                    className={`${styles.card} ${styles.cifras}`} 
-                    onClick={() => handleCardClick(0)}
+                    className={`${styles.card} ${styles.letras}`} 
+                    aria-disabled="true"
                     data-active={active === 0}
+                    onClick={() => handleCardClick(0)}
                     onPointerEnter={() => setPointed(0)}
                     onPointerLeave={() => setPointed(null)}
                     onFocus={() => setPointed(0)}
                     onBlur={() => setPointed(null)}
                 >
                     <div>
-                        <span className={styles.kicker}>Juego 1</span>
-                        <h2>Cifras</h2>
-                        <p>Seis números, cuatro operaciones y un objetivo de tres cifras.</p>
-                    </div>
-                    <div className={styles.tiles} aria-hidden="true">
-                        <span>75</span><span>8</span><span>6</span><span>25</span>
-                    </div>
-                    <div className={styles.go}>
-                        Jugar el reto <b aria-hidden="true">🡆</b>
-                    </div>
-                </button>
-
-                <button 
-                    type="button" 
-                    className={`${styles.card} ${styles.letras}`} 
-                    aria-disabled="true"
-                    data-active={active === 1}
-                    onClick={() => handleCardClick(1)}
-                    onPointerEnter={() => setPointed(1)}
-                    onPointerLeave={() => setPointed(null)}
-                    onFocus={() => setPointed(1)}
-                    onBlur={() => setPointed(null)}
-                >
-                    <div>
-                        <span className={styles.kicker}>Juego 2</span>
                         <h2>Letras</h2>
                         <p>Nueve letras para la palabra más larga.</p>
                     </div>
@@ -114,6 +99,28 @@ function HomePage() {
                     </div>
                     <div className={styles.go}>
                         <span className={styles.soon}>Próximamente</span>
+                    </div>
+                </button>
+
+                <button 
+                    type="button" 
+                    className={`${styles.card} ${styles.cifras}`} 
+                    onClick={() => handleCardClick(1)}
+                    data-active={active === 1}
+                    onPointerEnter={() => setPointed(1)}
+                    onPointerLeave={() => setPointed(null)}
+                    onFocus={() => setPointed(1)}
+                    onBlur={() => setPointed(null)}
+                >
+                    <div>
+                        <h2>Cifras</h2>
+                        <p>Seis números, cuatro operaciones y un objetivo de tres cifras.</p>
+                    </div>
+                    <div className={styles.tiles} aria-hidden="true">
+                        <span>75</span><span>8</span><span>6</span><span>25</span>
+                    </div>
+                    <div className={styles.go}>
+                        Jugar el reto <b aria-hidden="true">🡆</b>
                     </div>
                 </button>
 

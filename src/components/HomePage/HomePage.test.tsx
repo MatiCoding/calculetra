@@ -24,27 +24,25 @@ function fakeSize(element: HTMLElement, sizes: Record<string, number>) {
   }
 }
 
-// Gives the track and the cards the sizes they would have in a browser,
-// scrolled until Letras is in the centre, and fires the scroll event.
-function scrollToLetras() {
-  const cifras = screen.getByRole('button', { name: /Jugar el reto/ });
-  const letras = screen.getByRole('button', { name: /Próximamente/ });
-  fakeSize(cifras.parentElement!, { clientWidth: 400, scrollLeft: 358 });
-  fakeSize(cifras, { offsetLeft: 30, offsetWidth: 340 });
-  fakeSize(letras, { offsetLeft: 388, offsetWidth: 340 });
-  fireEvent.scroll(cifras.parentElement!);
+// Gives the track and its cards the sizes they would have in a browser
+// (340 px wide and 18 px apart), scrolls until the card whose name matches
+// `name` is in the centre, and fires the scroll event. It looks at the order
+// of the cards in the page, so it works whatever that order is.
+function scrollToCard(name: RegExp) {
+  const target = screen.getByRole('button', { name });
+  const track = target.parentElement!;
+  const cards = Array.from(track.children) as HTMLElement[];
+  cards.forEach((card, i) => fakeSize(card, { offsetLeft: 30 + i * 358, offsetWidth: 340 }));
+  fakeSize(track, { clientWidth: 400, scrollLeft: cards.indexOf(target) * 358 });
+  fireEvent.scroll(track);
 }
 
-// Like scrollToLetras, but scrolled until "Más retos", the last card, is in the centre.
+function scrollToLetras() {
+  scrollToCard(/Próximamente/);
+}
+
 function scrollToMore() {
-  const cifras = screen.getByRole('button', { name: /Jugar el reto/ });
-  const letras = screen.getByRole('button', { name: /Próximamente/ });
-  const more = screen.getByRole('button', { name: /Estadísticas/ });
-  fakeSize(cifras.parentElement!, { clientWidth: 400, scrollLeft: 716 });
-  fakeSize(cifras, { offsetLeft: 30, offsetWidth: 340 });
-  fakeSize(letras, { offsetLeft: 388, offsetWidth: 340 });
-  fakeSize(more, { offsetLeft: 746, offsetWidth: 340 });
-  fireEvent.scroll(cifras.parentElement!);
+  scrollToCard(/Estadísticas/);
 }
 
 describe('HomePage', () => {
@@ -141,15 +139,11 @@ describe('HomePage', () => {
     renderHome();
     const cifras = screen.getByRole('button', { name: /Jugar el reto/ });
     const letras = screen.getByRole('button', { name: /Próximamente/ });
-    const track = cifras.parentElement!;
 
     // jsdom does not lay out the page, so every size is 0. We give the track
     // and the cards the sizes they would have in a browser, with the track
     // scrolled until Letras is in the centre.
-    fakeSize(track, { clientWidth: 400, scrollLeft: 358 });
-    fakeSize(cifras, { offsetLeft: 30, offsetWidth: 340 });
-    fakeSize(letras, { offsetLeft: 388, offsetWidth: 340 });
-    fireEvent.scroll(track);
+    scrollToLetras();
 
     expect(letras.dataset.active).toBe('true');
     expect(cifras.dataset.active).toBe('false');
@@ -171,14 +165,16 @@ describe('HomePage', () => {
     expect(letras.scrollIntoView).toHaveBeenCalledWith(expect.objectContaining({ inline: 'center' }));
   });
 
-  it('moves to the next card with the next arrow', () => {
+  it('moves to the cards on each side of Cifras with the arrows', () => {
     renderHome();
     const scroll = vi.mocked(Element.prototype.scrollIntoView);
 
     fireEvent.click(screen.getByRole('button', { name: 'Siguiente' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Anterior' }));
 
     // scrollIntoView is on the prototype, so "this" says which card it moved.
-    expect(scroll.mock.contexts[0]).toBe(screen.getByRole('button', { name: /Próximamente/ }));
+    expect(scroll.mock.contexts[0]).toBe(screen.getByRole('button', { name: /Estadísticas/ }));
+    expect(scroll.mock.contexts[1]).toBe(screen.getByRole('button', { name: /Próximamente/ }));
   });
 
   it('disables the previous arrow on the first card and the next arrow on the last one', () => {
@@ -186,12 +182,12 @@ describe('HomePage', () => {
     const previous = screen.getByRole('button', { name: 'Anterior' }) as HTMLButtonElement;
     const next = screen.getByRole('button', { name: 'Siguiente' }) as HTMLButtonElement;
 
-    expect(previous.disabled).toBe(true);
+    // Cifras is in the middle, so both arrows work.
+    expect(previous.disabled).toBe(false);
     expect(next.disabled).toBe(false);
 
-    // Letras is in the middle now, so both arrows work.
     scrollToLetras();
-    expect(previous.disabled).toBe(false);
+    expect(previous.disabled).toBe(true);
     expect(next.disabled).toBe(false);
 
     scrollToMore();
@@ -269,7 +265,7 @@ describe('HomePage', () => {
     expect(screen.getByTestId('floating-tiles').dataset.game).toBe('Letras');
 
     fireEvent.pointerLeave(letras);
-    expect(screen.getByTestId('floating-tiles').dataset.game).toBe('Cifras');
+    expect(screen.getByTestId('floating-tiles').dataset.game).toBeUndefined();
   });
 
   it('lights up the tiles of the card with the focus', () => {
