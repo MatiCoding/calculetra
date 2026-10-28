@@ -29,6 +29,15 @@ function HomePage() {
         card?.scrollIntoView({behavior: 'smooth', inline:'center', block: 'nearest'})
     }
 
+    // A card on the side first moves to the center, only the card in the center opens its game.
+    function handleCardClick(index: number) {
+        if (index !== active) {
+            goTo(index)
+            return
+        }
+        if (GAMES[index] === 'Cifras') navigate('/cifras')
+    }
+
     return (
         <main className={styles.home}>
             <p className={styles.eyebrow}>Reto nº {getChallengeNumber(new Date())} · desliza para elegir</p>
@@ -37,7 +46,7 @@ function HomePage() {
                 <button 
                     type="button" 
                     className={`${styles.card} ${styles.cifras}`} 
-                    onClick={() => navigate('/cifras')}
+                    onClick={() => handleCardClick(0)}
                     data-active={active === 0}
                 >
                     <div>
@@ -58,6 +67,7 @@ function HomePage() {
                     className={`${styles.card} ${styles.letras}`} 
                     aria-disabled="true"
                     data-active={active === 1}
+                    onClick={() => handleCardClick(1)}
                 >
                     <div>
                         <span className={styles.kicker}>Juego 2</span>

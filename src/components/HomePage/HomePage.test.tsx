@@ -23,6 +23,17 @@ function fakeSize(element: HTMLElement, sizes: Record<string, number>) {
   }
 }
 
+// Gives the track and the cards the sizes they would have in a browser,
+// scrolled until Letras is in the centre, and fires the scroll event.
+function scrollToLetras() {
+  const cifras = screen.getByRole('button', { name: /Jugar el reto/ });
+  const letras = screen.getByRole('button', { name: /Próximamente/ });
+  fakeSize(cifras.parentElement!, { clientWidth: 400, scrollLeft: 358 });
+  fakeSize(cifras, { offsetLeft: 30, offsetWidth: 340 });
+  fakeSize(letras, { offsetLeft: 388, offsetWidth: 340 });
+  fireEvent.scroll(cifras.parentElement!);
+}
+
 describe('HomePage', () => {
   beforeEach(() => {
     // jsdom does not have scrollIntoView, so we put a fake one that only
@@ -147,6 +158,36 @@ describe('HomePage', () => {
     expect(previous.disabled).toBe(false);
     expect(next.disabled).toBe(true);
     expect(screen.getByRole('button', { name: 'Ir a Letras' }).getAttribute('aria-current')).toBe('true');
+  });
+
+  it('moves a card that is not in the centre to the centre before opening it', () => {
+    renderHome();
+    scrollToLetras();
+    const cifras = screen.getByRole('button', { name: /Jugar el reto/ });
+
+    fireEvent.click(cifras);
+
+    expect(vi.mocked(Element.prototype.scrollIntoView).mock.contexts).toContain(cifras);
+    expect(screen.queryByText('Página de Cifras')).toBeNull();
+  });
+
+  it('moves the Letras card to the centre when it is clicked from the side', () => {
+    renderHome();
+    const letras = screen.getByRole('button', { name: /Próximamente/ });
+
+    fireEvent.click(letras);
+
+    expect(vi.mocked(Element.prototype.scrollIntoView).mock.contexts).toContain(letras);
+  });
+
+  it('does nothing when the Letras card in the centre is clicked', () => {
+    renderHome();
+    scrollToLetras();
+
+    fireEvent.click(screen.getByRole('button', { name: /Próximamente/ }));
+
+    expect(Element.prototype.scrollIntoView).not.toHaveBeenCalled();
+    expect(screen.queryByText('Página de Cifras')).toBeNull();
   });
 
   it('hides the decorative tiles from screen readers', () => {

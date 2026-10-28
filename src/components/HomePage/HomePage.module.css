@@ -189,5 +189,5 @@
 
 .dots button[aria-current="true"] {
     width: 26px;
-    bacground: var(--color-text);
+    background: var(--color-text);
 }
