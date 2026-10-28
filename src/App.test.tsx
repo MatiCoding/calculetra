@@ -49,6 +49,15 @@ describe('App routes', () => {
     expect(screen.getByText(/Objetivo/)).toBeTruthy();
   });
 
+  it('goes back to the home page from the game', () => {
+    renderAt('/cifras');
+
+    fireEvent.click(screen.getByRole('link', { name: 'Volver a los juegos' }));
+
+    expect(screen.getByText(/Reto nº \d+/)).toBeTruthy();
+    expect(screen.queryByText(/Objetivo/)).toBeNull();
+  });
+
   it('does not show the button to switch game any more', () => {
     renderAt('/cifras');
 

@@ -27,10 +27,10 @@ describe('NotFound', () => {
         expect(screen.getByText('/reto-de-ayer')).toBeTruthy();
     });
 
-    it('links "Ir al reto de hoy" to the home page', () => {
+    it('links "Ir al reto de hoy" to the Cifras game', () => {
         renderNotFound(['/reto-de-ayer']);
 
-        expect(screen.getByRole('link', { name: 'Ir al reto de hoy' }).getAttribute('href')).toBe('/');
+        expect(screen.getByRole('link', { name: 'Ir al reto de hoy' }).getAttribute('href')).toBe('/cifras');
     });
 
     it('hides "Volver atrás" when the 404 is the first page of the visit', () => {
