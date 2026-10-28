@@ -1,12 +1,8 @@
-import { useState } from 'react'
 import { Outlet, Route, Routes } from 'react-router'
 
 import Header from './components/Header/Header'
-import ModeSwitch from './components/ModeSwitch/ModeSwitch'
 import NumbersGame from './components/NumbersGame/NumbersGame'
-import LettersGame from './components/LettersGame/LettersGame'
 import Footer from './components/Footer/Footer'
-import type { GameType } from './types/gameType'
 import AuthPage from './components/AuthPage/AuthPage'
 import NotFound from './components/NotFound/NotFound'
 import RequireAuth from './components/RequireAuth/RequireAuth'
@@ -16,6 +12,8 @@ import ResetPasswordPage from './components/ResetPasswordPage/ResetPasswordPage'
 import NoticeDialog from './components/NoticeDialog/NoticeDialog'
 import OAuthReturnNotice from './components/OAuthReturnNotice/OAuthReturnNotice'
 import PrivacyPage from './components/PrivacyPage/PrivacyPage'
+import HomePage from './components/HomePage/HomePage'
+import BackToGames from './components/BackToGames/BackToGames'
 
 function WithHeader() {
   return (
@@ -28,7 +26,6 @@ function WithHeader() {
 }
 
 function App() {
-  const [gameMode, setGameMode] = useState<GameType>('numbers')
   return (
     <>
       <Routes>
@@ -39,13 +36,11 @@ function App() {
               <>
                 <OAuthReturnNotice />
                 <NoticeDialog />
-                <ModeSwitch gameMode = {gameMode} setGameMode = {setGameMode} />
-                <main>
-                  { gameMode === 'numbers' ? <NumbersGame /> : <LettersGame /> }
-                </main>
+                <HomePage />
               </>
             }
           />
+          <Route path="/cifras" element={<main><BackToGames /><NumbersGame /></main>} />
           <Route path="/account" element={<main><RequireAuth><AccountPage /></RequireAuth></main>} />
           <Route path="/forgot-password" element={<main><ForgotPasswordForm /></main>} />
           <Route path="/reset-password" element={<main><ResetPasswordPage /></main>} />

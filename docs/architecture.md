@@ -6,7 +6,7 @@ It follows a reduced version of the [arc42](https://arc42.org) template: only th
 
 ## 1. Introduction and goals
 
-Calculetra is a daily puzzle inspired by the Spanish TV show *Cifras y Letras*. Every day there is one numbers challenge (**Cifras**), the same for every player. Players can create an account and log in. The letters mode (**Letras**) is not built yet. The rules of the game are in [`docs/rules/cifras.md`](rules/cifras.md).
+Calculetra is a daily puzzle inspired by the Spanish TV show *Cifras y Letras*. Every day there is one numbers challenge (**Cifras**), the same for every player. Players can create an account and log in. The letters mode (**Letras**) is not built yet. The home page (`/`) shows the games in a carousel, with the number of today's challenge; Cifras is played at `/cifras`. The rules of the game are in [`docs/rules/cifras.md`](rules/cifras.md).
 
 ### Quality goals
 
@@ -61,17 +61,14 @@ flowchart TD
     authForms["auth/signUp, auth/logIn, auth/password<br/>validation and error messages"]
     authApi["auth/api/<br/>Supabase client and calls"]
     config["config/<br/>feature flags"]
-    types["types/<br/>shared types"]
     supabaseLib[("@supabase/supabase-js")]
 
     entry --> components
     entry --> authContext
     entry --> config
-    entry --> types
     components --> domain
     components --> authContext
     components --> authForms
-    components --> types
     authContext --> authApi
     authApi --> supabaseLib
     authForms --> supabaseLib
@@ -79,14 +76,13 @@ flowchart TD
 
 | Block | Responsibility | Depends on |
 | --- | --- | --- |
-| `main.tsx`, `Root.tsx`, `App.tsx` | Start React, choose between the "under construction" page and the app, set up the router and the `AuthProvider`, and define the routes (`/`, `/signup`, `/login`, `/account`, `/forgot-password`, `/reset-password`, 404). | `components`, `auth/context`, `config`, `types` |
-| `components/` | One folder per component with its `.tsx`, CSS Module and test. `NumbersGame` is the game; `Header`, `SignUpForm`, `LogInForm`, `AccountPage`, `ForgotPasswordForm`, `ResetPasswordPage`, `NewPasswordForm`, `ChangeEmailForm` and `DeleteAccountForm` use the account; `NoticeDialog` shows, in a dialog, a message left by another page; `LettersGame` is a placeholder. | `domain`, `auth`, `types` |
-| `domain/cifras/` | Challenge generation, seeded random, operations, game reducer and score. | Nothing outside itself |
+| `main.tsx`, `Root.tsx`, `App.tsx` | Start React, choose between the "under construction" page and the app, set up the router and the `AuthProvider`, and define the routes (`/` with the game carousel, `/cifras`, `/signup`, `/login`, `/account`, `/forgot-password`, `/reset-password`, `/privacy`, 404). | `components`, `auth/context`, `config` |
+| `components/` | One folder per component with its `.tsx`, CSS Module and test. `HomePage` is the carousel with the Letras, Cifras and Más retos cards; `FloatingTiles` draws the number and letter tiles behind it; `NumbersGame` is the game and `BackToGames` the link back to the home page; `Header`, `SignUpForm`, `LogInForm`, `AccountPage`, `ForgotPasswordForm`, `ResetPasswordPage`, `NewPasswordForm`, `ChangeEmailForm` and `DeleteAccountForm` use the account; `NoticeDialog` shows, in a dialog, a message left by another page. | `domain`, `auth` |
+| `domain/cifras/` | Challenge generation and number, seeded random, operations, game reducer and score. | Nothing outside itself |
 | `auth/api/` | The Supabase client and the functions `signUp`, `logIn`, `logOut`, `resetPassword`, `updatePassword`, `changeEmail`, `deleteAccount`, `getCurrentUser` and `onAuthChange`. Turns Supabase's user into `AuthUser`. | `@supabase/supabase-js` |
 | `auth/context/` | `AuthProvider` keeps the current user and `useAuth()` gives it to components. | `auth/api` |
 | `auth/signUp/`, `auth/logIn/`, `auth/password/` | Form validation and translating Supabase errors into messages in Spanish. | `@supabase/supabase-js` (only its error helpers) |
 | `config/` | Feature flags read from environment variables. | Nothing |
-| `types/` | Types shared by several components, such as `GameType`. | Nothing |
 
 The arrow from `auth/signUp`, `auth/logIn` and `auth/password` to Supabase is not a break of the rule in section 4: they only use Supabase's error helpers, and they are still inside `src/auth`.
 
@@ -107,11 +103,12 @@ The arrow from `auth/signUp`, `auth/logIn` and `auth/password` to Supabase is no
 - Decorative elements use `aria-hidden="true"`.
 - Form fields have a `<label>`, errors use `role="alert"` and confirmations use `role="status"`.
 - Animations are turned off with `prefers-reduced-motion: reduce`.
+- In the home carousel the dots use `aria-current` for the card in the middle, and the cards that cannot be played yet use `aria-disabled`.
 
 ### Styling
 
 - Each component has its own [CSS Module](https://github.com/css-modules/css-modules) (`Component.module.css`), so class names do not clash. `auth/signUp`, `auth/logIn` and `auth/password` share `components/AuthForm.module.css`.
-- Global styles and colour tokens (`--color-bg`, `--color-number`, `--color-accent`…) are defined in `src/index.css`. `NumbersGame`, `NotFound` and `UnderDevelopment` use them; `Header`, `ModeSwitch` and `AuthForm` do not yet.
+- Global styles and colour tokens (`--color-bg`, `--color-number`, `--color-accent`…) are defined in `src/index.css`. Most components use them; `Header` does not yet.
 - The font is Inter, loaded with `@fontsource-variable/inter`.
 
 ### Environment variables and feature flags

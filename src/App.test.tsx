@@ -3,6 +3,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { fakeDialog } from './test/fakeDialog';
+import { fakeMatchMedia } from './test/fakeMatchMedia';
 import App from './App';
 
 // SignUpForm uses useAuth, but these tests only check navigation,
@@ -25,10 +26,42 @@ describe('App routes', () => {
   beforeAll(fakeDialog);
   afterEach(cleanup);
 
-  it('shows the game on /', () => {
+  it('shows the home page on /, not the game', () => {
     renderAt('/');
 
+    expect(screen.getByText(/Reto nº \d+/)).toBeTruthy();
+    expect(screen.queryByText(/Objetivo/)).toBeNull();
+  });
+
+  it('shows the Cifras game on /cifras', () => {
+    renderAt('/cifras');
+
     expect(screen.getByText(/Objetivo/)).toBeTruthy();
+  });
+
+  it('opens the Cifras game from its card on the home page', () => {
+    // With reduced motion the game opens at once, without waiting for the animation.
+    fakeMatchMedia(true);
+    renderAt('/');
+
+    fireEvent.click(screen.getByRole('button', { name: /Jugar el reto/ }));
+
+    expect(screen.getByText(/Objetivo/)).toBeTruthy();
+  });
+
+  it('goes back to the home page from the game', () => {
+    renderAt('/cifras');
+
+    fireEvent.click(screen.getByRole('link', { name: 'Volver a los juegos' }));
+
+    expect(screen.getByText(/Reto nº \d+/)).toBeTruthy();
+    expect(screen.queryByText(/Objetivo/)).toBeNull();
+  });
+
+  it('does not show the button to switch game any more', () => {
+    renderAt('/cifras');
+
+    expect(screen.queryByRole('button', { name: /Cambiar a/ })).toBeNull();
   });
 
   it('shows the sign up page on /signup', () => {
@@ -54,12 +87,13 @@ describe('App routes', () => {
     expect(screen.getByRole('heading', { name: 'Crea tu cuenta' })).toBeTruthy();
   });
 
-  it('goes back to the game from the title link', () => {
-    renderAt('/forgot-password');
+  it('goes back to the home page from the title link', () => {
+    renderAt('/cifras');
 
     fireEvent.click(screen.getByRole('link', { name: 'Calculetra' }));
 
-    expect(screen.getByText(/Objetivo/)).toBeTruthy();
+    expect(screen.getByText(/Reto nº \d+/)).toBeTruthy();
+    expect(screen.queryByText(/Objetivo/)).toBeNull();
   });
 
     it('shows the 404 page on an unknown route', () => {
@@ -77,10 +111,10 @@ describe('App routes', () => {
     );
 
     expect(screen.getByRole('dialog', { name: 'Tu cuenta se ha eliminado.' })).toBeTruthy();
-    expect(screen.getByText(/Objetivo/)).toBeTruthy();
+    expect(screen.getByText(/Reto nº \d+/)).toBeTruthy();
   });
 
-  it.each(['/', '/signup', '/login'])('does not show the 404 page on %s', (path) => {
+  it.each(['/', '/cifras', '/signup', '/login'])('does not show the 404 page on %s', (path) => {
     renderAt(path);
 
     expect(screen.queryByRole('heading', { name: 'Esta página no existe' })).toBeNull();
@@ -92,7 +126,7 @@ describe('App routes', () => {
     expect(screen.queryByRole('banner')).toBeNull();
   });
 
-  it.each(['/', '/forgot-password'])('shows the site header on %s', (path) => {
+  it.each(['/', '/cifras', '/forgot-password'])('shows the site header on %s', (path) => {
     renderAt(path);
 
     expect(screen.getByRole('banner')).toBeTruthy();

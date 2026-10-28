@@ -1,0 +1,11 @@
+.back {
+    display: inline-block;
+    margin-block: 8px 16px;
+    color: var(--color-accent);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.back:hover {
+    text-decoration: underline;
+}

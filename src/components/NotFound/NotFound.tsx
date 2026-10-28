@@ -56,7 +56,7 @@ function NotFound() {
                 </p>
 
                 <div className={styles.actions}>
-                    <Link to="/" className={styles.primary}>Ir al reto de hoy</Link>
+                    <Link to="/cifras" className={styles.primary}>Ir al reto de hoy</Link>
                     {key !== 'default' && (
                         <button type="button" className={styles.secondary} onClick={() => navigate(-1)}>Volver atrás</button>
                     )}
