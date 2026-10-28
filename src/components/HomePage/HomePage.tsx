@@ -1,16 +1,23 @@
 import { getChallengeNumber } from "../../domain/cifras/challenge";
 import { useNavigate } from "react-router";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { getActiveIndex } from "./carousel";
 import styles from './HomePage.module.css'
 
 const GAMES = ['Cifras', 'Letras']
+
+const GROW_MS = 500
+
+function prefersReducedMotion() {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+}
 
 function HomePage() {
     const navigate = useNavigate()
 
     const trackRef = useRef<HTMLDivElement>(null)
     const [active, setActive] = useState(0)
+    const [growFrom, setGrowFrom] = useState<DOMRect | null>(null)
 
     // On every scroll, look for the card in the center of the track.
     function handleScroll(){
@@ -26,7 +33,7 @@ function HomePage() {
     // Scrolls the track until the card number index is in the center. The scroll event then updates active.
     function goTo(index: number){
         const card = trackRef.current?.children[index]
-        card?.scrollIntoView({behavior: 'smooth', inline:'center', block: 'nearest'})
+        card?.scrollIntoView({behavior: prefersReducedMotion() ? 'auto' : 'smooth', inline:'center', block: 'nearest'})
     }
 
     // A card on the side first moves to the center, only the card in the center opens its game.
@@ -35,7 +42,22 @@ function HomePage() {
             goTo(index)
             return
         }
-        if (GAMES[index] === 'Cifras') navigate('/cifras')
+        if (GAMES[index] === 'Cifras') openCifras()
+    }
+
+    useEffect(() => {
+        if (!growFrom) return
+        const timer = setTimeout(() => navigate('/cifras'), GROW_MS)
+        return () => clearTimeout(timer)
+    }, [growFrom, navigate])
+
+    function openCifras() {
+        const card = trackRef.current?.children[0]
+        if (prefersReducedMotion() || !card){
+            navigate('/cifras')
+            return
+        }
+        setGrowFrom(card.getBoundingClientRect())
     }
 
     return (
@@ -91,6 +113,20 @@ function HomePage() {
                 </div>
                 <button type="button" className={styles.arrow} aria-label="Siguiente" disabled={active === GAMES.length - 1} onClick={() => goTo(active + 1)}>🢂</button>
             </div>
+            {growFrom && (
+                <div
+                    className={styles.grow}
+                    data-testid="grow"
+                    aria-hidden="true"
+                    style={{
+                        top: growFrom.top,
+                        left: growFrom.left,
+                        width: growFrom.width,
+                        height: growFrom.height,
+                        animationDuration: `${GROW_MS}ms`,
+                    }}
+                />
+            )}
         </main>
     )
 }

@@ -3,6 +3,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { fakeDialog } from './test/fakeDialog';
+import { fakeMatchMedia } from './test/fakeMatchMedia';
 import App from './App';
 
 // SignUpForm uses useAuth, but these tests only check navigation,
@@ -39,6 +40,8 @@ describe('App routes', () => {
   });
 
   it('opens the Cifras game from its card on the home page', () => {
+    // With reduced motion the game opens at once, without waiting for the animation.
+    fakeMatchMedia(true);
     renderAt('/');
 
     fireEvent.click(screen.getByRole('button', { name: /Jugar el reto/ }));

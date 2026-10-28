@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { fakeMatchMedia } from '../../test/fakeMatchMedia';
 import HomePage from './HomePage';
 
 // A fake /cifras page, so the tests can see if the card navigates there.
@@ -39,6 +40,8 @@ describe('HomePage', () => {
     // jsdom does not have scrollIntoView, so we put a fake one that only
     // remembers how it was called.
     Element.prototype.scrollIntoView = vi.fn();
+    // By default, a browser without "reduce motion".
+    fakeMatchMedia(false);
     // Only Date is faked, so the challenge number is always the same.
     vi.useFakeTimers({ toFake: ['Date'] });
     vi.setSystemTime(new Date('2026-10-27T10:00:00Z'));
@@ -71,12 +74,39 @@ describe('HomePage', () => {
     expect(card.getAttribute('aria-disabled')).toBe('true');
   });
 
-  it('opens /cifras when the Cifras card is clicked', () => {
+  it('grows the Cifras card and opens /cifras when the animation ends', () => {
+    // Now the timers are fake too, so the test decides when time passes.
+    vi.useFakeTimers({ toFake: ['Date', 'setTimeout', 'clearTimeout'] });
+    renderHome();
+
+    fireEvent.click(screen.getByRole('button', { name: /Jugar el reto/ }));
+
+    // While it grows, we are still on the home page.
+    expect(screen.getByTestId('grow')).toBeTruthy();
+    act(() => vi.advanceTimersByTime(499));
+    expect(screen.queryByText('Página de Cifras')).toBeNull();
+
+    act(() => vi.advanceTimersByTime(1));
+    expect(screen.getByText('Página de Cifras')).toBeTruthy();
+  });
+
+  it('opens /cifras at once, without growing, with reduced motion', () => {
+    fakeMatchMedia(true);
     renderHome();
 
     fireEvent.click(screen.getByRole('button', { name: /Jugar el reto/ }));
 
     expect(screen.getByText('Página de Cifras')).toBeTruthy();
+  });
+
+  it('scrolls smoothly to a card, but not with reduced motion', () => {
+    renderHome();
+    fireEvent.click(screen.getByRole('button', { name: 'Ir a Letras' }));
+    expect(Element.prototype.scrollIntoView).toHaveBeenLastCalledWith(expect.objectContaining({ behavior: 'smooth' }));
+
+    fakeMatchMedia(true);
+    fireEvent.click(screen.getByRole('button', { name: 'Ir a Letras' }));
+    expect(Element.prototype.scrollIntoView).toHaveBeenLastCalledWith(expect.objectContaining({ behavior: 'auto' }));
   });
 
   it('does not navigate when the Letras card is clicked', () => {
