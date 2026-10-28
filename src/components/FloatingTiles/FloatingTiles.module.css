@@ -1,0 +1,66 @@
+.sky {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.number,
+.letter {
+    position: absolute;
+    translate: -50% -50%;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    font-weight: 800;
+    font-size: 1.1rem;
+    opacity: 0.35;
+    animation: drift 7s ease-in-out infinite alternate;
+    transition: opacity 0.4s ease, scale 0.4s ease;
+}
+
+.number {
+    border-radius: 50%;
+    background: var(--color-number);
+    color: var(--color-text);
+    box-shadow: 0 4px 0 #b57d0c;
+}
+
+.letter {
+    border-radius: 9px;
+    background: var(--color-letter);
+    color: #fff;
+    box-shadow: 0 4px 0 #154483;
+}
+
+.number:nth-child(odd),
+.letter:nth-child(odd) {
+    animation-duration: 9s;
+}
+
+.number[data-lit="true"],
+.letter[data-lit="true"] {
+    opacity: 0.85;
+    scale: 1.15;
+}
+
+.number[data-lit="false"],
+.letter[data-lit="false"] {
+    opacity: 0.85;
+}
+
+@keyframes drift {
+    to {
+        transform: translate(24px, -18px) rotate(10deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .number,
+    .letter {
+        animation: none;
+        transition: none;
+    }
+}

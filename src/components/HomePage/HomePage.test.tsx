@@ -220,6 +220,32 @@ describe('HomePage', () => {
     expect(screen.queryByText('Página de Cifras')).toBeNull();
   });
 
+  it('does not light up any tiles when no card is pointed, even if one is in the centre', () => {
+    renderHome();
+    scrollToLetras();
+
+    expect(screen.getByTestId('floating-tiles').dataset.game).toBeUndefined();
+  });
+
+  it('lights up the tiles of the card under the pointer, and goes back when it leaves', () => {
+    renderHome();
+    const letras = screen.getByRole('button', { name: /Próximamente/ });
+
+    fireEvent.pointerEnter(letras);
+    expect(screen.getByTestId('floating-tiles').dataset.game).toBe('Letras');
+
+    fireEvent.pointerLeave(letras);
+    expect(screen.getByTestId('floating-tiles').dataset.game).toBe('Cifras');
+  });
+
+  it('lights up the tiles of the card with the focus', () => {
+    renderHome();
+
+    fireEvent.focus(screen.getByRole('button', { name: /Próximamente/ }));
+
+    expect(screen.getByTestId('floating-tiles').dataset.game).toBe('Letras');
+  });
+
   it('hides the decorative tiles from screen readers', () => {
     renderHome();
 

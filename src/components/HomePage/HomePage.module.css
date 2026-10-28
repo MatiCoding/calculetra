@@ -1,4 +1,6 @@
 .home {
+    position: relative;
+    isolation: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -47,13 +49,13 @@
     flex-direction: column;
     justify-content: space-between;
     scale: 0.88;
-    opacity: 0.55;
-    transition: scale 0.4s ease, opacity 0.4s ease;
+    filter: saturate(0.45) brightness(1.15);
+    transition: scale 0.4s ease, filter 0.4s ease;
 }
 
 .card[data-active="true"] {
     scale: 1;
-    opacity: 1;
+    filter: none;
 }
 
 .card:focus-visible {

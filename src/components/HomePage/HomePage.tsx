@@ -4,7 +4,9 @@ import { useRef, useState, useEffect } from "react";
 import { getActiveIndex } from "./carousel";
 import styles from './HomePage.module.css'
 
-const GAMES = ['Cifras', 'Letras']
+import FloatingTiles from "../FloatingTiles/FloatingTiles";
+
+const GAMES = ['Cifras', 'Letras'] as const
 
 const GROW_MS = 500
 
@@ -18,6 +20,7 @@ function HomePage() {
     const trackRef = useRef<HTMLDivElement>(null)
     const [active, setActive] = useState(0)
     const [growFrom, setGrowFrom] = useState<DOMRect | null>(null)
+    const [pointed, setPointed] = useState<number | null> (null)    // The card under the pointer or with the focus.
 
     // On every scroll, look for the card in the center of the track.
     function handleScroll(){
@@ -62,6 +65,7 @@ function HomePage() {
 
     return (
         <main className={styles.home}>
+            <FloatingTiles game={pointed === null ? null : GAMES[pointed]} />
             <p className={styles.eyebrow}>Reto nº {getChallengeNumber(new Date())} · desliza para elegir</p>
 
             <div className={styles.track} ref={trackRef} onScroll={handleScroll}>
@@ -70,6 +74,10 @@ function HomePage() {
                     className={`${styles.card} ${styles.cifras}`} 
                     onClick={() => handleCardClick(0)}
                     data-active={active === 0}
+                    onPointerEnter={() => setPointed(0)}
+                    onPointerLeave={() => setPointed(null)}
+                    onFocus={() => setPointed(0)}
+                    onBlur={() => setPointed(null)}
                 >
                     <div>
                         <span className={styles.kicker}>Juego 1</span>
@@ -90,6 +98,10 @@ function HomePage() {
                     aria-disabled="true"
                     data-active={active === 1}
                     onClick={() => handleCardClick(1)}
+                    onPointerEnter={() => setPointed(1)}
+                    onPointerLeave={() => setPointed(null)}
+                    onFocus={() => setPointed(1)}
+                    onBlur={() => setPointed(null)}
                 >
                     <div>
                         <span className={styles.kicker}>Juego 2</span>
