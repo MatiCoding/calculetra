@@ -48,7 +48,7 @@
 
 .number[data-lit="false"],
 .letter[data-lit="false"] {
-    opacity: 0.85;
+    opacity: 0.20;
 }
 
 @keyframes drift {
