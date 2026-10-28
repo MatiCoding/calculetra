@@ -153,8 +153,7 @@ src/
 │   └── logIn/       #   log in error messages
 ├── components/      # React components, one folder each (Name.tsx, Name.test.tsx, Name.module.css)
 ├── config/          # feature flags
-├── types/           # types shared by several components
-├── App.tsx          # pages: /, /signup, /login and the 404 page
+├── App.tsx          # pages: / (game carousel), /cifras, the account pages and the 404 page
 ├── Root.tsx         # router, AuthProvider and the "under construction" flag
 ├── main.tsx         # entry point
 └── index.css        # global styles and colour tokens
