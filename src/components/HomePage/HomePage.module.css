@@ -96,6 +96,19 @@
     cursor: default;
 }
 
+/* More challenges: a dashed outline of a card. */
+.more {
+    background: lightgrey;
+    color: var(--color-muted);
+    border: 2px dashed rgba(31, 36, 38, 0.2);
+    cursor: default;
+}
+
+.more h2 {
+    font-size: 1.6rem;
+    color: var(--color-text);
+}
+
 .tiles {
     position: absolute;
     right: -18px;

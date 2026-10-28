@@ -7,6 +7,7 @@ import styles from './HomePage.module.css'
 import FloatingTiles from "../FloatingTiles/FloatingTiles";
 
 const GAMES = ['Cifras', 'Letras'] as const
+const CARDS = [...GAMES, 'Más retos']
 
 const GROW_MS = 500
 
@@ -115,15 +116,28 @@ function HomePage() {
                         <span className={styles.soon}>Próximamente</span>
                     </div>
                 </button>
+
+                <button
+                    type="button"
+                    className={`${styles.card} ${styles.more}`}
+                    aria-disabled="true"
+                    data-active={active === 2}
+                    onClick={() => handleCardClick(2)}
+                >
+                    <div>
+                        <h2>Más retos</h2>
+                        <p>Estadísticas, rachas y clasificación llegarán con las cuentas.</p>
+                    </div>
+                </button>
             </div>
             <div className={styles.nav}>
                 <button type="button" className={styles.arrow} aria-label="Anterior" disabled={active === 0} onClick={() => goTo(active - 1)}>🢀</button>
                 <div className={styles.dots}>
-                    {GAMES.map((game, i) => (
-                        <button key={game} type="button" aria-label={`Ir a ${game}`} aria-current={active === i} onClick={() => goTo(i)} />
+                    {CARDS.map((card, i) => (
+                        <button key={card} type="button" aria-label={`Ir a ${card}`} aria-current={active === i} onClick={() => goTo(i)} />
                     ))}
                 </div>
-                <button type="button" className={styles.arrow} aria-label="Siguiente" disabled={active === GAMES.length - 1} onClick={() => goTo(active + 1)}>🢂</button>
+                <button type="button" className={styles.arrow} aria-label="Siguiente" disabled={active === CARDS.length - 1} onClick={() => goTo(active + 1)}>🢂</button>
             </div>
             {growFrom && (
                 <div

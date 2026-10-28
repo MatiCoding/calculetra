@@ -35,6 +35,18 @@ function scrollToLetras() {
   fireEvent.scroll(cifras.parentElement!);
 }
 
+// Like scrollToLetras, but scrolled until "Más retos", the last card, is in the centre.
+function scrollToMore() {
+  const cifras = screen.getByRole('button', { name: /Jugar el reto/ });
+  const letras = screen.getByRole('button', { name: /Próximamente/ });
+  const more = screen.getByRole('button', { name: /Estadísticas/ });
+  fakeSize(cifras.parentElement!, { clientWidth: 400, scrollLeft: 716 });
+  fakeSize(cifras, { offsetLeft: 30, offsetWidth: 340 });
+  fakeSize(letras, { offsetLeft: 388, offsetWidth: 340 });
+  fakeSize(more, { offsetLeft: 746, offsetWidth: 340 });
+  fireEvent.scroll(cifras.parentElement!);
+}
+
 describe('HomePage', () => {
   beforeEach(() => {
     // jsdom does not have scrollIntoView, so we put a fake one that only
@@ -171,23 +183,45 @@ describe('HomePage', () => {
 
   it('disables the previous arrow on the first card and the next arrow on the last one', () => {
     renderHome();
-    const cifras = screen.getByRole('button', { name: /Jugar el reto/ });
-    const letras = screen.getByRole('button', { name: /Próximamente/ });
     const previous = screen.getByRole('button', { name: 'Anterior' }) as HTMLButtonElement;
     const next = screen.getByRole('button', { name: 'Siguiente' }) as HTMLButtonElement;
 
     expect(previous.disabled).toBe(true);
     expect(next.disabled).toBe(false);
 
-    // Scroll until Letras is in the centre, like in the test above.
-    fakeSize(cifras.parentElement!, { clientWidth: 400, scrollLeft: 358 });
-    fakeSize(cifras, { offsetLeft: 30, offsetWidth: 340 });
-    fakeSize(letras, { offsetLeft: 388, offsetWidth: 340 });
-    fireEvent.scroll(cifras.parentElement!);
+    // Letras is in the middle now, so both arrows work.
+    scrollToLetras();
+    expect(previous.disabled).toBe(false);
+    expect(next.disabled).toBe(false);
 
+    scrollToMore();
     expect(previous.disabled).toBe(false);
     expect(next.disabled).toBe(true);
-    expect(screen.getByRole('button', { name: 'Ir a Letras' }).getAttribute('aria-current')).toBe('true');
+    expect(screen.getByRole('button', { name: 'Ir a Más retos' }).getAttribute('aria-current')).toBe('true');
+  });
+
+  it('shows a third card, "Más retos", that cannot be played yet', () => {
+    renderHome();
+
+    // The dot "Ir a Más retos" also has "Más retos" in its name, so the card
+    // is found by its description.
+    const card = screen.getByRole('button', { name: /Estadísticas/ });
+    expect(card.textContent).toContain('Más retos');
+    expect(card.getAttribute('aria-disabled')).toBe('true');
+  });
+
+  it('moves "Más retos" to the centre when it is clicked, and then does nothing', () => {
+    renderHome();
+    const more = screen.getByRole('button', { name: /Estadísticas/ });
+
+    fireEvent.click(more);
+    expect(vi.mocked(Element.prototype.scrollIntoView).mock.contexts).toContain(more);
+
+    vi.mocked(Element.prototype.scrollIntoView).mockClear();
+    scrollToMore();
+    fireEvent.click(more);
+    expect(Element.prototype.scrollIntoView).not.toHaveBeenCalled();
+    expect(screen.queryByText('Página de Cifras')).toBeNull();
   });
 
   it('moves a card that is not in the centre to the centre before opening it', () => {
