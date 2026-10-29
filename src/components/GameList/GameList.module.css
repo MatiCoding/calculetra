@@ -1,15 +1,260 @@
-/* The styles come in step 4. For now the classes exist so the component can use them. */
-.list {}
-.card {}
-.cifras {}
-.letras {}
-.more {}
-.title {}
-.head {}
-.mini {}
-.badge {}
-.body {}
-.inner {}
-.tiles {}
-.go {}
-.soon {}
+.list {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 420px;
+    display: grid;
+    gap: 14px;
+    padding: 0 16px 16px;
+}
+
+.card {
+    border-radius: 22px;
+    text-align: left;
+}
+.cifras {
+    background: var(--color-number);
+    color: var(--color-text);
+    box-shadow: 0 5px 0 #b57d0c;
+}
+
+.letras {
+    background: var(--color-letter);
+    color: #fff;
+    box-shadow: 0 5px 0 #154483;
+}
+
+.more {
+    background: #eef0f3;
+    color: var(--color-muted);
+    border: 2px dashed rgba(31, 36, 48, 0.22);
+}
+
+.title {
+    margin: 0;
+}
+
+.head {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    border-radius: inherit;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    font-size: 1.2rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    text-align: left;
+    cursor: pointer;
+    transition: font-size 0.35s ease, padding 0.35s ease;
+}
+
+.head:focus-visible, .go:focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 3px;
+}
+
+.card[data-open="true"] .head {
+    font-size: 1.9rem;
+    padding: 20px 20px 0;
+    cursor: default;
+}
+
+.mini {
+    flex: none;
+    box-sizing: border-box;
+    width: 46px;
+    height: 46px;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    font-size: 1.05rem;
+    background: #fff;
+    color: var(--color-letter);
+    border-radius: 11px;
+    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.18);
+    transition: width 0.35s ease, opacity 0.25s ease, margin 0.35s ease;
+}
+
+.cifras .mini {
+    border-radius: 50%;
+    color: var(--color-text);
+}
+
+.more .mini {
+    border-radius: 50%;
+    color: var(--color-text);
+}
+
+.card[data-open="true"] .mini {
+    width: 0;
+    opacity: 0;
+    margin-right: -14px;
+}
+
+.badge,
+.soon {
+    border-radius: 999px;
+    padding: 3px 9px;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.badge {
+    margin-left: auto;
+    flex: none;
+}
+
+.cifras .badge,
+.more .badge,
+.more .soon {
+    background: transparent;
+    border-color: rgba(31, 36, 48, 0.25);
+}
+
+.card[data-open="true"] .badge {
+    display: none;
+}
+
+.body {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.35s ease;
+}
+
+.card[data-open="true"] .body {
+    grid-template-rows: 1fr;
+}
+
+.inner {
+    min-height: 0;
+    overflow: hidden;
+    display: grid;
+    gap: 18px;
+    padding: 0 20px;
+    transition: padding 0.35s ease;
+}
+
+.card[data-open="true"] .inner {
+    padding-top: 6px;
+    padding-bottom: 20px;
+}
+
+.inner p {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.45;
+    max-width: 28ch;
+}
+
+.tiles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-top: 6px;
+}
+
+.tiles span {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    background: #fff;
+    font-weight: 800;
+    font-size: 1.05rem;
+    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.18);
+}
+
+.cifras .tiles span {
+    border-radius: 50%;
+}
+
+.letras .tiles span {
+    border-radius: 10px;
+    color: var(--color-letter);
+}
+
+/* Like in the carousel, only the Cifras tiles bob, and only while the card is open. */
+.cifras[data-open="true"] .tiles span {
+    animation: bob 2.4s ease-in-out infinite;
+}
+
+.cifras[data-open="true"] .tiles span:nth-child(2) { animation-delay: 0.2s; }
+.cifras[data-open="true"] .tiles span:nth-child(3) { animation-delay: 0.4s; }
+.cifras[data-open="true"] .tiles span:nth-child(4) { animation-delay: 0.6s; }
+.cifras[data-open="true"] .tiles span:nth-child(5) { animation-delay: 0.8s; }
+
+@keyframes bob {
+    50% {
+        translate: 0 -6px;
+    }
+}
+
+.go {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    padding: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 800;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.go b {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--color-text);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    transition: translate 0.25s ease;
+}
+
+.go:hover b {
+    translate: 6px 0;
+}
+
+.soon {
+    justify-self: start;
+    font-size: 0.7rem;
+}
+
+/* On the narrowest phones the five tiles fit in one row. */
+@media (max-width: 360px) {
+    .tiles {
+        gap: 6px;
+    }
+
+    .tiles span {
+        width: 38px;
+        height: 38px;
+        font-size: 0.95rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .head,
+    .mini,
+    .body,
+    .inner,
+    .go b {
+        transition: none;
+    }
+
+    .cifras[data-open="true"] .tiles span {
+        animation: none;
+    }
+}
