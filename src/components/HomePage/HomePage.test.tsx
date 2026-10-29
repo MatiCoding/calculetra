@@ -37,6 +37,16 @@ function scrollToCard(name: RegExp) {
   fireEvent.scroll(track);
 }
 
+// Wide screen with "reduce motion" on: only that query matches.
+function reducedMotionOnly(query: string) {
+  return query.includes('reduce');
+}
+
+// Narrow screen (a phone) without "reduce motion".
+function phone(query: string) {
+  return query.includes('max-width');
+}
+
 function scrollToLetras() {
   scrollToCard(/Próximamente/);
 }
@@ -101,7 +111,7 @@ describe('HomePage', () => {
   });
 
   it('opens /cifras at once, without growing, with reduced motion', () => {
-    fakeMatchMedia(true);
+    fakeMatchMedia(reducedMotionOnly);
     renderHome();
 
     fireEvent.click(screen.getByRole('button', { name: /Jugar el reto/ }));
@@ -114,7 +124,7 @@ describe('HomePage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Ir a Letras' }));
     expect(Element.prototype.scrollIntoView).toHaveBeenLastCalledWith(expect.objectContaining({ behavior: 'smooth' }));
 
-    fakeMatchMedia(true);
+    fakeMatchMedia(reducedMotionOnly);
     fireEvent.click(screen.getByRole('button', { name: 'Ir a Letras' }));
     expect(Element.prototype.scrollIntoView).toHaveBeenLastCalledWith(expect.objectContaining({ behavior: 'auto' }));
   });
@@ -281,5 +291,63 @@ describe('HomePage', () => {
 
     const card = screen.getByRole('button', { name: /Jugar el reto/ });
     expect(card.querySelector('[aria-hidden="true"]')?.textContent).toContain('75');
+  });
+});
+
+describe('HomePage on a phone', () => {
+  beforeEach(() => {
+    fakeMatchMedia(phone);
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-10-27T10:00:00Z'));
+  });
+
+  afterEach(() => {
+    cleanup();
+    vi.useRealTimers();
+  });
+
+  it('shows the list of games instead of the carousel', () => {
+    renderHome();
+
+    expect(screen.getByRole('button', { name: /Cifras/, expanded: true })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Anterior' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Ir a Cifras' })).toBeNull();
+    expect(screen.queryByTestId('floating-tiles')).toBeNull();
+  });
+
+  it("shows the number of today's challenge, without telling to swipe", () => {
+    renderHome();
+
+    expect(screen.getByText('Reto nº 9')).toBeTruthy();
+  });
+
+  it('grows the Cifras card of the list and opens /cifras', () => {
+    vi.useFakeTimers({ toFake: ['Date', 'setTimeout', 'clearTimeout'] });
+    renderHome();
+
+    fireEvent.click(screen.getByRole('button', { name: /Jugar el reto/ }));
+
+    expect(screen.getByTestId('grow')).toBeTruthy();
+    act(() => vi.advanceTimersByTime(500));
+    expect(screen.getByText('Página de Cifras')).toBeTruthy();
+  });
+
+  it('opens /cifras at once with reduced motion', () => {
+    fakeMatchMedia(true);
+    renderHome();
+
+    fireEvent.click(screen.getByRole('button', { name: /Jugar el reto/ }));
+
+    expect(screen.queryByTestId('grow')).toBeNull();
+    expect(screen.getByText('Página de Cifras')).toBeTruthy();
+  });
+
+  it('does not navigate when another card is opened', () => {
+    renderHome();
+
+    fireEvent.click(screen.getByRole('button', { name: /Letras/ }));
+
+    expect(screen.getByRole('button', { name: /Letras/, expanded: true })).toBeTruthy();
+    expect(screen.queryByText('Página de Cifras')).toBeNull();
   });
 });
