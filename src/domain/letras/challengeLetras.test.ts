@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { CONSONANTS, VOWELS, pickWeighted } from './challengeLetras';
+import { CONSONANTS, VOWELS, generateLetters, getDailyLetters, pickWeighted } from './challengeLetras';
+import { createRandom } from '../shared/random';
+
+function countVowels(letters: Array<string>): number {
+  return letters.filter((letter) => letter in VOWELS).length;
+}
 
 describe('letter bags', () => {
   it('has exactly the five vowels in the vowel bag', () => {
@@ -49,5 +54,62 @@ describe('pickWeighted', () => {
     for (let i = 0; i < 50; i++) {
       expect(Object.keys(CONSONANTS)).toContain(pickWeighted(CONSONANTS, random));
     }
+  });
+});
+
+describe('generateLetters', () => {
+  it('gives 9 letters', () => {
+    expect(generateLetters(createRandom(1))).toHaveLength(9);
+  });
+
+  it('gives between 3 and 5 vowels and the rest consonants', () => {
+    for (let seed = 0; seed < 200; seed++) {
+      const letters = generateLetters(createRandom(seed));
+
+      expect(countVowels(letters)).toBeGreaterThanOrEqual(3);
+      expect(countVowels(letters)).toBeLessThanOrEqual(5);
+      for (const letter of letters) {
+        expect(letter in VOWELS || letter in CONSONANTS).toBe(true);
+      }
+    }
+  });
+
+  it('uses every vowel count from 3 to 5 on some day', () => {
+    const counts = new Set<number>();
+    for (let seed = 0; seed < 200; seed++) {
+      counts.add(countVowels(generateLetters(createRandom(seed))));
+    }
+
+    expect([...counts].sort()).toEqual([3, 4, 5]);
+  });
+
+  it('does not always put the vowels first', () => {
+    const vowelsFirst = (letters: Array<string>) =>
+      letters.slice(0, countVowels(letters)).every((letter) => letter in VOWELS);
+    let alwaysFirst = true;
+    for (let seed = 0; seed < 50; seed++) {
+      if (!vowelsFirst(generateLetters(createRandom(seed)))) alwaysFirst = false;
+    }
+
+    expect(alwaysFirst).toBe(false);
+  });
+
+  it('gives the same letters for the same seed', () => {
+    expect(generateLetters(createRandom(42))).toEqual(generateLetters(createRandom(42)));
+  });
+});
+
+describe('getDailyLetters', () => {
+  it('gives the same letters all day in Madrid', () => {
+    // 00:30 and 23:30 in Madrid on 14 October 2026
+    expect(getDailyLetters(new Date('2026-10-13T22:30:00Z'))).toEqual(
+      getDailyLetters(new Date('2026-10-14T21:30:00Z')),
+    );
+  });
+
+  it('gives different letters the next day', () => {
+    expect(getDailyLetters(new Date('2026-10-14T10:00:00Z'))).not.toEqual(
+      getDailyLetters(new Date('2026-10-15T10:00:00Z')),
+    );
   });
 });
