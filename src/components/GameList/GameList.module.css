@@ -85,8 +85,10 @@
 }
 
 .more .mini {
-    border-radius: 50%;
-    color: var(--color-text);
+    background: transparent;
+    border: 2px dashed rgba(31, 36, 48, 0.25);
+    box-shadow: none;
+    color: var(--color-muted);
 }
 
 .card[data-open="true"] .mini {
