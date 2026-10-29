@@ -2,15 +2,18 @@ import { getChallengeNumber } from "../../domain/cifras/challenge";
 import { useNavigate } from "react-router";
 import { useRef, useState, useEffect, useLayoutEffect } from "react";
 import { getActiveIndex } from "./carousel";
+import { useMediaQuery } from "../../hooks/useMediaQuery";
 import styles from './HomePage.module.css'
 
 import FloatingTiles from "../FloatingTiles/FloatingTiles";
+import GameList from "../GameList/GameList";
 
 const GAMES = ['Letras', 'Cifras'] as const // Same order of appareance
 const CIFRAS = GAMES.indexOf('Cifras')
 const CARDS = [...GAMES, 'Más retos']
 
 const GROW_MS = 500
+const MOBILE = '(max-width: 600px)'
 
 function prefersReducedMotion() {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -18,6 +21,7 @@ function prefersReducedMotion() {
 
 function HomePage() {
     const navigate = useNavigate()
+    const isMobile = useMediaQuery(MOBILE)
 
     const trackRef = useRef<HTMLDivElement>(null)
     const [active, setActive] = useState(CIFRAS)
@@ -47,7 +51,7 @@ function HomePage() {
             goTo(index)
             return
         }
-        if (GAMES[index] === 'Cifras') openCifras()
+        if (GAMES[index] === 'Cifras') openCifras(trackRef.current?.children[CIFRAS])
     }
 
     useLayoutEffect(() => {
@@ -55,7 +59,7 @@ function HomePage() {
         const card = track?.children[CIFRAS] as HTMLElement | undefined
         if (!track || !card) return
         track.scrollLeft = card.offsetLeft + card.offsetWidth / 2 - track.clientWidth / 2
-    }, [])
+    }, [isMobile])
 
     useEffect(() => {
         if (!growFrom) return
@@ -63,13 +67,37 @@ function HomePage() {
         return () => clearTimeout(timer)
     }, [growFrom, navigate])
 
-    function openCifras() {
-        const card = trackRef.current?.children[CIFRAS]
+    function openCifras(card: Element | undefined) {
         if (prefersReducedMotion() || !card){
             navigate('/cifras')
             return
         }
         setGrowFrom(card.getBoundingClientRect())
+    }
+
+    const grow = growFrom && (
+                <div
+                    className={styles.grow}
+                    data-testid="grow"
+                    aria-hidden="true"
+                    style={{
+                        top: growFrom.top,
+                        left: growFrom.left,
+                        width: growFrom.width,
+                        height: growFrom.height,
+                        animationDuration: `${GROW_MS}ms`,
+                    }}
+                />
+    )
+
+    if (isMobile) {
+        return (
+            <main className={styles.home}>
+                <p className={styles.eyebrow}>Reto nº {getChallengeNumber(new Date())}</p>
+                <GameList onPlay={openCifras} />
+                {grow}
+            </main>
+        )    
     }
 
     return (
@@ -143,23 +171,10 @@ function HomePage() {
                     {CARDS.map((card, i) => (
                         <button key={card} type="button" aria-label={`Ir a ${card}`} aria-current={active === i} onClick={() => goTo(i)} />
                     ))}
-                </div>
+                </div>            
                 <button type="button" className={styles.arrow} aria-label="Siguiente" disabled={active === CARDS.length - 1} onClick={() => goTo(active + 1)}>🢂</button>
             </div>
-            {growFrom && (
-                <div
-                    className={styles.grow}
-                    data-testid="grow"
-                    aria-hidden="true"
-                    style={{
-                        top: growFrom.top,
-                        left: growFrom.left,
-                        width: growFrom.width,
-                        height: growFrom.height,
-                        animationDuration: `${GROW_MS}ms`,
-                    }}
-                />
-            )}
+            {grow}
         </main>
     )
 }

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
-import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { fakeDialog } from './test/fakeDialog';
 import { fakeMatchMedia } from './test/fakeMatchMedia';
 import App from './App';
@@ -24,6 +24,8 @@ function renderAt(path: string) {
 
 describe('App routes', () => {
   beforeAll(fakeDialog);
+  // HomePage asks the screen width, so every test starts with a wide screen.
+  beforeEach(() => fakeMatchMedia(false));  
   afterEach(cleanup);
 
   it('shows the home page on /, not the game', () => {

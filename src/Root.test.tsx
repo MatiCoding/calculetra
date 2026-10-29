@@ -2,6 +2,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import type { AuthUser } from './auth/api/auth';
+import { fakeMatchMedia } from './test/fakeMatchMedia';
 import { fakeDialog } from './test/fakeDialog';
 
 // The game is wrapped in AuthProvider, which would create the real Supabase
@@ -18,6 +19,9 @@ vi.mock('./auth/api/auth', () => ({
   deleteAccount: vi.fn(),
   logInWithProvider: vi.fn(),
 }));
+
+// The home page asks the screen width, and jsdom has no matchMedia.
+beforeAll(() => fakeMatchMedia(false));
 
 async function renderRoot(flag: string | undefined) {
   vi.stubEnv('VITE_UNDER_CONSTRUCTION', flag);
