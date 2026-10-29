@@ -7,7 +7,7 @@ export const CONSONANTS: Record<string, number> = {
     P: 3, Q: 1, R: 7, S: 8, T: 5, V: 1, X: 1, Y: 1, Z: 1,
 };
 
-const LETTERS_PER_CHALLENGE = 9;
+export const LETTERS_PER_CHALLENGE = 9;
 const MIN_VOWELS = 3;
 const MAX_VOWELS = 5;
 

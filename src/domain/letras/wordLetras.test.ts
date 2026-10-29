@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { canBuild, normalizeWord } from './wordLetras';
+import { canBuild, canSubmit, normalizeWord } from './wordLetras';
 
 const LETTERS = ['P', 'A', 'O', 'H', 'C', 'I', 'E', 'A', 'L'];
 
@@ -66,5 +66,23 @@ describe('canBuild', () => {
   it('treats Ñ and N as different letters', () => {
     expect(canBuild('AÑO', ['A', 'N', 'O'])).toBe(false);
     expect(canBuild('AÑO', ['A', 'Ñ', 'O'])).toBe(true);
+  });
+});
+
+describe('canSubmit', () => {
+  it('lets the player send a word of 3 letters or more made with the letters of the day', () => {
+    expect(canSubmit('PEL', LETTERS)).toBe(true);
+    expect(canSubmit('CHAPELA', LETTERS)).toBe(true);
+    expect(canSubmit('PALOHCIEA', LETTERS)).toBe(true);
+  });
+
+  it('does not let the player send a word shorter than 3 letters', () => {
+    expect(canSubmit('', LETTERS)).toBe(false);
+    expect(canSubmit('A', LETTERS)).toBe(false);
+    expect(canSubmit('PA', LETTERS)).toBe(false);
+  });
+
+  it('does not let the player send a word with letters that are not available', () => {
+    expect(canSubmit('CASA', LETTERS)).toBe(false);
   });
 });

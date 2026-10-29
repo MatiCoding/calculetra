@@ -1,13 +1,11 @@
-const COMBINING_TILDE = '̃';
-
-// Turns what the palyer typed into the form the game uses.
+// Turns what the player typed into the form the game uses: upper case,
+// no accents (CAMIÓN -> CAMION), but the Ñ stays an Ñ.
 export function normalizeWord(text: string): string {
-    return text
-        .trim()
-        .toUpperCase()
-        .normalize('NFD')
-        .replace(new RegExp(`N${COMBINING_TILDE}`, 'g'), 'Ñ')
-        .replace(/[̀-ͯ]/g, '');
+    const letters = [...text.trim().toUpperCase().normalize('NFC')];
+
+    return letters
+        .map((letter) => (letter === 'Ñ' ? letter : letter.normalize('NFD')[0]))
+        .join('');
 }
 
 export function canBuild(word: string, letters: Array<string>): boolean {
@@ -20,4 +18,11 @@ export function canBuild(word: string, letters: Array<string>): boolean {
     }
 
     return true;
+}
+
+export const MIN_WORD_LENGTH = 3;
+
+// "Enviar" is only enabled when this is true, so a bad word does not waste the answer.
+export function canSubmit(word: string, letters: Array<string>): boolean {
+    return word.length >= MIN_WORD_LENGTH && canBuild(word, letters);
 }
