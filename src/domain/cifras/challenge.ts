@@ -1,14 +1,11 @@
 import type { Challenge } from "./types";
 import { createRandom, hashString } from "../shared/random";
+import { getDateKey } from "../shared/date";
 
 const bag : Array<number> = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 25, 50, 75, 100];
 const NUMBERS_PER_CHALLENGE = 6;
 const FIRST_DATE_CHALLENGE = "2026-10-19";
 const MS_PER_DAY = 24*60*60*1000;
-
-export function getDateKey(date: Date): string {
-    return new Intl.DateTimeFormat("en-CA", {timeZone: "Europe/Madrid"}).format(date)
-}
 
 export function generateChallenge(random: () => number): Challenge {
     const copy : Array<number> = [...bag];
