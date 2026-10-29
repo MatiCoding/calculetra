@@ -6,6 +6,15 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-29
+
+### Added
+- A home page with the games: Letras, Cifras and a "Más retos" card coming soon. On computers they are a carousel with arrows, dots and floating letter tiles behind; on phones they are a list that opens one game at a time.
+- Each daily challenge shows its number ("Reto nº N").
+
+### Changed
+- The Cifras game now lives at `/cifras`, with a link back to the games.
+
 ## [0.2.1] - 2026-10-26
 
 ### Security
@@ -55,7 +64,8 @@ First playable version.
 - 404 page for unknown addresses.
 - Documentation website with the game rules, the architecture and the technical decisions.
 
-[Unreleased]: https://github.com/MatiCoding/calculetra/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/MatiCoding/calculetra/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/MatiCoding/calculetra/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/MatiCoding/calculetra/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/MatiCoding/calculetra/compare/v0.1.3...v0.2.0
 [0.1.3]: https://github.com/MatiCoding/calculetra/compare/v0.1.2...v0.1.3
