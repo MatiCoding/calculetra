@@ -6,7 +6,7 @@ It follows a reduced version of the [arc42](https://arc42.org) template: only th
 
 ## 1. Introduction and goals
 
-Calculetra is a daily puzzle inspired by the Spanish TV show *Cifras y Letras*. Every day there is one numbers challenge (**Cifras**), the same for every player. Players can create an account and log in. The letters mode (**Letras**) is not built yet. The home page (`/`) shows the games in a carousel, with the number of today's challenge; Cifras is played at `/cifras`. The rules of the game are in [`docs/rules/cifras.md`](rules/cifras.md).
+Calculetra is a daily puzzle inspired by the Spanish TV show *Cifras y Letras*. Every day there is one numbers challenge (**Cifras**), the same for every player. Players can create an account and log in. The letters mode (**Letras**) is not built yet. The home page (`/`) shows the number of today's challenge and the games: in a carousel on wide screens, and on phones in a list that opens one card at a time; Cifras is played at `/cifras`. The rules of the game are in [`docs/rules/cifras.md`](rules/cifras.md).
 
 ### Quality goals
 
@@ -61,6 +61,7 @@ flowchart TD
     authForms["auth/signUp, auth/logIn, auth/password<br/>validation and error messages"]
     authApi["auth/api/<br/>Supabase client and calls"]
     config["config/<br/>feature flags"]
+    hooks["hooks/<br/>shared React hooks"]
     supabaseLib[("@supabase/supabase-js")]
 
     entry --> components
@@ -69,6 +70,7 @@ flowchart TD
     components --> domain
     components --> authContext
     components --> authForms
+    components --> hooks
     authContext --> authApi
     authApi --> supabaseLib
     authForms --> supabaseLib
@@ -77,12 +79,13 @@ flowchart TD
 | Block | Responsibility | Depends on |
 | --- | --- | --- |
 | `main.tsx`, `Root.tsx`, `App.tsx` | Start React, choose between the "under construction" page and the app, set up the router and the `AuthProvider`, and define the routes (`/` with the game carousel, `/cifras`, `/signup`, `/login`, `/account`, `/forgot-password`, `/reset-password`, `/privacy`, 404). | `components`, `auth/context`, `config` |
-| `components/` | One folder per component with its `.tsx`, CSS Module and test. `HomePage` is the carousel with the Letras, Cifras and Más retos cards; `FloatingTiles` draws the number and letter tiles behind it; `NumbersGame` is the game and `BackToGames` the link back to the home page; `Header`, `SignUpForm`, `LogInForm`, `AccountPage`, `ForgotPasswordForm`, `ResetPasswordPage`, `NewPasswordForm`, `ChangeEmailForm` and `DeleteAccountForm` use the account; `NoticeDialog` shows, in a dialog, a message left by another page. | `domain`, `auth` |
+| `components/` | One folder per component with its `.tsx`, CSS Module and test. `HomePage` shows the Letras, Cifras and Más retos cards in a carousel, or with `GameList` as a list that opens one card at a time on phones; `FloatingTiles` draws the number and letter tiles behind it; `NumbersGame` is the game and `BackToGames` the link back to the home page; `Header`, `SignUpForm`, `LogInForm`, `AccountPage`, `ForgotPasswordForm`, `ResetPasswordPage`, `NewPasswordForm`, `ChangeEmailForm` and `DeleteAccountForm` use the account; `NoticeDialog` shows, in a dialog, a message left by another page. | `domain`, `auth` |
 | `domain/cifras/` | Challenge generation and number, seeded random, operations, game reducer and score. | Nothing outside itself |
 | `auth/api/` | The Supabase client and the functions `signUp`, `logIn`, `logOut`, `resetPassword`, `updatePassword`, `changeEmail`, `deleteAccount`, `getCurrentUser` and `onAuthChange`. Turns Supabase's user into `AuthUser`. | `@supabase/supabase-js` |
 | `auth/context/` | `AuthProvider` keeps the current user and `useAuth()` gives it to components. | `auth/api` |
 | `auth/signUp/`, `auth/logIn/`, `auth/password/` | Form validation and translating Supabase errors into messages in Spanish. | `@supabase/supabase-js` (only its error helpers) |
 | `config/` | Feature flags read from environment variables. | Nothing |
+| `hooks/` | React hooks shared by several components, such as `useMediaQuery`, which tells whether a media query (for example the phone width) matches. | React |
 
 The arrow from `auth/signUp`, `auth/logIn` and `auth/password` to Supabase is not a break of the rule in section 4: they only use Supabase's error helpers, and they are still inside `src/auth`.
 
@@ -95,6 +98,7 @@ The arrow from `auth/signUp`, `auth/logIn` and `auth/password` to Supabase is no
 - Component tests use [Testing Library](https://testing-library.com) in a `jsdom` environment, chosen per file with `// @vitest-environment jsdom`. They find elements by role and label, as a user would.
 - `tests/production-build.test.ts` builds the app and checks that the feature flag ships only the right page.
 - CI (GitHub Actions, `.github/workflows/ci.yml`) runs `npm run lint`, `npm test` and `npm run build` on every push to `developer` and on every pull request to `main`.
+- jsdom has no `matchMedia`. Tests that need it call `fakeMatchMedia` from `src/test/`, with `true` or `false` for every query, or with a function that answers each query on its own.
 
 ### Accessibility
 
@@ -104,6 +108,7 @@ The arrow from `auth/signUp`, `auth/logIn` and `auth/password` to Supabase is no
 - Form fields have a `<label>`, errors use `role="alert"` and confirmations use `role="status"`.
 - Animations are turned off with `prefers-reduced-motion: reduce`.
 - In the home carousel the dots use `aria-current` for the card in the middle, and the cards that cannot be played yet use `aria-disabled`.
+- In the list of games on phones, each row is a button inside a heading, with `aria-expanded` and `aria-controls`, and the closed cards are `inert`, so their content cannot get the focus.
 
 ### Styling
 
