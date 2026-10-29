@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { generateChallenge, getChallengeNumber, getDailyChallenge, getDateKey } from './challenge';
-import { createRandom } from './random';
+import { createRandom } from '../shared/random';
 
 const SMALL_NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 const BIG_NUMBERS = [25, 50, 75, 100];

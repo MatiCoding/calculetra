@@ -1,5 +1,5 @@
 import type { Challenge } from "./types";
-import { createRandom, hashString } from "./random";
+import { createRandom, hashString } from "../shared/random";
 
 const bag : Array<number> = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 25, 50, 75, 100];
 const NUMBERS_PER_CHALLENGE = 6;
