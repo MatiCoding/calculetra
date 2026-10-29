@@ -1,5 +1,5 @@
 import { useReducer } from 'react';
-import { getDailyChallenge } from '../../domain/cifras/challenge';
+import { getDailyChallenge } from '../../domain/cifras/challengeCifras';
 import { gameReducer, initialState } from '../../domain/cifras/game';
 import {calculateScore, getBestValue} from '../../domain/cifras/score';
 import type { OperationError, Operator } from '../../domain/cifras/types';

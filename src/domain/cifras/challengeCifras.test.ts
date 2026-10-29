@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { generateChallenge, getChallengeNumber, getDailyChallenge} from './challenge';
+import { generateChallenge, getChallengeNumber, getDailyChallenge} from './challengeCifras';
 import { createRandom } from '../shared/random';
 
 const SMALL_NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];

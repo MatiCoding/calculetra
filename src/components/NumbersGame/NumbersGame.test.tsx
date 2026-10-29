@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { getDailyChallenge } from '../../domain/cifras/challenge';
+import { getDailyChallenge } from '../../domain/cifras/challengeCifras';
 import { gameReducer, initialState } from '../../domain/cifras/game';
 import { calculateScore, getBestValue } from '../../domain/cifras/score';
 import type { Challenge } from '../../domain/cifras/types';

@@ -1,4 +1,4 @@
-import { getChallengeNumber } from "../../domain/cifras/challenge";
+import { getChallengeNumber } from "../../domain/cifras/challengeCifras";
 import { useNavigate } from "react-router";
 import { useRef, useState, useEffect, useLayoutEffect } from "react";
 import { getActiveIndex } from "./carousel";
