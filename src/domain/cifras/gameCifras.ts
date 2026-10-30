@@ -1,5 +1,5 @@
 import { applyOperation } from './operation';
-import type { Challenge, GameAction, GameState, Tile } from './types';
+import type { Challenge, GameAction, GameState, Tile } from './typesCifras';
 
 export function initialState(challenge: Challenge): GameState {
     return {

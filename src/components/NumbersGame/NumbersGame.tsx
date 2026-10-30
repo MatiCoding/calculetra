@@ -1,8 +1,8 @@
 import { useReducer } from 'react';
 import { getDailyChallenge } from '../../domain/cifras/challengeCifras';
-import { gameReducer, initialState } from '../../domain/cifras/game';
-import {calculateScore, getBestValue} from '../../domain/cifras/score';
-import type { OperationError, Operator } from '../../domain/cifras/types';
+import { gameReducer, initialState } from '../../domain/cifras/gameCifras';
+import {calculateScore, getBestValue} from '../../domain/cifras/scoreCifras';
+import type { OperationError, Operator } from '../../domain/cifras/typesCifras';
 import styles from './NumbersGame.module.css';
 
 const OPERATORS: Array<{ operator: Operator; label: string; symbol: string }> = [

@@ -1,4 +1,4 @@
-import type { Challenge } from "./types";
+import type { Challenge } from "./typesCifras";
 import { createRandom, hashString } from "../shared/random";
 import { getDateKey } from "../shared/date";
 

@@ -1,4 +1,4 @@
-import type { Operator, OperationResult } from './types';
+import type { Operator, OperationResult } from './typesCifras';
 
 export function applyOperation(a: number, operator: Operator, b: number): OperationResult {
     switch (operator) {
