@@ -55,7 +55,7 @@ To propose a change:
 
 If your change is something a player will notice, add a line to the `[Unreleased]` section of [`CHANGELOG.md`](CHANGELOG.md) in the same pull request (under `### Added`, `### Changed` or `### Fixed`). Internal changes such as tests, CI or refactors do not need one.
 
-CI runs lint, tests and build on every pull request. A pull request needs a green CI run before it is merged.
+CI runs four separate checks on every pull request: `lint`, `test`, `build` and `docs`. They run in parallel, so one failing does not hide the others, and each one shows its own result on the pull request. A pull request needs all four green before it is merged. Pushing a new commit cancels the run still in progress for the same branch.
 
 ### Merging into main
 
