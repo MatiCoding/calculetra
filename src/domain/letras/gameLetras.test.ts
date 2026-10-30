@@ -100,3 +100,78 @@ describe('gameReducer', () => {
     expect(before.picked).toEqual([]);
   });
 });
+
+describe('type', () => {
+  function type(state: GameState, text: string): GameState {
+    return [...text].reduce((current, letter) => gameReducer(current, { type: 'type', letter }), state);
+  }
+
+  it('picks the tile with the typed letter', () => {
+    const state = type(initialState(LETTERS), 'CHAPELA');
+
+    expect(getWord(state)).toBe('CHAPELA');
+  });
+
+  it('accepts lower case and accented letters', () => {
+    const state = type(initialState(LETTERS), 'pé');
+
+    expect(getWord(state)).toBe('PE');
+  });
+
+  it('uses the next free tile when a letter is repeated', () => {
+    const state = type(initialState(LETTERS), 'AA');
+
+    expect(state.picked).toEqual([1, 7]);
+  });
+
+  it('ignores a letter that is not available', () => {
+    const before = type(initialState(LETTERS), 'P');
+
+    expect(type(before, 'Z')).toBe(before);
+    expect(type(before, 'P')).toBe(before);
+  });
+
+  it('ignores keys that are not letters', () => {
+    const before = initialState(LETTERS);
+
+    expect(type(before, '1')).toBe(before);
+  });
+});
+
+describe('submit', () => {
+  const dictionary = new Set(['CHAPELA', 'ALOPECIA']);
+
+  function submit(state: GameState): GameState {
+    return gameReducer(state, { type: 'submit', dictionary });
+  }
+
+  it('gives one point per letter for a word in the dictionary', () => {
+    // C H A P E L A
+    const state = submit(pick(initialState(LETTERS), 4, 3, 1, 0, 6, 8, 7));
+
+    expect(state.result).toEqual({ word: 'CHAPELA', isValid: true, score: 7 });
+  });
+
+  it('gives 0 points for a word that is not in the dictionary', () => {
+    // P A L O H C I E A
+    const state = submit(pick(initialState(LETTERS), 0, 1, 8, 2, 3, 4, 5, 6, 7));
+
+    expect(state.result).toEqual({ word: 'PALOHCIEA', isValid: false, score: 0 });
+  });
+
+  it('does not send a word shorter than 3 letters', () => {
+    const before = pick(initialState(LETTERS), 0, 1);
+
+    expect(submit(before)).toBe(before);
+    expect(submit(before).result).toBeNull();
+  });
+
+  it('ends the game: nothing changes after sending', () => {
+    const finished = submit(pick(initialState(LETTERS), 4, 3, 1, 0, 6, 8, 7));
+
+    expect(gameReducer(finished, { type: 'removeLast' })).toBe(finished);
+    expect(gameReducer(finished, { type: 'clear' })).toBe(finished);
+    expect(gameReducer(finished, { type: 'pick', id: 2 })).toBe(finished);
+    expect(submit(finished)).toBe(finished);
+  });
+});

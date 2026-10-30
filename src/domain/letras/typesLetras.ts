@@ -10,4 +10,6 @@ export type GameState = {
 export type GameAction = 
     | { type: 'pick', id: number }
     | {type: 'removeLast'}
-    | {type: 'clear'};
+    | { type: 'clear' }
+    | { type: 'type', letter: string }
+    | { type: 'submit', dictionary: ReadonlySet<string> };
