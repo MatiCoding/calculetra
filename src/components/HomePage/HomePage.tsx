@@ -1,4 +1,4 @@
-import { getChallengeNumber } from "../../domain/cifras/challenge";
+import { getChallengeNumber } from "../../domain/cifras/challengeCifras";
 import { useNavigate } from "react-router";
 import { useRef, useState, useEffect, useLayoutEffect } from "react";
 import { getActiveIndex } from "./carousel";
@@ -10,6 +10,7 @@ import GameList from "../GameList/GameList";
 
 const GAMES = ['Letras', 'Cifras'] as const // Same order of appareance
 const CIFRAS = GAMES.indexOf('Cifras')
+const PATHS: Record<string, string> = { Letras: '/letras', Cifras: '/cifras' }
 const CARDS = [...GAMES, 'Más retos']
 
 const GROW_MS = 500
@@ -25,7 +26,7 @@ function HomePage() {
 
     const trackRef = useRef<HTMLDivElement>(null)
     const [active, setActive] = useState(CIFRAS)
-    const [growFrom, setGrowFrom] = useState<DOMRect | null>(null)
+    const [opening, setOpening] = useState<{ game: string, from: DOMRect } | null>(null)
     const [pointed, setPointed] = useState<number | null> (null)    // The card under the pointer or with the focus.
 
     // On every scroll, look for the card in the center of the track.
@@ -51,7 +52,7 @@ function HomePage() {
             goTo(index)
             return
         }
-        if (GAMES[index] === 'Cifras') openCifras(trackRef.current?.children[CIFRAS])
+        if (index < GAMES.length) openGame(GAMES[index], trackRef.current?.children[index])
     }
 
     useLayoutEffect(() => {
@@ -62,29 +63,31 @@ function HomePage() {
     }, [isMobile])
 
     useEffect(() => {
-        if (!growFrom) return
-        const timer = setTimeout(() => navigate('/cifras'), GROW_MS)
+        if (!opening) return
+        const timer = setTimeout(() => navigate(PATHS[opening.game]), GROW_MS)
         return () => clearTimeout(timer)
-    }, [growFrom, navigate])
+    }, [opening, navigate])
 
-    function openCifras(card: Element | undefined) {
+    // Grows the card until it fills the screen and then opens its game.
+    function openGame(game: string, card: Element | undefined) {
         if (prefersReducedMotion() || !card){
-            navigate('/cifras')
+            navigate(PATHS[game])
             return
         }
-        setGrowFrom(card.getBoundingClientRect())
+        setOpening({ game, from: card.getBoundingClientRect() })
     }
 
-    const grow = growFrom && (
+    const grow = opening && (
                 <div
                     className={styles.grow}
                     data-testid="grow"
+                    data-game={opening.game}
                     aria-hidden="true"
                     style={{
-                        top: growFrom.top,
-                        left: growFrom.left,
-                        width: growFrom.width,
-                        height: growFrom.height,
+                        top: opening.from.top,
+                        left: opening.from.left,
+                        width: opening.from.width,
+                        height: opening.from.height,
                         animationDuration: `${GROW_MS}ms`,
                     }}
                 />
@@ -94,7 +97,7 @@ function HomePage() {
         return (
             <main className={styles.home}>
                 <p className={styles.eyebrow}>Reto nº {getChallengeNumber(new Date())}</p>
-                <GameList onPlay={openCifras} />
+                <GameList onPlay={openGame} />
                 {grow}
             </main>
         )    
@@ -110,7 +113,6 @@ function HomePage() {
                 <button 
                     type="button" 
                     className={`${styles.card} ${styles.letras}`} 
-                    aria-disabled="true"
                     data-active={active === 0}
                     onClick={() => handleCardClick(0)}
                     onPointerEnter={() => setPointed(0)}
@@ -126,7 +128,7 @@ function HomePage() {
                         <span>L</span><span>E</span><span>T</span><span>A</span>
                     </div>
                     <div className={styles.go}>
-                        <span className={styles.soon}>Próximamente</span>
+                        Jugar el reto <b aria-hidden="true">🡆</b>
                     </div>
                 </button>
 

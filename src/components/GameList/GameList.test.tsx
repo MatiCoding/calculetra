@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import GameList from './GameList';
 
@@ -12,6 +12,11 @@ function renderList() {
 // The button of each card's row, found by the game's name.
 function row(name: RegExp) {
   return screen.getByRole('button', { name });
+}
+
+// The "Jugar el reto" button inside a game's card.
+function playButton(name: RegExp) {
+  return within(row(name).closest('section')!).getByRole('button', { name: /Jugar el reto/ });
 }
 
 describe('GameList', () => {
@@ -73,18 +78,27 @@ describe('GameList', () => {
     expect(letrasBody.hasAttribute('inert')).toBe(true);
   });
 
-  it('calls onPlay with the Cifras card when "Jugar el reto" is clicked', () => {
+  it('calls onPlay with the game and its card when "Jugar el reto" is clicked', () => {
     const onPlay = renderList();
-    fireEvent.click(screen.getByRole('button', { name: /Jugar el reto/ }));
+    fireEvent.click(playButton(/Cifras/));
     expect(onPlay).toHaveBeenCalledTimes(1);
-    expect(onPlay.mock.calls[0][0].textContent).toContain('Seis números');
+    expect(onPlay.mock.calls[0][0]).toBe('Cifras');
+    expect(onPlay.mock.calls[0][1].textContent).toContain('Seis números');
   });
 
-  it('shows "Próximamente" instead of a play button in Letras and Más retos', () => {
-    renderList();
+  it('lets the player open Letras too', () => {
+    const onPlay = renderList();
     fireEvent.click(row(/Letras/));
-    expect(screen.getAllByText('Próximamente')).toHaveLength(2);
-    expect(screen.getAllByRole('button', { name: /Jugar el reto/ })).toHaveLength(1);
+    fireEvent.click(playButton(/Letras/));
+    expect(onPlay.mock.calls[0][0]).toBe('Letras');
+    expect(onPlay.mock.calls[0][1].textContent).toContain('Nueve letras');
+  });
+
+  it('shows "Próximamente" instead of a play button only in Más retos', () => {
+    renderList();
+    expect(screen.getAllByText('Próximamente')).toHaveLength(1);
+    expect(screen.getAllByRole('button', { name: /Jugar el reto/ })).toHaveLength(2);
+    expect(row(/Letras/).textContent).toContain('Hoy');
   });
 
   it('hides the small tiles from screen readers', () => {

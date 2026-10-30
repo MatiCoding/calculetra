@@ -1,10 +1,10 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { getDailyChallenge } from '../../domain/cifras/challenge';
-import { gameReducer, initialState } from '../../domain/cifras/game';
-import { calculateScore, getBestValue } from '../../domain/cifras/score';
-import type { Challenge } from '../../domain/cifras/types';
+import { getDailyChallenge } from '../../domain/cifras/challengeCifras';
+import { gameReducer, initialState } from '../../domain/cifras/gameCifras';
+import { calculateScore, getBestValue } from '../../domain/cifras/scoreCifras';
+import type { Challenge } from '../../domain/cifras/typesCifras';
 import NumbersGame from './NumbersGame';
 
 // The challenge depends on today's date, so the tests fix the date.

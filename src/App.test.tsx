@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { fakeDialog } from './test/fakeDialog';
@@ -20,6 +20,13 @@ function renderAt(path: string) {
       <App />
     </MemoryRouter>,
   );
+}
+
+// fakeMatchMedia(true) is a phone, where the home page shows the list of
+// games: each card of the list has its own "Jugar el reto" button.
+function playButton(game: string) {
+  const card = screen.getByRole('button', { name: new RegExp(`^${game}`) }).closest('section')!;
+  return within(card).getByRole('button', { name: /Jugar el reto/ });
 }
 
 describe('App routes', () => {
@@ -46,9 +53,25 @@ describe('App routes', () => {
     fakeMatchMedia(true);
     renderAt('/');
 
-    fireEvent.click(screen.getByRole('button', { name: /Jugar el reto/ }));
+    fireEvent.click(playButton('Cifras'));
 
     expect(screen.getByText(/Objetivo/)).toBeTruthy();
+  });
+
+  it('opens the Letras game from its card on the home page', () => {
+    fakeMatchMedia(true);
+    renderAt('/');
+    fireEvent.click(screen.getByRole('button', { name: /^Letras/ }));
+
+    fireEvent.click(playButton('Letras'));
+
+    expect(screen.getByRole('heading', { name: 'Forma la palabra más larga' })).toBeTruthy();
+  });
+
+  it('shows the Letras game on /letras', () => {
+    renderAt('/letras');
+
+    expect(screen.getByRole('list', { name: 'Letras' })).toBeTruthy();
   });
 
   it('goes back to the home page from the game', () => {

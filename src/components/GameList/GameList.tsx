@@ -16,10 +16,10 @@ const GAMES = [
         name: 'Letras',
         className: styles.letras,
         mini: 'L',
-        badge: 'Pronto',
+        badge: 'Hoy',
         text: 'Nueve letras para la palabra más larga.',
         tiles: ['L', 'E', 'T', 'R', 'A'],
-        playable: false,
+        playable: true,
     },
     {
         name: 'Más retos',
@@ -33,8 +33,8 @@ const GAMES = [
 ];
 
 type GameListProps = {
-    // Called with the open Cifras card, so the page can grow it.
-    onPlay: (card: HTMLElement) => void;
+    // Called with the game and its open card, so the page can grow it.
+    onPlay: (game: string, card: HTMLElement) => void;
 };
 
 function GameList({ onPlay }: GameListProps) {
@@ -72,7 +72,7 @@ function GameList({ onPlay }: GameListProps) {
                                     <button
                                         type="button"
                                         className={styles.go}
-                                        onClick={(event) => onPlay(event.currentTarget.closest('section')!)}
+                                        onClick={(event) => onPlay(game.name, event.currentTarget.closest('section')!)}
                                     >
                                         Jugar el reto <b aria-hidden="true">🡆</b>
                                     </button>

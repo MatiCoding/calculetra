@@ -1,4 +1,4 @@
-import type { GameState } from './types';
+import type { GameState } from './typesCifras';
 
 function distance(value: number, target: number): number {
     return Math.abs(value - target);

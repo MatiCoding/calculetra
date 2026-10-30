@@ -14,6 +14,7 @@ import OAuthReturnNotice from './components/OAuthReturnNotice/OAuthReturnNotice'
 import PrivacyPage from './components/PrivacyPage/PrivacyPage'
 import HomePage from './components/HomePage/HomePage'
 import BackToGames from './components/BackToGames/BackToGames'
+import LettersGame from './components/LettersGame/LettersGame'
 
 function WithHeader() {
   return (
@@ -41,6 +42,7 @@ function App() {
             }
           />
           <Route path="/cifras" element={<main><BackToGames /><NumbersGame /></main>} />
+          <Route path="/letras" element={<main><BackToGames /><LettersGame /></main>} />
           <Route path="/account" element={<main><RequireAuth><AccountPage /></RequireAuth></main>} />
           <Route path="/forgot-password" element={<main><ForgotPasswordForm /></main>} />
           <Route path="/reset-password" element={<main><ResetPasswordPage /></main>} />

@@ -1,17 +1,18 @@
 // @vitest-environment jsdom
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { fakeMatchMedia } from '../../test/fakeMatchMedia';
 import HomePage from './HomePage';
 
-// A fake /cifras page, so the tests can see if the card navigates there.
+// Fake /cifras and /letras pages, so the tests can see where a card navigates.
 function renderHome() {
   render(
     <MemoryRouter initialEntries={['/']}>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/cifras" element={<p>Página de Cifras</p>} />
+        <Route path="/letras" element={<p>Página de Letras</p>} />
       </Routes>
     </MemoryRouter>,
   );
@@ -47,8 +48,12 @@ function phone(query: string) {
   return query.includes('max-width');
 }
 
+// Both games say "Jugar el reto", so the cards are found by their description.
+const CIFRAS = /Seis números/;
+const LETRAS = /Nueve letras/;
+
 function scrollToLetras() {
-  scrollToCard(/Próximamente/);
+  scrollToCard(LETRAS);
 }
 
 function scrollToMore() {
@@ -81,17 +86,17 @@ describe('HomePage', () => {
   it('shows the Cifras card with its name, description and button text', () => {
     renderHome();
 
-    const card = screen.getByRole('button', { name: /Jugar el reto/ });
+    const card = screen.getByRole('button', { name: CIFRAS });
     expect(card.textContent).toContain('Seis números');
     expect(card.textContent).toContain('Jugar el reto');
   });
 
-  it('shows the Letras card as coming soon', () => {
+  it('shows the Letras card ready to play', () => {
     renderHome();
 
-    const card = screen.getByRole('button', { name: /Próximamente/ });
-    expect(card.textContent).toContain('Próximamente');
-    expect(card.getAttribute('aria-disabled')).toBe('true');
+    const card = screen.getByRole('button', { name: LETRAS });
+    expect(card.textContent).toContain('Jugar el reto');
+    expect(card.hasAttribute('aria-disabled')).toBe(false);
   });
 
   it('grows the Cifras card and opens /cifras when the animation ends', () => {
@@ -99,7 +104,7 @@ describe('HomePage', () => {
     vi.useFakeTimers({ toFake: ['Date', 'setTimeout', 'clearTimeout'] });
     renderHome();
 
-    fireEvent.click(screen.getByRole('button', { name: /Jugar el reto/ }));
+    fireEvent.click(screen.getByRole('button', { name: CIFRAS }));
 
     // While it grows, we are still on the home page.
     expect(screen.getByTestId('grow')).toBeTruthy();
@@ -114,7 +119,7 @@ describe('HomePage', () => {
     fakeMatchMedia(reducedMotionOnly);
     renderHome();
 
-    fireEvent.click(screen.getByRole('button', { name: /Jugar el reto/ }));
+    fireEvent.click(screen.getByRole('button', { name: CIFRAS }));
 
     expect(screen.getByText('Página de Cifras')).toBeTruthy();
   });
@@ -129,26 +134,39 @@ describe('HomePage', () => {
     expect(Element.prototype.scrollIntoView).toHaveBeenLastCalledWith(expect.objectContaining({ behavior: 'auto' }));
   });
 
-  it('does not navigate when the Letras card is clicked', () => {
+  it('grows the Letras card and opens /letras when it is in the centre', () => {
+    vi.useFakeTimers({ toFake: ['Date', 'setTimeout', 'clearTimeout'] });
     renderHome();
+    scrollToLetras();
 
-    fireEvent.click(screen.getByRole('button', { name: /Próximamente/ }));
+    fireEvent.click(screen.getByRole('button', { name: LETRAS }));
 
-    expect(screen.queryByText('Página de Cifras')).toBeNull();
-    expect(screen.getByRole('button', { name: /Próximamente/ })).toBeTruthy();
+    expect(screen.getByTestId('grow').dataset.game).toBe('Letras');
+    act(() => vi.advanceTimersByTime(500));
+    expect(screen.getByText('Página de Letras')).toBeTruthy();
+  });
+
+  it('opens /letras at once, without growing, with reduced motion', () => {
+    fakeMatchMedia(reducedMotionOnly);
+    renderHome();
+    scrollToLetras();
+
+    fireEvent.click(screen.getByRole('button', { name: LETRAS }));
+
+    expect(screen.getByText('Página de Letras')).toBeTruthy();
   });
 
   it('starts with the Cifras card as the active one', () => {
     renderHome();
 
-    expect(screen.getByRole('button', { name: /Jugar el reto/ }).dataset.active).toBe('true');
-    expect(screen.getByRole('button', { name: /Próximamente/ }).dataset.active).toBe('false');
+    expect(screen.getByRole('button', { name: CIFRAS }).dataset.active).toBe('true');
+    expect(screen.getByRole('button', { name: LETRAS }).dataset.active).toBe('false');
   });
 
   it('makes the card in the centre the active one when the track scrolls', () => {
     renderHome();
-    const cifras = screen.getByRole('button', { name: /Jugar el reto/ });
-    const letras = screen.getByRole('button', { name: /Próximamente/ });
+    const cifras = screen.getByRole('button', { name: CIFRAS });
+    const letras = screen.getByRole('button', { name: LETRAS });
 
     // jsdom does not lay out the page, so every size is 0. We give the track
     // and the cards the sizes they would have in a browser, with the track
@@ -168,7 +186,7 @@ describe('HomePage', () => {
 
   it('moves the card to the centre when its dot is clicked', () => {
     renderHome();
-    const letras = screen.getByRole('button', { name: /Próximamente/ });
+    const letras = screen.getByRole('button', { name: LETRAS });
 
     fireEvent.click(screen.getByRole('button', { name: 'Ir a Letras' }));
 
@@ -184,7 +202,7 @@ describe('HomePage', () => {
 
     // scrollIntoView is on the prototype, so "this" says which card it moved.
     expect(scroll.mock.contexts[0]).toBe(screen.getByRole('button', { name: /Estadísticas/ }));
-    expect(scroll.mock.contexts[1]).toBe(screen.getByRole('button', { name: /Próximamente/ }));
+    expect(scroll.mock.contexts[1]).toBe(screen.getByRole('button', { name: LETRAS }));
   });
 
   it('disables the previous arrow on the first card and the next arrow on the last one', () => {
@@ -233,7 +251,7 @@ describe('HomePage', () => {
   it('moves a card that is not in the centre to the centre before opening it', () => {
     renderHome();
     scrollToLetras();
-    const cifras = screen.getByRole('button', { name: /Jugar el reto/ });
+    const cifras = screen.getByRole('button', { name: CIFRAS });
 
     fireEvent.click(cifras);
 
@@ -241,23 +259,15 @@ describe('HomePage', () => {
     expect(screen.queryByText('Página de Cifras')).toBeNull();
   });
 
-  it('moves the Letras card to the centre when it is clicked from the side', () => {
+  it('moves the Letras card to the centre when it is clicked from the side, without opening it', () => {
     renderHome();
-    const letras = screen.getByRole('button', { name: /Próximamente/ });
+    const letras = screen.getByRole('button', { name: LETRAS });
 
     fireEvent.click(letras);
 
     expect(vi.mocked(Element.prototype.scrollIntoView).mock.contexts).toContain(letras);
-  });
-
-  it('does nothing when the Letras card in the centre is clicked', () => {
-    renderHome();
-    scrollToLetras();
-
-    fireEvent.click(screen.getByRole('button', { name: /Próximamente/ }));
-
-    expect(Element.prototype.scrollIntoView).not.toHaveBeenCalled();
-    expect(screen.queryByText('Página de Cifras')).toBeNull();
+    expect(screen.queryByTestId('grow')).toBeNull();
+    expect(screen.queryByText('Página de Letras')).toBeNull();
   });
 
   it('does not light up any tiles when no card is pointed, even if one is in the centre', () => {
@@ -269,7 +279,7 @@ describe('HomePage', () => {
 
   it('lights up the tiles of the card under the pointer, and goes back when it leaves', () => {
     renderHome();
-    const letras = screen.getByRole('button', { name: /Próximamente/ });
+    const letras = screen.getByRole('button', { name: LETRAS });
 
     fireEvent.pointerEnter(letras);
     expect(screen.getByTestId('floating-tiles').dataset.game).toBe('Letras');
@@ -281,7 +291,7 @@ describe('HomePage', () => {
   it('lights up the tiles of the card with the focus', () => {
     renderHome();
 
-    fireEvent.focus(screen.getByRole('button', { name: /Próximamente/ }));
+    fireEvent.focus(screen.getByRole('button', { name: LETRAS }));
 
     expect(screen.getByTestId('floating-tiles').dataset.game).toBe('Letras');
   });
@@ -289,10 +299,16 @@ describe('HomePage', () => {
   it('hides the decorative tiles from screen readers', () => {
     renderHome();
 
-    const card = screen.getByRole('button', { name: /Jugar el reto/ });
+    const card = screen.getByRole('button', { name: CIFRAS });
     expect(card.querySelector('[aria-hidden="true"]')?.textContent).toContain('75');
   });
 });
+
+// On a phone each card of the list has its own "Jugar el reto" button.
+function playButton(game: string) {
+  const card = screen.getByRole('button', { name: new RegExp(`^${game}`) }).closest('section')!;
+  return within(card).getByRole('button', { name: /Jugar el reto/ });
+}
 
 describe('HomePage on a phone', () => {
   beforeEach(() => {
@@ -325,7 +341,7 @@ describe('HomePage on a phone', () => {
     vi.useFakeTimers({ toFake: ['Date', 'setTimeout', 'clearTimeout'] });
     renderHome();
 
-    fireEvent.click(screen.getByRole('button', { name: /Jugar el reto/ }));
+    fireEvent.click(playButton('Cifras'));
 
     expect(screen.getByTestId('grow')).toBeTruthy();
     act(() => vi.advanceTimersByTime(500));
@@ -336,7 +352,7 @@ describe('HomePage on a phone', () => {
     fakeMatchMedia(true);
     renderHome();
 
-    fireEvent.click(screen.getByRole('button', { name: /Jugar el reto/ }));
+    fireEvent.click(playButton('Cifras'));
 
     expect(screen.queryByTestId('grow')).toBeNull();
     expect(screen.getByText('Página de Cifras')).toBeTruthy();
@@ -345,9 +361,22 @@ describe('HomePage on a phone', () => {
   it('does not navigate when another card is opened', () => {
     renderHome();
 
-    fireEvent.click(screen.getByRole('button', { name: /Letras/ }));
+    fireEvent.click(screen.getByRole('button', { name: /^Letras/ }));
 
-    expect(screen.getByRole('button', { name: /Letras/, expanded: true })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /^Letras/, expanded: true })).toBeTruthy();
     expect(screen.queryByText('Página de Cifras')).toBeNull();
+    expect(screen.queryByText('Página de Letras')).toBeNull();
+  });
+
+  it('grows the Letras card of the list and opens /letras', () => {
+    vi.useFakeTimers({ toFake: ['Date', 'setTimeout', 'clearTimeout'] });
+    renderHome();
+    fireEvent.click(screen.getByRole('button', { name: /^Letras/ }));
+
+    fireEvent.click(playButton('Letras'));
+
+    expect(screen.getByTestId('grow').dataset.game).toBe('Letras');
+    act(() => vi.advanceTimersByTime(500));
+    expect(screen.getByText('Página de Letras')).toBeTruthy();
   });
 });

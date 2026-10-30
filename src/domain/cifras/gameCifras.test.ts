@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { gameReducer, initialState } from './game';
-import type { Challenge, GameState, Operator } from './types';
+import { gameReducer, initialState } from './gameCifras';
+import type { Challenge, GameState, Operator } from './typesCifras';
 
 const challenge: Challenge = { numbers: [100, 75, 50, 25, 8, 3], target: 325 };
 
