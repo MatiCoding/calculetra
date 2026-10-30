@@ -6,6 +6,12 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-30
+
+### Added
+- Letras: a new daily letters challenge at `/letras`. You get nine letters (three to five of them vowels), the same for everyone, and build the longest Spanish word you can. You only get one answer: one point per letter if the word is in the dictionary, 18 if it uses all nine, and 0 if it is not. You can click or type the letters, delete with Backspace and send with Enter.
+- The Letras card on the home page now opens the game.
+
 ## [0.3.0] - 2026-10-29
 
 ### Added
@@ -64,7 +70,8 @@ First playable version.
 - 404 page for unknown addresses.
 - Documentation website with the game rules, the architecture and the technical decisions.
 
-[Unreleased]: https://github.com/MatiCoding/calculetra/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/MatiCoding/calculetra/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/MatiCoding/calculetra/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/MatiCoding/calculetra/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/MatiCoding/calculetra/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/MatiCoding/calculetra/compare/v0.1.3...v0.2.0
