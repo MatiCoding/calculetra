@@ -27,7 +27,7 @@ A daily numbers-and-letters puzzle inspired by the Spanish TV show *Cifras y Let
 | **Cifras** (numbers): a new challenge every day, with undo, reset and a score | ✅ Playable |
 | **Accounts**: sign up, log in and log out with email and password | ✅ Available |
 | Saving your results, daily leaderboard and personal stats | 🗓️ Planned |
-| **Letras** (letters) | 🗓️ Coming soon |
+| **Letras** (letters): nine new letters every day to build the longest word | ✅ Playable |
 
 You can play without an account. For now an account only lets you log in: results are not saved yet.
 
@@ -41,7 +41,9 @@ The full rules (how the challenge is generated, which operations are allowed and
 
 ### Letras
 
-Coming soon.
+You get nine letters (between three and five of them vowels). Build the longest Spanish word you can with them: each letter can be used once, and the word needs at least three letters. Accents do not matter. You only get one answer: if the word is in the dictionary you score one point per letter, and a word with all nine letters scores 18. If it is not, you score 0.
+
+You can click the letters or type them, delete with Backspace and send with Enter. The dictionary is explained in [ADR 0008](docs/decisions/0008-letras-dictionary.md).
 
 ## Tech stack
 
@@ -132,6 +134,7 @@ npm run docs:build # builds the documentation site and fails on broken links
 | Command                | What it does                                              |
 | ---------------------- | --------------------------------------------------------- |
 | `npm run dev`          | Starts the development server with live reload            |
+| `npm run words`        | Builds the Letras dictionary (`public/letras/words.txt`); `dev` and `build` run it first |
 | `npm test`             | Runs the tests once                                       |
 | `npm run test:watch`   | Runs the tests and re-runs them on every change           |
 | `npm run lint`         | Runs ESLint                                               |
@@ -145,7 +148,10 @@ npm run docs:build # builds the documentation site and fails on broken links
 
 ```
 src/
-├── domain/cifras/   # Cifras game logic: challenge, operations, game state, score (plain TypeScript, no React)
+├── domain/          # game logic in plain TypeScript, no React
+│   ├── cifras/      #   Cifras: challenge, operations, game state, score
+│   ├── letras/      #   Letras: daily letters, word checks, dictionary, game state, score
+│   └── shared/      #   seeded random and the date in Madrid, used by both games
 ├── auth/            # accounts; the only folder that knows about Supabase
 │   ├── api/         #   Supabase client and calls (sign up, log in, log out)
 │   ├── context/     #   AuthProvider and the useAuth hook
@@ -154,7 +160,7 @@ src/
 ├── components/      # React components, one folder each (Name.tsx, Name.test.tsx, Name.module.css)
 ├── config/          # feature flags
 ├── hooks/           # React hooks shared by several components
-├── App.tsx          # pages: / (game carousel), /cifras, the account pages and the 404 page
+├── App.tsx          # pages: / (game carousel), /cifras, /letras, the account pages and the 404 page
 ├── Root.tsx         # router, AuthProvider and the "under construction" flag
 ├── main.tsx         # entry point
 └── index.css        # global styles and colour tokens
