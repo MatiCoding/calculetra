@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [ main, developer ]
 
+# One CI run per branch or PR; a new push cancels the outdated one
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
     checks:
         runs-on: ubuntu-latest
