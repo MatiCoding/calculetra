@@ -59,7 +59,7 @@ You can click the letters or type them, delete with Backspace and send with Ente
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org) 22 or later (it comes with npm). Check your version with `node -v`.
+- [Node.js](https://nodejs.org) 24 or later (it comes with npm). Check your version with `node -v`.
 - [Git](https://git-scm.com).
 - A [Supabase](https://supabase.com) project (the free plan is enough), only if you want to run the app locally. See [step 3](#3-set-up-the-environment-variables).
 
@@ -120,7 +120,7 @@ This runs every test file once and shows which tests passed or failed. While you
 
 ### 6. Check your changes before pushing
 
-CI runs these same checks on every push to `developer` and on every pull request, so running them locally first saves you a red build:
+CI runs these same checks as four separate jobs on every push to `developer` and on every pull request, so running them locally first saves you a red build:
 
 ```bash
 npm run lint       # looks for common mistakes and bad practices
