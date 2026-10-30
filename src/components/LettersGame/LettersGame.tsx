@@ -13,6 +13,7 @@ function LettersGame({loadWords = loadDictionary}: Props) {
     const [dictionary, setDictionary] = useState<Set<string> | null>(null);
     const [loadFailed, setLoadFailed] = useState(false);
 
+    // Loads dictionary.
     useEffect(() => {
         let ignore = false;
         loadWords().then((words) => {
@@ -24,6 +25,27 @@ function LettersGame({loadWords = loadDictionary}: Props) {
             ignore = true;
         };
     }, [loadWords]);
+
+    // Physical keyboard: letters, Backspace and Enter.
+    useEffect(() => {
+        function handleKeyDown(event: KeyboardEvent) {
+            if (event.ctrlKey || event.metaKey || event.altKey) return;
+
+            if (event.key === 'Backspace') {
+                event.preventDefault();
+                dispatch({ type: 'removeLast' });
+            } else if (event.key === 'Enter') {
+                // On a focused button, Enter already clicks it.
+                if (event.target instanceof HTMLButtonElement) return;
+                if (dictionary !== null) dispatch({ type: 'submit', dictionary });
+            } else if (event.key.length === 1) {
+                dispatch({ type: 'type', letter: event.key });
+            }
+        }
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [dictionary]);
 
     const word = getWord(state);
     const letters = state.tiles.map((tile) => tile.letter);

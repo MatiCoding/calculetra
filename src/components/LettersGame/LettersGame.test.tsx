@@ -194,4 +194,76 @@ describe('LettersGame', () => {
             expect(isDisabled(button('Enviar'))).toBe(true);
         });
     });
+
+    describe('keyboard', () => {
+        function press(key: string, target: Window | HTMLElement = window) {
+            fireEvent.keyDown(target, { key });
+        }
+
+        it('types the letters of the day', async () => {
+            await renderGame();
+
+            press(letters[4].toLowerCase());
+            press(letters[0]);
+
+            expect(shownWord()).toBe(letters[4] + letters[0]);
+        });
+
+        it('ignores letters that are not available and other keys', async () => {
+            await renderGame();
+            const missing = 'ABCDEFGHIJLMNÑOPQRSTUVXYZ'.split('').find((l) => !letters.includes(l))!;
+
+            press(missing);
+            press('1');
+            press('Shift');
+
+            expect(shownWord()).toBe('');
+        });
+
+        it('ignores shortcuts like Ctrl+R', async () => {
+            await renderGame();
+
+            fireEvent.keyDown(window, { key: letters[0], ctrlKey: true });
+
+            expect(shownWord()).toBe('');
+        });
+
+        it('removes the last letter with Backspace', async () => {
+            await renderGame();
+            press(letters[0]);
+            press(letters[1]);
+
+            press('Backspace');
+
+            expect(shownWord()).toBe(letters[0]);
+        });
+
+        it('sends the word with Enter', async () => {
+            const word = letters.slice(0, 3).join('');
+            await renderGame([word]);
+            letters.slice(0, 3).forEach((letter) => press(letter));
+
+            press('Enter');
+
+            expect(resultValues()).toEqual([word, 'Sí, está en el diccionario', '3', '3']);
+        });
+
+        it('does not send with Enter while the word is too short', async () => {
+            await renderGame();
+            press(letters[0]);
+
+            press('Enter');
+
+            expect(screen.queryByRole('region', { name: 'Resultado' })).toBeNull();
+        });
+
+        it('does not send when Enter is pressed on a focused button', async () => {
+            await renderGame();
+            clickLetters(0, 1, 2);
+
+            press('Enter', button('Borrar todo'));
+
+            expect(screen.queryByRole('region', { name: 'Resultado' })).toBeNull();
+        });
+    });
 });
