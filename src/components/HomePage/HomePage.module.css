@@ -93,7 +93,6 @@
     background: var(--color-letter);
     color: #fff;
     box-shadow: 0 10px 0 #154483;
-    cursor: default;
 }
 
 /* More challenges: a dashed outline of a card. */
@@ -237,6 +236,10 @@
     background: var(--color-number);
     border-radius: 26px;
     animation: grow ease-in-out forwards;
+}
+
+.grow[data-game="Letras"] {
+    background: var(--color-letter);
 }
 
 @keyframes grow {
