@@ -8,19 +8,29 @@ export type AuthUser = {
   email: string
     // false for users who only log in with Google or GitHub.
   hasPassword: boolean
+  providers: LoginMethod[]  // How the user can log in.
+  createdAt: string
+
 }
 
 export type OAuthProvider = 'google' | 'github'
+export type LoginMethod = 'email' | OAuthProvider
+
+const LOGIN_METHODS: string[] = ['email', 'google', 'github']
+
+function isLoginMethod(provider: string): provider is LoginMethod {
+  return LOGIN_METHODS.includes(provider)
+}
 
 function toAuthUser(user: User): AuthUser {
-  // Supabase allows users without email (phone login). We only use email,
-  // so an empty string is enough here.
-  return { 
-    id: user.id, 
-    email: user.email ?? '', 
-    // The providers the user can log in with, the same list the Supabase
-    // dashboard shows. "email" means they have a password.
-    hasPassword: user.app_metadata.providers?.includes('email') ?? false,
+  const providers: string[] = user.app_metadata.providers ?? []
+  return {
+    id: user.id,
+    email: user.email ?? '',
+    hasPassword: providers.includes('email'),
+    // Other providers (phone, ...) are not used in Calculetra.
+    providers: providers.filter(isLoginMethod),
+    createdAt: user.created_at,
   }
 }
 
