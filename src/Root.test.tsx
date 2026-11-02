@@ -87,7 +87,8 @@ describe('Root, deleting the account', () => {
     const { default: Root } = await import('./Root');
     render(<Root />);
 
-    fireEvent.click(await screen.findByRole('button', { name: 'Eliminar cuenta' }));
+    fireEvent.click(await screen.findByRole('tab', { name: 'Eliminar cuenta' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Eliminar cuenta' }));
     fireEvent.change(screen.getByLabelText('Tu correo'), { target: { value: 'ana@example.com' } });
     fireEvent.click(screen.getByRole('button', { name: 'Eliminar definitivamente' }));
 

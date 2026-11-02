@@ -12,12 +12,6 @@
     text-align: center;
 }
 
-.email {
-    margin: 0;
-    color: var(--color-muted);
-    overflow-wrap: anywhere;
-}
-
 .section {
     background: var(--color-card);
     color: var(--color-text);
@@ -32,4 +26,22 @@
 .note {
     margin: 0;
     color: var(--color-muted);
+}
+
+.tabs {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+}
+
+.tabs button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.tabs button[aria-selected="true"] {
+    font-weight: 700;
+    color: var(--color-accent);
 }
