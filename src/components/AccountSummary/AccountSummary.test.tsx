@@ -17,7 +17,7 @@ describe('AccountSummary', () => {
         render(<AccountSummary user={fakeUser()} />)
 
         const stats = screen.getAllByRole('listitem').map((item) => item.textContent)
-        expect(stats).toEqual(['–Retos jugados', '–Racha', '–Mejor puntuación'])
+        expect(stats).toEqual(['-Retos jugados', '-Racha', '-Mejor puntuación'])
     })
 
     it('says that the stats are not there yet', () => {

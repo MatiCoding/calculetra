@@ -42,4 +42,11 @@ describe('ProfileCard', () => {
 
         expect(screen.getByText('Miembro desde octubre de 2026')).toBeTruthy()
     })
+
+    it('shows an icon for each way of logging in', () => {
+        render(<ProfileCard user={fakeUser({ providers: ['email', 'google'] })} />)
+
+        const chip = screen.getByText('Entras con correo y contraseña o Google')
+        expect(chip.querySelectorAll('svg')).toHaveLength(2)
+    })
 })

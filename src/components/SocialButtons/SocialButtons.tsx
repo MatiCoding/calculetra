@@ -4,6 +4,7 @@ import { SOCIAL_PROVIDERS } from './socialProviders'
 import styles from './SocialButtons.module.css'
 import {useAuth} from '../../auth/context/useAuth';
 import type { OAuthProvider } from '../../auth/api/auth';
+import ProviderLogo from './ProviderLogo';
 
 type SocialButtonsProps = {
     // The text of the line under the buttons, e.g. "o entra con tu email".
@@ -42,9 +43,7 @@ function SocialButtons({ dividerText }: SocialButtonsProps) {
                         onClick={() => handleClick(provider.id)}
                         disabled={pending}
                     >
-                        <svg viewBox="0 0 24 24" aria-hidden="true">
-                            <path fill={provider.color} d={provider.path} />
-                        </svg>
+                        <ProviderLogo provider={provider.id} />
                         {provider.name}
                     </button>
                 ))}
