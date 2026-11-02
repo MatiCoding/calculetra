@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router';
+import { MemoryRouter, useLocation } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AuthContextValue } from '../../auth/context/AuthContext';
 import AccountPage from './AccountPage';
@@ -15,13 +15,25 @@ vi.mock('../../auth/context/useAuth', () => ({
     useAuth: () => auth,
 }));
 
-// DeleteAccountForm uses useNavigate, which needs a router.
-function renderPage() {
+// Shows the current URL, so the tests can check the ?tab= part.
+function ShowLocation() {
+    const location = useLocation();
+    return <p data-testid="location">{location.pathname + location.search}</p>;
+}
+
+// The page reads the tab from the URL and DeleteAccountForm uses
+// useNavigate, so it needs a router.
+function renderPage(url = '/account') {
     render(
-        <MemoryRouter>
+        <MemoryRouter initialEntries={[url]}>
             <AccountPage />
+            <ShowLocation />
         </MemoryRouter>,
     );
+}
+
+function currentUrl() {
+    return screen.getByTestId('location').textContent;
 }
 
 function tabNames() {
@@ -206,6 +218,56 @@ describe('AccountPage', () => {
             fireEvent.keyDown(screen.getByRole('tab', { name: 'Resumen' }), { key: 'a' });
 
             expect(selectedTab()).toBe('Resumen');
+        });
+    });
+
+    describe('the tab in the URL', () => {
+        function selectedTab() {
+            return screen.getByRole('tab', { selected: true }).textContent;
+        }
+
+        it('opens the tab in ?tab=', () => {
+            renderPage('/account?tab=correo');
+
+            expect(selectedTab()).toBe('Correo');
+            expect(screen.getByLabelText('Correo nuevo')).toBeTruthy();
+        });
+
+        it('opens Resumen when the tab in ?tab= does not exist', () => {
+            renderPage('/account?tab=nope');
+
+            expect(selectedTab()).toBe('Resumen');
+        });
+
+        it('opens Resumen when the user does not have that tab', () => {
+            auth.user = fakeUser({ hasPassword: false, providers: ['google'] });
+            renderPage('/account?tab=contrasena');
+
+            expect(selectedTab()).toBe('Resumen');
+        });
+
+        it('puts the selected tab in the URL', () => {
+            renderPage();
+
+            fireEvent.click(screen.getByRole('tab', { name: 'Eliminar cuenta' }));
+
+            expect(currentUrl()).toBe('/account?tab=eliminar');
+        });
+
+        it('leaves the URL plain for Resumen', () => {
+            renderPage('/account?tab=correo');
+
+            fireEvent.click(screen.getByRole('tab', { name: 'Resumen' }));
+
+            expect(currentUrl()).toBe('/account');
+        });
+
+        it('also changes the URL with the arrow keys', () => {
+            renderPage();
+
+            fireEvent.keyDown(screen.getByRole('tab', { name: 'Resumen' }), { key: 'ArrowRight' });
+
+            expect(currentUrl()).toBe('/account?tab=contrasena');
         });
     });
 });

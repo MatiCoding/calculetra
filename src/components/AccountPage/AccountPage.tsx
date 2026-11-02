@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import type { KeyboardEvent } from 'react';
+import { useSearchParams } from 'react-router';
 import {useAuth} from '../../auth/context/useAuth';
 import styles from './AccountPage.module.css';
 import NewPasswordForm from '../NewPasswordForm/NewPasswordForm';
@@ -6,7 +7,6 @@ import ChangeEmailForm from '../ChangeEmailForm/ChangeEmailForm';
 import DeleteAccountForm from '../DeleteAccountForm/DeleteAccountForm';
 import ProfileCard from '../ProfileCard/ProfileCard';
 import AccountIcon, { type AccountIconName } from '../AccountIcon/AccountIcon';
-import type { KeyboardEvent } from 'react';
 
 type TabId = 'resumen' | 'contrasena' | 'correo' | 'eliminar';
 
@@ -28,16 +28,19 @@ function tabsFor(hasPassword: boolean): Tab[] {
 }
 
 function AccountPage() {
-    // RequireAuth only shows this page when there is a user but TypeScript does not know that,
-    // so users can still be null here.
     const {user} = useAuth();
-    const [selected, setSelected] = useState<TabId>('resumen');
+    const [searchParams, setSearchParams] = useSearchParams();
 
     const tabs = tabsFor(user?.hasPassword ?? false);
+    const selected: TabId = tabs.find((tab) => tab.id === searchParams.get('tab'))?.id ?? 'resumen';
+
+    function select(tab: Tab) {
+        setSearchParams(tab.id === 'resumen' ? {} : { tab: tab.id }, { replace: true });
+    }
 
     function selectAndFocus(tab: Tab) {
-    setSelected(tab.id);
-    document.getElementById(`tab-${tab.id}`)?.focus();
+        select(tab);
+        document.getElementById(`tab-${tab.id}`)?.focus();
     }
 
     function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
@@ -73,8 +76,8 @@ function AccountPage() {
                         id={`tab-${tab.id}`}
                         aria-selected={tab.id === selected}
                         aria-controls={`panel-${tab.id}`}
-                        onClick={() => setSelected(tab.id)}
                         tabIndex={tab.id === selected ? 0 : -1}
+                        onClick={() => select(tab)}
                     >
                         <AccountIcon name={tab.icon} />
                         {tab.label}
