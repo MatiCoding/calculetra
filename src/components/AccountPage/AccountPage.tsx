@@ -8,6 +8,7 @@ import DeleteAccountForm from '../DeleteAccountForm/DeleteAccountForm';
 import ProfileCard from '../ProfileCard/ProfileCard';
 import BackToGames from '../BackToGames/BackToGames';
 import AccountIcon, { type AccountIconName } from '../AccountIcon/AccountIcon';
+import AccountSummary from '../AccountSummary/AccountSummary';
 
 type TabId = 'resumen' | 'contrasena' | 'correo' | 'eliminar';
 
@@ -98,16 +99,8 @@ function AccountPage() {
                     aria-labelledby={`tab-${selected}`}
                     className={selected === 'eliminar' ? `${styles.panel} ${styles.danger}` : styles.panel}
                 >
-                    {selected === 'resumen' && (
-                        <>
-                            <h3>Resumen</h3>
-                            {!user?.hasPassword && (
-                                <p className={styles.note}>
-                                    Entras con tu cuenta de Google o GitHub, así que no tienes contraseña en Calculetra y tu correo es el de esa cuenta.
-                                </p>
-                            )}
-                        </>
-                    )}
+                    {selected === 'resumen' && user && <AccountSummary user={user} />}
+                    
                     {selected === 'contrasena' && (
                         <>
                             <h3>Cambiar contraseña</h3>
