@@ -48,3 +48,16 @@
     font-size: 0.8rem;
     color: #5a4206;
 }
+
+/* In a narrow column (the left column of the account page on a computer),
+   the tile goes on top so the email has the whole width. */
+@container (max-width: 320px) {
+    .card {
+        grid-template-columns: 1fr;
+    }
+
+    .tile {
+        grid-row: auto;
+        margin-bottom: 8px;
+    }
+}
