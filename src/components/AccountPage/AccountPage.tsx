@@ -6,6 +6,7 @@ import NewPasswordForm from '../NewPasswordForm/NewPasswordForm';
 import ChangeEmailForm from '../ChangeEmailForm/ChangeEmailForm';
 import DeleteAccountForm from '../DeleteAccountForm/DeleteAccountForm';
 import ProfileCard from '../ProfileCard/ProfileCard';
+import BackToGames from '../BackToGames/BackToGames';
 import AccountIcon, { type AccountIconName } from '../AccountIcon/AccountIcon';
 
 type TabId = 'resumen' | 'contrasena' | 'correo' | 'eliminar';
@@ -64,62 +65,69 @@ function AccountPage() {
 
     return (
         <div className={styles.account}>
+            <BackToGames />
             <h2>Mi cuenta</h2>
-            {user && <ProfileCard user={user} />}
 
-            <div role="tablist" aria-label="Opciones de la cuenta" className={styles.tabs} onKeyDown={handleKeyDown}>
-                {tabs.map((tab) => (
-                    <button
-                        key={tab.id}
-                        type="button"
-                        role="tab"
-                        id={`tab-${tab.id}`}
-                        aria-selected={tab.id === selected}
-                        aria-controls={`panel-${tab.id}`}
-                        tabIndex={tab.id === selected ? 0 : -1}
-                        onClick={() => select(tab)}
-                    >
-                        <AccountIcon name={tab.icon} />
-                        {tab.label}
-                    </button>
-                ))}
+            <div className={styles.layout}>
+                <div className={styles.side}>
+                    {user && <ProfileCard user={user} />}
+
+                    <div role="tablist" aria-label="Opciones de la cuenta" className={styles.tabs} onKeyDown={handleKeyDown}>
+                        {tabs.map((tab) => (
+                            <button
+                                key={tab.id}
+                                type="button"
+                                role="tab"
+                                id={`tab-${tab.id}`}
+                                aria-selected={tab.id === selected}
+                                aria-controls={`panel-${tab.id}`}
+                                tabIndex={tab.id === selected ? 0 : -1}
+                                onClick={() => select(tab)}
+                                className={tab.id === 'eliminar' ? styles.dangerTab : undefined}
+                            >
+                                <AccountIcon name={tab.icon} />
+                                {tab.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                <section
+                    role="tabpanel"
+                    id={`panel-${selected}`}
+                    aria-labelledby={`tab-${selected}`}
+                    className={selected === 'eliminar' ? `${styles.panel} ${styles.danger}` : styles.panel}
+                >
+                    {selected === 'resumen' && (
+                        <>
+                            <h3>Resumen</h3>
+                            {!user?.hasPassword && (
+                                <p className={styles.note}>
+                                    Entras con tu cuenta de Google o GitHub, así que no tienes contraseña en Calculetra y tu correo es el de esa cuenta.
+                                </p>
+                            )}
+                        </>
+                    )}
+                    {selected === 'contrasena' && (
+                        <>
+                            <h3>Cambiar contraseña</h3>
+                            <NewPasswordForm askCurrentPassword />
+                        </>
+                    )}
+                    {selected === 'correo' && (
+                        <>
+                            <h3>Cambiar correo</h3>
+                            <ChangeEmailForm />
+                        </>
+                    )}
+                    {selected === 'eliminar' && (
+                        <>
+                            <h3>Eliminar cuenta</h3>
+                            <DeleteAccountForm />
+                        </>
+                    )}
+                </section>
             </div>
-
-            <section
-                role="tabpanel"
-                id={`panel-${selected}`}
-                aria-labelledby={`tab-${selected}`}
-                className={styles.section}
-            >
-                {selected === 'resumen' && (
-                    <>
-                        <h3>Resumen</h3>
-                        {!user?.hasPassword && (
-                            <p className={styles.note}>
-                                Entras con tu cuenta de Google o GitHub, así que no tienes contraseña en Calculetra y tu correo es el de esa cuenta.
-                            </p>
-                        )}
-                    </>
-                )}
-                {selected === 'contrasena' && (
-                    <>
-                        <h3>Cambiar contraseña</h3>
-                        <NewPasswordForm askCurrentPassword />
-                    </>
-                )}
-                {selected === 'correo' && (
-                    <>
-                        <h3>Cambiar correo</h3>
-                        <ChangeEmailForm />
-                    </>
-                )}
-                {selected === 'eliminar' && (
-                    <>
-                        <h3>Eliminar cuenta</h3>
-                        <DeleteAccountForm />
-                    </>
-                )}
-            </section>
         </div>
     );
 }
