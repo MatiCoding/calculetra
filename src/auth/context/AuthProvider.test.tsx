@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { getCurrentUser, onAuthChange, logInWithProvider, type AuthUser } from '../api/auth'
 import { AuthProvider } from './AuthProvider'
 import { useAuth } from './useAuth'
+import { fakeUser } from '../../test/fakeUser'
 
 vi.mock('../api/auth', () => ({
   getCurrentUser: vi.fn(),
@@ -25,7 +26,7 @@ function ShowUser() {
   return <p>{user ? user.email : 'nobody'}</p>
 }
 
-const userT: AuthUser = { id: '1', email: 'userT@example.com', hasPassword: true }
+const userT: AuthUser = fakeUser({email: 'userT@example.com'})
 
 describe('AuthProvider', () => {
   beforeEach(() => {

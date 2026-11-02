@@ -4,6 +4,7 @@ import { MemoryRouter } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AuthContextValue } from '../../auth/context/AuthContext';
 import AccountPage from './AccountPage';
+import { fakeUser } from '../../test/fakeUser';
 
 // Each test can change `auth.user` before rendering.
 const { auth } = vi.hoisted(() => ({
@@ -25,7 +26,7 @@ function renderPage() {
 
 describe('AccountPage', () => {
     beforeEach(() => {
-        auth.user = { id: '1', email: 'ana@example.com', hasPassword: true };
+        auth.user = fakeUser();
         auth.loading = false;
         auth.updatePassword = vi.fn();
         auth.changeEmail = vi.fn();
@@ -73,7 +74,7 @@ describe('AccountPage', () => {
 
     describe('for a user who only logs in with a provider', () => {
         beforeEach(() => {
-            auth.user = { id: '1', email: 'ana@gmail.com', hasPassword: false };
+            auth.user = fakeUser({email: 'ana@gmail.com', hasPassword: false, providers: ['google']});
         });
 
         it('hides changing the password and the email', () => {

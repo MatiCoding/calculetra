@@ -4,6 +4,7 @@ import { MemoryRouter } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AuthContextValue } from '../../auth/context/AuthContext';
 import ResetPasswordPage from './ResetPasswordPage';
+import { fakeUser } from '../../test/fakeUser';
 
 // Same trick as in RequireAuth.test.tsx: each test changes `auth` first.
 const { auth } = vi.hoisted(() => ({
@@ -32,7 +33,7 @@ describe('ResetPasswordPage', () => {
     afterEach(cleanup);
 
     it('shows the form when the link has logged the user in', () => {
-        auth.user = { id: '1', email: 'ana@example.com', hasPassword: true };
+        auth.user = fakeUser();
 
         renderPage();
 
