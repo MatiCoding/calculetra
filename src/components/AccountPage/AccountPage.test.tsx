@@ -141,4 +141,71 @@ describe('AccountPage', () => {
             expect(screen.queryByText(/no tienes contraseña en Calculetra/)).toBeNull();
         });
     });
+
+    describe('with the keyboard', () => {
+        function selectedTab() {
+            return screen.getByRole('tab', { selected: true }).textContent;
+        }
+
+        it('only lets Tab reach the selected tab', () => {
+            renderPage();
+
+            expect(screen.getByRole('tab', { name: 'Resumen' }).tabIndex).toBe(0);
+            expect(screen.getByRole('tab', { name: 'Contraseña' }).tabIndex).toBe(-1);
+        });
+
+        it('selects and focuses the next tab with the right arrow', () => {
+            renderPage();
+
+            fireEvent.keyDown(screen.getByRole('tab', { name: 'Resumen' }), { key: 'ArrowRight' });
+
+            expect(selectedTab()).toBe('Contraseña');
+            expect(document.activeElement).toBe(screen.getByRole('tab', { name: 'Contraseña' }));
+            expect(screen.getByRole('tab', { name: 'Contraseña' }).tabIndex).toBe(0);
+        });
+
+        it('goes back to the first tab after the last one', () => {
+            renderPage();
+
+            fireEvent.click(screen.getByRole('tab', { name: 'Eliminar cuenta' }));
+            fireEvent.keyDown(screen.getByRole('tab', { name: 'Eliminar cuenta' }), { key: 'ArrowRight' });
+
+            expect(selectedTab()).toBe('Resumen');
+        });
+
+        it('selects the previous tab with the left arrow, going round at the start', () => {
+            renderPage();
+
+            fireEvent.keyDown(screen.getByRole('tab', { name: 'Resumen' }), { key: 'ArrowLeft' });
+
+            expect(selectedTab()).toBe('Eliminar cuenta');
+        });
+
+        it('selects the first tab with Home and the last one with End', () => {
+            renderPage();
+
+            fireEvent.keyDown(screen.getByRole('tab', { name: 'Resumen' }), { key: 'End' });
+            expect(selectedTab()).toBe('Eliminar cuenta');
+
+            fireEvent.keyDown(screen.getByRole('tab', { name: 'Eliminar cuenta' }), { key: 'Home' });
+            expect(selectedTab()).toBe('Resumen');
+        });
+
+        it('only moves between the tabs the user has', () => {
+            auth.user = fakeUser({ hasPassword: false, providers: ['github'] });
+            renderPage();
+
+            fireEvent.keyDown(screen.getByRole('tab', { name: 'Resumen' }), { key: 'ArrowRight' });
+
+            expect(selectedTab()).toBe('Eliminar cuenta');
+        });
+
+        it('does nothing with other keys', () => {
+            renderPage();
+
+            fireEvent.keyDown(screen.getByRole('tab', { name: 'Resumen' }), { key: 'a' });
+
+            expect(selectedTab()).toBe('Resumen');
+        });
+    });
 });

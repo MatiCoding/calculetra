@@ -6,6 +6,7 @@ import ChangeEmailForm from '../ChangeEmailForm/ChangeEmailForm';
 import DeleteAccountForm from '../DeleteAccountForm/DeleteAccountForm';
 import ProfileCard from '../ProfileCard/ProfileCard';
 import AccountIcon, { type AccountIconName } from '../AccountIcon/AccountIcon';
+import type { KeyboardEvent } from 'react';
 
 type TabId = 'resumen' | 'contrasena' | 'correo' | 'eliminar';
 
@@ -34,12 +35,36 @@ function AccountPage() {
 
     const tabs = tabsFor(user?.hasPassword ?? false);
 
+    function selectAndFocus(tab: Tab) {
+    setSelected(tab.id);
+    document.getElementById(`tab-${tab.id}`)?.focus();
+    }
+
+    function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+        const index = tabs.findIndex((tab) => tab.id === selected);
+        const last = tabs.length - 1;
+
+        if (event.key === 'ArrowRight') {
+            selectAndFocus(tabs[index === last ? 0 : index + 1]);
+        } else if (event.key === 'ArrowLeft') {
+            selectAndFocus(tabs[index === 0 ? last : index - 1]);
+        } else if (event.key === 'Home') {
+            selectAndFocus(tabs[0]);
+        } else if (event.key === 'End') {
+            selectAndFocus(tabs[last]);
+        } else {
+            return;
+        }
+        // The page must not scroll with the arrow, Home or End keys.
+        event.preventDefault();
+    }
+
     return (
         <div className={styles.account}>
             <h2>Mi cuenta</h2>
             {user && <ProfileCard user={user} />}
 
-            <div role="tablist" aria-label="Opciones de la cuenta" className={styles.tabs}>
+            <div role="tablist" aria-label="Opciones de la cuenta" className={styles.tabs} onKeyDown={handleKeyDown}>
                 {tabs.map((tab) => (
                     <button
                         key={tab.id}
@@ -49,6 +74,7 @@ function AccountPage() {
                         aria-selected={tab.id === selected}
                         aria-controls={`panel-${tab.id}`}
                         onClick={() => setSelected(tab.id)}
+                        tabIndex={tab.id === selected ? 0 : -1}
                     >
                         <AccountIcon name={tab.icon} />
                         {tab.label}
