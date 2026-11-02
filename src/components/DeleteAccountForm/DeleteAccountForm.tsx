@@ -4,6 +4,7 @@ import { useAuth } from '../../auth/context/useAuth';
 
 import formStyles from '../AuthForm.module.css';
 import styles from './DeleteAccountForm.module.css';
+import buttons from '../buttons.module.css';
 
 // Supabase saves emails in lower case, so "Ana@Example.com" is the same email.
 function normalize(email: string): string {
@@ -58,7 +59,7 @@ function DeleteAccountForm() {
         return (
             <>
                 <p>Se borrará tu cuenta para siempre y no podrás volver a entrar con ella.</p>
-                <button type="button" className={styles.danger} onClick={() => setConfirming(true)}>
+                <button type="button" className={buttons.danger} onClick={() => setConfirming(true)}>
                     Eliminar cuenta
                 </button>
             </>
@@ -82,8 +83,8 @@ function DeleteAccountForm() {
             {error && <p role="alert" className={formStyles.error}>{error}</p>}
 
             <div className={styles.actions}>
-                <button type="button" onClick={cancel} disabled={submitting}>Cancelar</button>
-                <button type="submit" className={styles.danger} disabled={submitting}>
+                <button type="button" onClick={cancel} disabled={submitting} className={buttons.secondary}>Cancelar</button>
+                <button type="submit" className={buttons.danger} disabled={submitting}>
                     Eliminar definitivamente
                 </button>
             </div>

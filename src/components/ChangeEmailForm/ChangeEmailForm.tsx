@@ -4,6 +4,7 @@ import { getChangeEmailErrorMessage } from '../../auth/email/emailErrors';
 import { validateNewEmail } from '../../auth/email/validateNewEmail';
 
 import styles from '../AuthForm.module.css';
+import buttons from '../buttons.module.css';
 
 // Asks Supabase to change the email of the logged-in user. The email does not
 // change here: Supabase sends confirmation links and changes it when they are
@@ -58,7 +59,7 @@ function ChangeEmailForm() {
                     El correo cambiará cuando abras los dos enlaces.
                 </p>
             )}
-            <button type="submit" disabled={submitting}>Cambiar correo</button>
+            <button type="submit" disabled={submitting} className={buttons.primary}>Cambiar correo</button>
         </form>
     );
 }

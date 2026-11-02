@@ -12,7 +12,7 @@
 }
 
 .account h2 {
-    text-align: center;
+    margin: 0 0 16px;
 }
 
 .layout {
@@ -76,7 +76,7 @@
     color: var(--color-danger);
 }
 
-.tabs .dangerTab [aria-selected="true"]{
+.tabs .dangerTab[aria-selected="true"]{
     background: #fbe9e7;
     color: var(--color-danger);
 }
@@ -94,6 +94,38 @@
     font-size: 1.3rem;
 }
 
+.panel form {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    gap: 6px;
+}
+
+.panel form label {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.panel form input {
+    padding: 10px 12px;
+    border: 1px solid #cfcabd;
+    border-radius: 8px;
+    background: #fff;
+    font: inherit;
+}
+
+.panel form input:focus {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 1px;
+    border-color: var(--color-accent);
+}
+
+.panel form > button[type="submit"] {
+    align-self: flex-end;
+    margin-top: 8px;
+}
+
+
 .danger {
     border: 2px solid #efc3be;
 }
@@ -104,7 +136,7 @@
 
 .note {
     margin: 0;
-    color: var(--color-danger);
+    color: var(--color-muted);
 }
 
 @media (max-width: 760px) {
