@@ -7,7 +7,7 @@
     display: grid;
     grid-template-columns: auto 1fr;
     column-gap: 16px;
-    row-gap: 6px;
+    row-gap: 10px;
     align-items: center;
     text-align: left;
 }
@@ -39,6 +39,7 @@
     align-items: center;
     gap: 4px;
     margin: 0;
+    margin-left: -4px;
     padding: 4px 10px;
     background: #fff;
     border-radius: 12px;
@@ -54,6 +55,7 @@
     display: block;
     width: 14px;
     height: 14px;
+    translate: 0 1px;
 }
 
 .since {
