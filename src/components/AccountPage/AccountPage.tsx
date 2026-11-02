@@ -3,6 +3,7 @@ import styles from './AccountPage.module.css';
 import NewPasswordForm from '../NewPasswordForm/NewPasswordForm';
 import ChangeEmailForm from '../ChangeEmailForm/ChangeEmailForm';
 import DeleteAccountForm from '../DeleteAccountForm/DeleteAccountForm';
+import ProfileCard from '../ProfileCard/ProfileCard';
 
 function AccountPage() {
     // RequireAuth only shows this page when there is a user but TypeScript does not know that,
@@ -12,7 +13,7 @@ function AccountPage() {
     return (
         <div className={styles.account}>
             <h2>Mi cuenta</h2>
-            <p className={styles.email}>Correo: {user?.email}</p>
+            {user && <ProfileCard user={user} />}
 
             {user?.hasPassword ? (
                 <>

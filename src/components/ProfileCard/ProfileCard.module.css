@@ -1,0 +1,50 @@
+.card {
+    background: var(--color-number);
+    color: var(--color-text);
+    border-radius: 18px;
+    padding: 20px;
+    box-shadow: 0 5px 0 #b97f0f;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 16px;
+    row-gap: 6px;
+    align-items: center;
+    text-align: left;
+}
+
+.tile {
+    grid-row: span 3;
+    width: 58px;
+    height: 58px;
+    display: grid;
+    place-items: center;
+    background: #fff;
+    color: var(--color-letter);
+    font-size: 1.8rem;
+    font-weight: 800;
+    border-radius: 12px;
+    box-shadow: 0 4px 0 #c7d4e6;
+    transform: rotate(-4deg);
+}
+
+.email {
+    margin: 0;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.chip {
+    justify-self: start;
+    margin: 0;
+    padding: 4px 10px;
+    background: #fff;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.since {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #5a4206;
+}
