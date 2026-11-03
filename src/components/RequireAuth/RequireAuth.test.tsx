@@ -4,6 +4,7 @@ import { MemoryRouter, Route, Routes } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AuthContextValue } from '../../auth/context/AuthContext';
 import RequireAuth from './RequireAuth';
+import { fakeUser } from '../../test/fakeUser';
 
 // Each test changes `auth` before rendering, so the fake useAuth returns the
 // state that test needs (loading, logged in or logged out).
@@ -55,7 +56,7 @@ describe('RequireAuth', () => {
     });
 
     it('shows the page to a logged-in user', () => {
-        auth.user = { id: '1', email: 'ana@example.com', hasPassword: true };
+        auth.user = fakeUser();
 
         renderAccount();
 

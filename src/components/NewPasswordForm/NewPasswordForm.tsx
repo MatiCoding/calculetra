@@ -4,6 +4,7 @@ import { getNewPasswordErrorMessage } from '../../auth/password/passwordErrors';
 import { validateNewPassword } from '../../auth/password/validateNewPassword';
 
 import styles from '../AuthForm.module.css';
+import buttons from '../buttons.module.css';
 
 type NewPasswordFormProps = {
     askCurrentPassword?: boolean;
@@ -88,7 +89,7 @@ function NewPasswordForm({ askCurrentPassword = false }: NewPasswordFormProps) {
 
             {error && <p role="alert" className={styles.error}>{error}</p>}
             {saved && <p role="status">Tu contraseña se ha cambiado.</p>}
-            <button type="submit" disabled={submitting}>Guardar contraseña</button>
+            <button type="submit" disabled={submitting} className={buttons.primary}>Guardar contraseña</button>
         </form>
     );
 }

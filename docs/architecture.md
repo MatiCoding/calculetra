@@ -6,7 +6,7 @@ It follows a reduced version of the [arc42](https://arc42.org) template: only th
 
 ## 1. Introduction and goals
 
-Calculetra is a daily puzzle inspired by the Spanish TV show *Cifras y Letras*. Every day there is one numbers challenge (**Cifras**) and one letters challenge (**Letras**), the same for every player. Players can create an account and log in. The home page (`/`) shows the number of today's challenge and the games: in a carousel on wide screens, and on phones in a list that opens one card at a time; Cifras is played at `/cifras` and Letras at `/letras`. The rules of the game are in [`docs/rules/cifras.md`](rules/cifras.md).
+Calculetra is a daily puzzle inspired by the Spanish TV show *Cifras y Letras*. Every day there is one numbers challenge (**Cifras**) and one letters challenge (**Letras**), the same for every player. Players can create an account and log in. The home page (`/`) shows the number of today's challenge and the games: in a carousel on wide screens, and on phones in a list that opens one card at a time; Cifras is played at `/cifras` and Letras at `/letras`. The account page `/account` shows a profile card and the account options in tabs. The rules of the game are in [`docs/rules/cifras.md`](rules/cifras.md).
 
 ### Quality goals
 
@@ -80,11 +80,11 @@ flowchart TD
 | Block | Responsibility | Depends on |
 | --- | --- | --- |
 | `main.tsx`, `Root.tsx`, `App.tsx` | Start React, choose between the "under construction" page and the app, set up the router and the `AuthProvider`, and define the routes (`/` with the game carousel, `/cifras`, `/letras`, `/signup`, `/login`, `/account`, `/forgot-password`, `/reset-password`, `/privacy`, 404). | `components`, `auth/context`, `config` |
-| `components/` | One folder per component with its `.tsx`, CSS Module and test. `HomePage` shows the Letras, Cifras and Más retos cards in a carousel, or with `GameList` as a list that opens one card at a time on phones; `FloatingTiles` draws the number and letter tiles behind it; `NumbersGame` and `LettersGame` are the games and `BackToGames` the link back to the home page; `Header`, `SignUpForm`, `LogInForm`, `AccountPage`, `ForgotPasswordForm`, `ResetPasswordPage`, `NewPasswordForm`, `ChangeEmailForm` and `DeleteAccountForm` use the account; `NoticeDialog` shows, in a dialog, a message left by another page. | `domain`, `auth` |
+| `components/` | One folder per component with its `.tsx`, CSS Module and test. `HomePage` shows the Letras, Cifras and Más retos cards in a carousel, or with `GameList` as a list that opens one card at a time on phones; `FloatingTiles` draws the number and letter tiles behind it; `NumbersGame` and `LettersGame` are the games and `BackToGames` the link back to the home page; `Header`, `SignUpForm`, `LogInForm`, `AccountPage` (with ProfileCard, AccountSummary and the AccountIcon icons, in tabs), `ForgotPasswordForm`, `ResetPasswordPage`, `NewPasswordForm`, `ChangeEmailForm` and `DeleteAccountForm` use the account; `NoticeDialog` shows, in a dialog, a message left by another page. `ProviderLogo` draws the Google and GitHub logos for `SocialButtons` and the profile card. | `domain`, `auth` |
 | `domain/cifras/` | Challenge generation and number, operations, game reducer and score. | `domain/shared` |
 | `domain/letras/` | Daily letters from weighted bags, word checks (normalize, can it be built, can it be sent), dictionary loading, game reducer and score. | `domain/shared` |
 | `domain/shared/` | The seeded random (`hashString`, `createRandom`) and `getDateKey`, the date in Madrid. | Nothing |
-| `auth/api/` | The Supabase client and the functions `signUp`, `logIn`, `logOut`, `resetPassword`, `updatePassword`, `changeEmail`, `deleteAccount`, `getCurrentUser` and `onAuthChange`. Turns Supabase's user into `AuthUser`. | `@supabase/supabase-js` |
+| `auth/api/` | The Supabase client and the functions `signUp`, `logIn`, `logOut`, `resetPassword`, `updatePassword`, `changeEmail`, `deleteAccount`, `getCurrentUser` and `onAuthChange`. Turns Supabase's user into `AuthUser` (email, whether it has a password, how it logs in and when it was created). | `@supabase/supabase-js` |
 | `auth/context/` | `AuthProvider` keeps the current user and `useAuth()` gives it to components. | `auth/api` |
 | `auth/signUp/`, `auth/logIn/`, `auth/password/` | Form validation and translating Supabase errors into messages in Spanish. | `@supabase/supabase-js` (only its error helpers) |
 | `config/` | Feature flags read from environment variables. | Nothing |
@@ -102,6 +102,7 @@ The arrow from `auth/signUp`, `auth/logIn` and `auth/password` to Supabase is no
 - `tests/production-build.test.ts` builds the app and checks that the feature flag ships only the right page.
 - CI (GitHub Actions, `.github/workflows/ci.yml`) runs `npm run lint`, `npm test` and `npm run build` on every push to `developer` and on every pull request to `main`.
 - jsdom has no `matchMedia`. Tests that need it call `fakeMatchMedia` from `src/test/`, with `true` or `false` for every query, or with a function that answers each query on its own.
+- `src/test/fakeUser.ts` builds an AuthUser for tests; pass only the fields the test cares about.
 
 ### Accessibility
 
@@ -112,10 +113,11 @@ The arrow from `auth/signUp`, `auth/logIn` and `auth/password` to Supabase is no
 - Animations are turned off with `prefers-reduced-motion: reduce`.
 - In the home carousel the dots use `aria-current` for the card in the middle, and the cards that cannot be played yet use `aria-disabled`.
 - In the list of games on phones, each row is a button inside a heading, with `aria-expanded` and `aria-controls`, and the closed cards are `inert`, so their content cannot get the focus.
+- The account page follows the ARIA tabs pattern: `role="tablist"`, `"tab"` and `"tabpanel"`, `aria-selected` and `aria-controls`, only the selected tab can get the focus with Tab, and the arrow keys, Home and End move between tabs.
 
 ### Styling
 
-- Each component has its own [CSS Module](https://github.com/css-modules/css-modules) (`Component.module.css`), so class names do not clash. `auth/signUp`, `auth/logIn` and `auth/password` share `components/AuthForm.module.css`.
+- Each component has its own [CSS Module](https://github.com/css-modules/css-modules) (`Component.module.css`), so class names do not clash. `auth/signUp`, `auth/logIn` and `auth/password` share `components/AuthForm.module.css`; the buttons of the account forms use `components/buttons.module.css`.
 - Global styles and colour tokens (`--color-bg`, `--color-number`, `--color-accent`…) are defined in `src/index.css`. Most components use them; `Header` does not yet.
 - The font is Inter, loaded with `@fontsource-variable/inter`.
 

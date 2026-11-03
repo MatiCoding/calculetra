@@ -3,6 +3,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AuthContextValue } from '../../auth/context/AuthContext';
+import { fakeUser } from '../../test/fakeUser';
 import Header from './Header';
 
 // Each test changes `auth` before rendering, so the fake useAuth returns the
@@ -52,7 +53,7 @@ describe('Header', () => {
     });
 
     it('shows the email and "Cerrar sesión" when someone is logged in', () => {
-        auth.user = { id: '1', email: 'ana@example.com', hasPassword: true };
+        auth.user = fakeUser();
         renderHeader();
 
         expect(screen.getByText('ana@example.com')).toBeTruthy();
@@ -61,7 +62,7 @@ describe('Header', () => {
     });
 
     it('calls logOut when "Cerrar sesión" is clicked', () => {
-        auth.user = { id: '1', email: 'ana@example.com', hasPassword: true };
+        auth.user = fakeUser();
         renderHeader();
 
         fireEvent.click(screen.getByRole('button', { name: 'Cerrar sesión' }));
@@ -70,7 +71,7 @@ describe('Header', () => {
     });
 
     it('links the email to the account page', () => {
-        auth.user = { id: '1', email: 'ana@example.com', hasPassword: true };
+        auth.user = fakeUser();
         renderHeader();
 
         expect(screen.getByRole('link', { name: 'ana@example.com' }).getAttribute('href')).toBe('/account');

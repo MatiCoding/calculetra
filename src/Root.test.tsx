@@ -4,6 +4,7 @@ import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import type { AuthUser } from './auth/api/auth';
 import { fakeMatchMedia } from './test/fakeMatchMedia';
 import { fakeDialog } from './test/fakeDialog';
+import { fakeUser } from './test/fakeUser';
 
 // The game is wrapped in AuthProvider, which would create the real Supabase
 // client. CI has no .env, so we replace the auth module with a fake one.
@@ -74,7 +75,7 @@ describe('Root, deleting the account', () => {
     // After resetModules the fake auth module is created again, so take it now.
     const auth = await import('./auth/api/auth');
     let changeUser: (user: AuthUser | null) => void = () => {};
-    vi.mocked(auth.getCurrentUser).mockResolvedValue({ id: '1', email: 'ana@example.com', hasPassword: true });
+    vi.mocked(auth.getCurrentUser).mockResolvedValue(fakeUser());
     vi.mocked(auth.onAuthChange).mockImplementation((callback) => {
       changeUser = callback;
       return () => {};
@@ -86,7 +87,8 @@ describe('Root, deleting the account', () => {
     const { default: Root } = await import('./Root');
     render(<Root />);
 
-    fireEvent.click(await screen.findByRole('button', { name: 'Eliminar cuenta' }));
+    fireEvent.click(await screen.findByRole('tab', { name: 'Eliminar cuenta' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Eliminar cuenta' }));
     fireEvent.change(screen.getByLabelText('Tu correo'), { target: { value: 'ana@example.com' } });
     fireEvent.click(screen.getByRole('button', { name: 'Eliminar definitivamente' }));
 

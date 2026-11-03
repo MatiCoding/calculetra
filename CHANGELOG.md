@@ -6,6 +6,9 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+- A new account page. A profile card shows your email, how you log in (with its icon) and since when you are a member. The options are now tabs (Resumen, Contraseña, Correo and Eliminar cuenta) instead of three open forms, with the same look as the games. The selected tab is kept in the URL, and you can move between tabs with the arrow keys.
+
 ## [0.4.0] - 2026-10-30
 
 ### Added

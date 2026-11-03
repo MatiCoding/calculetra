@@ -21,8 +21,8 @@ vi.mock('./supabaseClient', () => ({
   },
 }))
 
-const supabaseUser = { id: '1', email: 'a@b.com', app_metadata: {} }
-const authUser = { id: '1', email: 'a@b.com', hasPassword: false }
+const supabaseUser = { id: '1', email: 'a@b.com', app_metadata: {}, created_at: '2026-10-01T09:30:00Z' }
+const authUser = { id: '1', email: 'a@b.com', hasPassword: false, providers: [], createdAt: '2026-10-01T09:30:00Z' }
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -122,7 +122,7 @@ describe('getCurrentUser', () => {
       error: null,
     } as never)
 
-    await expect(getCurrentUser()).resolves.toEqual({ ...authUser, hasPassword: true })
+    await expect(getCurrentUser()).resolves.toEqual({ ...authUser, hasPassword: true, providers: ['email', 'google'] })
   })
 
   it('says that the user has no password when they only log in with providers', async () => {
@@ -131,7 +131,25 @@ describe('getCurrentUser', () => {
       error: null,
     } as never)
 
-    await expect(getCurrentUser()).resolves.toEqual({ ...authUser, hasPassword: false })
+    await expect(getCurrentUser()).resolves.toEqual({ ...authUser, hasPassword: false, providers: ['github'] })
+  })
+
+  it('leaves out the providers that Calculetra does not use', async () => {
+    vi.mocked(supabase.auth.getUser).mockResolvedValue({
+      data: { user: { ...supabaseUser, app_metadata: { providers: ['phone', 'google'] } } },
+      error: null,
+    } as never)
+
+    await expect(getCurrentUser()).resolves.toMatchObject({ providers: ['google'] })
+  })
+
+  it('returns the date the account was created', async () => {
+    vi.mocked(supabase.auth.getUser).mockResolvedValue({
+      data: { user: supabaseUser },
+      error: null,
+    } as never)
+
+    await expect(getCurrentUser()).resolves.toMatchObject({ createdAt: '2026-10-01T09:30:00Z' })
   })
 })
 
