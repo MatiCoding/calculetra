@@ -6,6 +6,14 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-04
+
+### Added
+- A loading screen while your session is restored. When you reload a page that needs an account (like `/account`) or open the reset password link, you see bouncing Cifras tiles with "Cargando…" instead of a blank page. It only appears if loading takes longer than 300 ms, and the tiles stay still if your system asks for reduced motion.
+
+### Changed
+- A new account page. A profile card shows your email, how you log in (with its icon) and since when you are a member. The options are now tabs (Resumen, Contraseña, Correo and Eliminar cuenta) instead of three open forms, with the same look as the games. The selected tab is kept in the URL, and you can move between tabs with the arrow keys.
+
 ### Changed
 - A new account page. A profile card shows your email, how you log in (with its icon) and since when you are a member. The options are now tabs (Resumen, Contraseña, Correo and Eliminar cuenta) instead of three open forms, with the same look as the games. The selected tab is kept in the URL, and you can move between tabs with the arrow keys.
 
@@ -73,7 +81,8 @@ First playable version.
 - 404 page for unknown addresses.
 - Documentation website with the game rules, the architecture and the technical decisions.
 
-[Unreleased]: https://github.com/MatiCoding/calculetra/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/MatiCoding/calculetra/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/MatiCoding/calculetra/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/MatiCoding/calculetra/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/MatiCoding/calculetra/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/MatiCoding/calculetra/compare/v0.2.0...v0.2.1
