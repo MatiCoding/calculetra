@@ -1,6 +1,7 @@
 import { Link } from 'react-router';
 import { useAuth } from '../../auth/context/useAuth';
 import NewPasswordForm from '../NewPasswordForm/NewPasswordForm';
+import LoadingScreen from '../LoadingScreen/LoadingScreen';
 
 // The page the reset email opens. Supabase reads the link and logs the user
 // in, so a valid link means there is a user here.
@@ -8,7 +9,7 @@ function ResetPasswordPage() {
     const { user, loading } = useAuth();
 
     // Same as RequireAuth: wait until the session is known.
-    if (loading) return null;
+    if (loading) return <LoadingScreen />;
 
     if (!user) {
         return (
