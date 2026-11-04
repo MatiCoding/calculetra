@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from '@testing-library/react';
+import { act, cleanup, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AuthContextValue } from '../../auth/context/AuthContext';
@@ -30,7 +30,10 @@ describe('ResetPasswordPage', () => {
         auth.updatePassword = vi.fn();
     });
 
-    afterEach(cleanup);
+    afterEach(() => {
+        cleanup();
+        vi.useRealTimers();
+    });
 
     it('shows the form when the link has logged the user in', () => {
         auth.user = fakeUser();
@@ -49,11 +52,16 @@ describe('ResetPasswordPage', () => {
         expect(screen.queryByLabelText('Nueva contraseña')).toBeNull();
     });
 
-    it('shows nothing while the session is being restored', () => {
+    it('shows the loading screen while the session is being restored', () => {
+        vi.useFakeTimers();
         auth.loading = true;
 
         renderPage();
+        act(() => {
+            vi.advanceTimersByTime(300);
+        });
 
+        expect(screen.getByRole('status').textContent).toContain('Cargando…');
         expect(screen.queryByRole('heading')).toBeNull();
     });
 });

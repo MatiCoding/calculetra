@@ -1,6 +1,7 @@
 import {Navigate} from "react-router";
 import { useAuth } from "../../auth/context/useAuth";
 import type { ReactNode } from "react";
+import LoadingScreen from "../LoadingScreen/LoadingScreen";
 
 type RequireAuthProps = {
     children: ReactNode;
@@ -10,9 +11,9 @@ type RequireAuthProps = {
 function RequireAuth({children} : RequireAuthProps) {
     const { user, loading } = useAuth();
 
-    // While the session is being restored, user is alsa null.
+    // While the session is being restored, user is also null.
     // If we checked user first, reloading a protected page would always send you to /login.
-    if (loading) return null;
+    if (loading) return <LoadingScreen />;
 
     if (!user) return <Navigate to="/login" replace />;
 

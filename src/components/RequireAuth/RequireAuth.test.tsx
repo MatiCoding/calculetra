@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from '@testing-library/react';
+import { act, cleanup, render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AuthContextValue } from '../../auth/context/AuthContext';
@@ -37,7 +37,10 @@ describe('RequireAuth', () => {
         auth.logOut = vi.fn();
     });
 
-    afterEach(cleanup);
+    afterEach(() => {
+        cleanup();
+        vi.useRealTimers();
+    });
 
     it('sends a user who is not logged in to /login', () => {
         renderAccount();
@@ -46,13 +49,20 @@ describe('RequireAuth', () => {
         expect(screen.queryByText('secret')).toBeNull();
     });
 
-    it('does not redirect while the session is being restored', () => {
+    it('shows the loading screen, not the page or /login, while the session is being restored', () => {
+        vi.useFakeTimers();
         auth.loading = true;
 
         renderAccount();
+        act(() => {
+            vi.advanceTimersByTime(300);
+        });
 
+        expect(screen.getByRole('status').textContent).toContain('Cargando…');
         expect(screen.queryByText('login page')).toBeNull();
         expect(screen.queryByText('secret')).toBeNull();
+
+        vi.useRealTimers();
     });
 
     it('shows the page to a logged-in user', () => {
