@@ -46,7 +46,7 @@ describe('PrivacyPage', () => {
     it('shows a contact email', () => {
         renderPrivacyPage();
 
-        const link = screen.getByRole('link', { name: 'mateorz2308@gmail.com' });
-        expect(link.getAttribute('href')).toBe('mailto:mateorz2308@gmail.com');
+        const link = screen.getByRole('link', { name: 'calculetra.game@gmail.com' });
+        expect(link.getAttribute('href')).toBe('mailto:calculetra.game@gmail.com');
     });
 });

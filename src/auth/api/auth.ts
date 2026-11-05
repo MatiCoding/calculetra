@@ -42,7 +42,12 @@ export async function logIn(email: string, password: string): Promise<AuthUser> 
 
 // Returns null if the aacount is created but not yet confirmed (email confirmation pending).
 export async function signUp(email: string, password: string): Promise<AuthUser | null> {
-    const {data, error} = await supabase.auth.signUp({ email, password })
+    const {data, error} = await supabase.auth.signUp({
+      email,
+      password,
+      // The current site: localhost with npm run dev, the real domain in production.
+      options: { emailRedirectTo: `${window.location.origin}/` },
+    })
     if (error) throw error
     if (data.user !== null && data.user.identities?.length === 0) throw new AuthApiError('Usuario ya registrado', 422, 'user_already_exists')
     if (data.session === null) return null

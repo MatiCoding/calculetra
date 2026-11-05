@@ -64,3 +64,4 @@ What becomes easier or harder, risks, and follow-up work.
 | 0006 | [Delete accounts with a database function](0006-delete-account.md) | Accepted |
 | 0007 | [One account per email, linked automatically](0007-one-account-per-email.md) | Accepted |
 | 0008 | [Letras dictionary: a generated word list, downloaded only on /letras](0008-letras-dictionary.md) | Accepted |
+| 0009 | [Send auth emails through Gmail SMTP](0009-auth-email-sender.md) | Accepted |

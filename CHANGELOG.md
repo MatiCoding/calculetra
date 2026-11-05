@@ -6,13 +6,14 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+- Account emails (confirm your account, reset your password and change your email) are now in Spanish, show the Calculetra name and come from calculetra.game@gmail.com, instead of Supabase's default emails in English.
+- The contact email in the privacy policy is now calculetra.game@gmail.com.
+
 ## [0.5.0] - 2026-11-04
 
 ### Added
 - A loading screen while your session is restored. When you reload a page that needs an account (like `/account`) or open the reset password link, you see bouncing Cifras tiles with "Cargando…" instead of a blank page. It only appears if loading takes longer than 300 ms, and the tiles stay still if your system asks for reduced motion.
-
-### Changed
-- A new account page. A profile card shows your email, how you log in (with its icon) and since when you are a member. The options are now tabs (Resumen, Contraseña, Correo and Eliminar cuenta) instead of three open forms, with the same look as the games. The selected tab is kept in the URL, and you can move between tabs with the arrow keys.
 
 ### Changed
 - A new account page. A profile card shows your email, how you log in (with its icon) and since when you are a member. The options are now tabs (Resumen, Contraseña, Correo and Eliminar cuenta) instead of three open forms, with the same look as the games. The selected tab is kept in the URL, and you can move between tabs with the arrow keys.
