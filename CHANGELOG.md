@@ -8,6 +8,7 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 - Account emails (confirm your account, reset your password and change your email) are now in Spanish, show the Calculetra name and come from calculetra.game@gmail.com, instead of Supabase's default emails in English.
+- The contact email in the privacy policy is now calculetra.game@gmail.com.
 
 ## [0.5.0] - 2026-11-04
 

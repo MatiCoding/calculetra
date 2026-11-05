@@ -56,7 +56,7 @@ function PrivacyPage() {
                 <h2>Contacto</h2>
                 <p>
                     Si tienes cualquier duda sobre tus datos, escríbeme a{' '}
-                    <a href="mailto:mateorz2308@gmail.com">mateorz2308@gmail.com</a>.
+                    <a href="mailto:calculetra.game@gmail.com">calculetra.game@gmail.com</a>.
                 </p>
             </section>
         </main>
