@@ -6,6 +6,8 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-11-05
+
 ### Changed
 - Account emails (confirm your account, reset your password and change your email) are now in Spanish, show the Calculetra name and come from calculetra.game@gmail.com, instead of Supabase's default emails in English.
 - The contact email in the privacy policy is now calculetra.game@gmail.com.
@@ -83,6 +85,7 @@ First playable version.
 - Documentation website with the game rules, the architecture and the technical decisions.
 
 [Unreleased]: https://github.com/MatiCoding/calculetra/compare/v0.5.0...HEAD
+[0.5.1]: https://github.com/MatiCoding/calculetra/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/MatiCoding/calculetra/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/MatiCoding/calculetra/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/MatiCoding/calculetra/compare/v0.2.1...v0.3.0
