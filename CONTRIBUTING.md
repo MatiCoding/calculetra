@@ -225,3 +225,43 @@ GitHub apps work for every user straight away, with no review.
 2. Add its name, colour and logo to `src/components/SocialButtons/socialProviders.ts`.
 3. Add it to the `it.each` tests in `auth.test.ts` and `SocialButtons.test.tsx`.
 4. Set it up in its developer console and in Supabase, as above, and check that it gives a verified email (see [ADR 0007](docs/decisions/0007-one-account-per-email.md)).
+
+## Auth emails
+
+Supabase Auth sends the account emails: confirm sign up, reset password and change email. Their templates are in [`supabase/templates/`](supabase/templates/), so a change to an email is reviewed in a pull request like the rest of the code. Supabase does not read these files: after merging a change, copy it into the dashboard by hand.
+
+The emails are sent through Gmail's SMTP server from `calculetra.game@gmail.com` (see [ADR 0009](docs/decisions/0009-auth-email-sender.md)). You only need this section if you want real emails in your own Supabase project.
+
+### 1. Sender (SMTP)
+
+Supabase only lets you change the templates with your own SMTP server.
+
+1. In the Google account that sends the emails, turn on **2-Step Verification** (**Security → How you sign in to Google**). Having the methods set up is not enough: it must say *On*.
+2. Go to `myaccount.google.com/apppasswords`, create an app password called `Supabase Calculetra` and copy the 16 letters without spaces.
+3. Supabase → **Authentication → Emails → SMTP Settings**: turn on **Enable Custom SMTP** and fill in:
+   - **Sender email** and **Username**: the Gmail address.
+   - **Sender name**: `Calculetra`.
+   - **Host**: `smtp.gmail.com`, **Port**: `465`.
+   - **Password**: the app password.
+4. Supabase → **Authentication → Rate Limits**: set **Rate limit for sending emails** to `20` per hour, below Gmail's daily limit.
+
+The app password is only saved in Supabase. Never commit it or put it in `.env`. If it leaks, delete it in the same Google page and create a new one.
+
+### 2. Templates
+
+In **Authentication → Emails → Templates**, for each template set the subject, paste the file in the message body and save:
+
+| Template | Subject | File |
+| --- | --- | --- |
+| Confirm signup | Confirma tu cuenta de Calculetra | `confirmation.html` |
+| Reset password | Restablece tu contraseña de Calculetra | `recovery.html` |
+| Change email address | Confirma tu nuevo correo en Calculetra | `email_change.html` |
+
+The templates use Supabase's variables: `{{ .ConfirmationURL }}` (the link), `{{ .Email }}` and, in the change email template, `{{ .NewEmail }}`. Email clients ignore most CSS, so keep the layout in tables with inline styles and the title as text, not as an image.
+
+### 3. Links
+
+Each email opens the page that the app asks for (`emailRedirectTo` or `redirectTo` in `src/auth/api/auth.ts`), on the current site. For that to work locally and in production, both sites must be in **Authentication → URL Configuration → Redirect URLs** (see [Allowed redirect URLs](#1-allowed-redirect-urls-supabase)).
+
+If an email does not arrive, check the spam folder and **Logs → Auth** in Supabase.
+
