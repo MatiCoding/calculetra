@@ -24,7 +24,7 @@ So Calculetra needs its own SMTP provider. We do not own a domain yet: the site 
 - The app password is only saved in the Supabase dashboard (*Authentication → Emails → SMTP Settings*). It is never committed to the repository.
 - The rate limit for emails in Supabase (*Authentication → Rate Limits*) is 20 emails an hour (480 a day), below Gmail's daily limit (about 500), so a bot asking for many emails cannot get the account blocked.
 
-How to set it up is in [CONTRIBUTING](../../CONTRIBUTING.md#auth-emails).
+How to set it up is in [the contribution guide](https://github.com/MatiCoding/calculetra/blob/main/CONTRIBUTING.md#auth-emails).
 
 ## Alternatives considered
 
