@@ -23,3 +23,7 @@ export type GameAction =
     | { type: 'undoTo', resultId: number}
     | { type: 'reset' }
     | { type: 'finish' }
+
+export type TreeNode = 
+    | {kind: 'leaf', tile: Tile}
+    | {kind: 'step', tile: Tile, operator: Operator, left: TreeNode, right: TreeNode};
