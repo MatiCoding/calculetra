@@ -20,5 +20,6 @@ export type GameAction =
     | { type: 'selectTile', id: number }
     | { type: 'selectOperator', operator: Operator }
     | { type: 'undo' }
+    | { type: 'undoTo', resultId: number}
     | { type: 'reset' }
     | { type: 'finish' }

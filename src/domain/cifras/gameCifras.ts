@@ -54,6 +54,39 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 error: null,
             };
         }
+        case 'undoTo': {
+            const index = state.steps.findIndex((step) => step.result.id === action.resultId);
+            if (index === -1) {
+                return state;
+            }
+
+            // The result and every later result that was made from it, directly or not.
+            const removedIds = new Set([action.resultId]);
+            for (const step of state.steps.slice(index + 1)) {
+                if (removedIds.has(step.left.id) || removedIds.has(step.right.id)) {
+                    removedIds.add(step.result.id);
+                }
+            }
+
+            const removedSteps = state.steps.filter((step) => removedIds.has(step.result.id));
+            const freedTiles = removedSteps
+                .flatMap((step) => [step.left, step.right])
+                .filter((tile) => !removedIds.has(tile.id));
+            const tiles = [
+                ...state.tiles.filter((tile) => !removedIds.has(tile.id)),
+                ...freedTiles,
+            ].toSorted((a, b) => a.id - b.id);
+
+            return {
+                ...state,
+                tiles,
+                steps: state.steps.filter((step) => !removedIds.has(step.result.id)),
+                selectedId: null,
+                operator: null,
+                error: null,
+            };
+        }
+        
         case 'reset':
             return initialState(state.challenge);
         case 'finish':

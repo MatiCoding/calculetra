@@ -219,6 +219,71 @@ describe('undo', () => {
   });
 });
 
+describe('undoTo', () => {
+  it('undoes the step that made the result', () => {
+    const played = play(initialState(challenge), 100, '×', 3);
+    const state = gameReducer(played, { type: 'undoTo', resultId: idOf(played, 300) });
+
+    expect(values(state)).toEqual([100, 75, 50, 25, 8, 3]);
+    expect(state.steps).toEqual([]);
+  });
+
+  it('also undoes the steps that used the result, directly or not', () => {
+    const first = play(initialState(challenge), 100, '×', 3);
+    const second = play(first, 300, '-', 75);
+    const third = play(second, 225, '+', 50);
+    const state = gameReducer(third, { type: 'undoTo', resultId: idOf(first, 300) });
+
+    expect(values(state)).toEqual([100, 75, 50, 25, 8, 3]);
+    expect(state.steps).toEqual([]);
+  });
+
+  it('keeps the steps that made the numbers the result was made from', () => {
+    const first = play(initialState(challenge), 100, '×', 3);
+    const second = play(first, 300, '-', 75);
+    const state = gameReducer(second, { type: 'undoTo', resultId: idOf(second, 225) });
+
+    expect(values(state)).toEqual(values(first));
+    expect(steps(state)).toEqual(steps(first));
+  });
+
+  it('keeps the other branches, even if they were made later', () => {
+    // 50 + 8 does not use the 300, so it stays.
+    const first = play(initialState(challenge), 100, '×', 3);
+    const second = play(first, 50, '+', 8);
+    const third = play(second, 300, '-', 75);
+    const state = gameReducer(third, { type: 'undoTo', resultId: idOf(first, 300) });
+
+    expect(values(state)).toEqual([100, 75, 25, 3, 58]);
+    expect(steps(state)).toEqual([[50, '+', 8, 58]]);
+  });
+
+  it('clears the selection and the error', () => {
+    const played = play(initialState(challenge), 100, '×', 3);
+    const selected = gameReducer(played, { type: 'selectTile', id: idOf(played, 75) });
+    const state = gameReducer(selected, { type: 'undoTo', resultId: idOf(played, 300) });
+
+    expect(state.selectedId).toBeNull();
+    expect(state.operator).toBeNull();
+    expect(state.error).toBeNull();
+  });
+
+  it('does nothing if no step made that tile', () => {
+    const played = play(initialState(challenge), 100, '×', 3);
+
+    // The 75 is a starting number, not the result of a step.
+    expect(gameReducer(played, { type: 'undoTo', resultId: idOf(played, 75) })).toBe(played);
+    expect(gameReducer(played, { type: 'undoTo', resultId: 999 })).toBe(played);
+  });
+
+  it('does nothing once the game is finished', () => {
+    const played = play(initialState(challenge), 100, '×', 3);
+    const finished = gameReducer(played, { type: 'finish' });
+
+    expect(gameReducer(finished, { type: 'undoTo', resultId: idOf(played, 300) })).toBe(finished);
+  });
+});
+
 describe('reset', () => {
   it('goes back to the start', () => {
     const first = play(initialState(challenge), 100, '×', 3);
