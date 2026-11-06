@@ -46,10 +46,14 @@ function Node({ node, onUndo, disabled }: NodeProps) {
             >
                 {node.tile.value}
             </button>
-            <div className={styles.children}>
-                <Node node={node.left} onUndo={onUndo} disabled={disabled} />
+                        <div className={styles.children}>
+                <div className={styles.branch}>
+                    <Node node={node.left} onUndo={onUndo} disabled={disabled} />
+                </div>
                 <span className={styles.operator} aria-hidden="true">{node.operator}</span>
-                <Node node={node.right} onUndo={onUndo} disabled={disabled} />
+                <div className={styles.branch}>
+                    <Node node={node.right} onUndo={onUndo} disabled={disabled} />
+                </div>
             </div>
         </div>
     );
