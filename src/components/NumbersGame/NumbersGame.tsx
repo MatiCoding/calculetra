@@ -68,8 +68,12 @@ function NumbersGame() {
                 {ERROR_MESSAGES[state.error]}
             </p>}
 
-            <SolutionTree trees={buildTree(state.steps)} />
-            
+            <SolutionTree
+                trees={buildTree(state.steps)}
+                onUndo={(resultId) => dispatch({ type: 'undoTo', resultId })}
+                disabled={state.finished}
+            />
+
             <div className={styles.actions}>
                 <button onClick={() => dispatch({ type: 'undo' })} disabled={state.steps.length === 0 || state.finished} className={styles.secondary}>
                     Deshacer

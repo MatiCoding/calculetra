@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen, within } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { gameReducer, initialState } from '../../domain/cifras/gameCifras';
 import { buildTree } from '../../domain/cifras/treeCifras';
 import type { Challenge, GameState, Operator } from '../../domain/cifras/typesCifras';
@@ -22,8 +22,8 @@ function play(state: GameState, a: number, operator: Operator, b: number): GameS
     return gameReducer(withOperator, { type: 'selectTile', id: idOf(withOperator, b) });
 }
 
-function renderTree(state: GameState) {
-    render(<SolutionTree trees={buildTree(state.steps)} />);
+function renderTree(state: GameState, { onUndo = () => {}, disabled = false } = {}) {
+    render(<SolutionTree trees={buildTree(state.steps)} onUndo={onUndo} disabled={disabled} />);
 }
 
 // The steps of the tree, from the top of each tree down.
@@ -66,5 +66,30 @@ describe('SolutionTree', () => {
         const list = screen.getByRole('list', { name: 'Cómo has llegado' });
         expect(within(list).getAllByRole('listitem')).toHaveLength(2);
         expect(stepLabels()).toEqual(['100 × 3 = 300', '50 + 8 = 58']);
+    });
+
+    it('asks to undo a result when it is tapped', () => {
+        const onUndo = vi.fn();
+        const first = play(initialState(challenge), 100, '×', 3);
+        const state = play(first, 300, '+', 25);
+        renderTree(state, { onUndo });
+
+        fireEvent.click(screen.getByRole('button', { name: 'Deshacer 100 × 3 = 300' }));
+
+        expect(onUndo).toHaveBeenCalledWith(idOf(first, 300));
+    });
+
+    it('does not let the starting numbers be tapped to undo', () => {
+        renderTree(play(initialState(challenge), 100, '×', 3));
+
+        expect(screen.getAllByRole('button').map((button) => button.getAttribute('aria-label'))).toEqual([
+            'Deshacer 100 × 3 = 300',
+        ]);
+    });
+
+    it('disables the results when it is disabled', () => {
+        renderTree(play(initialState(challenge), 100, '×', 3), { disabled: true });
+
+        expect((screen.getByRole('button', { name: 'Deshacer 100 × 3 = 300' }) as HTMLButtonElement).disabled).toBe(true);
     });
 });

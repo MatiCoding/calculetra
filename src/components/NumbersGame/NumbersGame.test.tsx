@@ -175,6 +175,30 @@ describe('NumbersGame', () => {
         expect(stepTexts()).toEqual([`${a + b} + ${c} = ${a + b + c}`, `${a} + ${b} = ${a + b}`]);
     });
 
+    it('undoes a branch when a result in the tree is tapped', () => {
+        render(<NumbersGame />);
+        const [a, b, c, d] = challenge.numbers;
+
+        playFirstSum();
+        // Now numbers[2] and numbers[3] are the first two numbers on the board.
+        playFirstSum();
+        clickButton(`Deshacer ${a} + ${b} = ${a + b}`);
+
+        expect(numberValues()).toEqual([a, b, ...challenge.numbers.slice(4), c + d]);
+        expect(stepTexts()).toEqual([`${c} + ${d} = ${c + d}`]);
+    });
+
+    it('does not let the player undo from the tree after finishing', () => {
+        render(<NumbersGame />);
+        const [a, b] = challenge.numbers;
+
+        playFirstSum();
+        clickButton('Terminar');
+
+        const result = screen.getByRole('button', { name: `Deshacer ${a} + ${b} = ${a + b}` }) as HTMLButtonElement;
+        expect(result.disabled).toBe(true);
+    });
+
     it('shows a message when a subtraction is not positive', () => {
         render(<NumbersGame />);
         const smallest = challenge.numbers.indexOf(Math.min(...challenge.numbers));

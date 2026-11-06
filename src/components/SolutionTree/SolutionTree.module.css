@@ -62,8 +62,24 @@
 }
 
 .result {
+    border: none;
+    font-family: inherit;
+    cursor: pointer;
     background-color: var(--color-letter);
     color: white;
+}
+
+.result:hover:not(:disabled) {
+    opacity: 0.85;
+}
+
+.result:focus-visible {
+    outline: 3px solid var(--color-text);
+    outline-offset: 2px;
+}
+
+.result:disabled {
+    cursor: default;
 }
 
 .operator {
