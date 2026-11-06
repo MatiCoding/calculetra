@@ -3,6 +3,8 @@ import { cleanup, fireEvent, render, screen, within } from '@testing-library/rea
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { getDailyChallenge } from '../../domain/cifras/challengeCifras';
 import { gameReducer, initialState } from '../../domain/cifras/gameCifras';
+import { applyOperation } from '../../domain/cifras/operation';
+import { previewKind } from '../../domain/cifras/previewCifras';
 import { calculateScore, getBestValue } from '../../domain/cifras/scoreCifras';
 import type { Challenge } from '../../domain/cifras/typesCifras';
 import NumbersGame from './NumbersGame';
@@ -26,6 +28,12 @@ function stepTexts() {
     const list = screen.queryByRole('list', { name: 'Pasos' });
     if (list === null) return [];
     return within(list).queryAllByRole('listitem').map((item) => item.textContent);
+}
+
+// The preview label above each number, or null if it has none.
+function previewOf(index: number) {
+    const item = numberButtons()[index].closest('li');
+    return item?.querySelector('[data-kind]') ?? null;
 }
 
 function clickNumber(index: number) {
@@ -84,6 +92,63 @@ describe('NumbersGame', () => {
         expect(stepTexts()).toEqual([`${a} + ${b} = ${a + b}`]);
         // The selection is cleared after the operation.
         expect(numberButtons().every((button) => button.getAttribute('aria-pressed') === 'false')).toBe(true);
+    });
+
+    it('shows no preview until a number and an operator are chosen', () => {
+        render(<NumbersGame />);
+
+        clickNumber(0);
+
+        expect(challenge.numbers.map((_, index) => previewOf(index))).toEqual(challenge.numbers.map(() => null));
+    });
+
+    it('shows above every other number the result it would give', () => {
+        render(<NumbersGame />);
+        const [first, ...others] = challenge.numbers;
+
+        clickNumber(0);
+        clickButton('Sumar');
+
+        expect(previewOf(0)).toBeNull();
+        others.forEach((value, index) => {
+            const preview = previewOf(index + 1);
+            expect(preview?.textContent).toBe(`= ${first + value}`);
+            expect(preview?.getAttribute('data-kind')).toBe(
+                previewKind({ ok: true, value: first + value }, challenge.target),
+            );
+        });
+    });
+
+    it('says "no vale" above a number when the operation is not allowed', () => {
+        render(<NumbersGame />);
+        const smallest = challenge.numbers.indexOf(Math.min(...challenge.numbers));
+        const biggest = challenge.numbers.indexOf(Math.max(...challenge.numbers));
+
+        clickNumber(smallest);
+        clickButton('Restar');
+
+        expect(previewOf(biggest)?.textContent).toBe('no vale');
+        expect(previewOf(biggest)?.getAttribute('data-kind')).toBe('invalid');
+    });
+
+    it('updates the preview when the operator changes', () => {
+        render(<NumbersGame />);
+        const [a, b] = challenge.numbers;
+        const product = applyOperation(a, '×', b);
+
+        clickNumber(0);
+        clickButton('Sumar');
+        clickButton('Multiplicar');
+
+        expect(previewOf(1)?.textContent).toBe(product.ok ? `= ${product.value}` : 'no vale');
+    });
+
+    it('hides the preview after the operation is made', () => {
+        render(<NumbersGame />);
+
+        playFirstSum();
+
+        expect(numberButtons().map((_, index) => previewOf(index)).every((preview) => preview === null)).toBe(true);
     });
 
     it('shows a message when a subtraction is not positive', () => {

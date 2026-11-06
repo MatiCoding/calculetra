@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { gameReducer, initialState } from './gameCifras';
-import { previewOperation } from './previewCifras';
+import { previewKind, previewOperation } from './previewCifras';
 import type { Challenge, GameState, Operator } from './typesCifras';
 
 const challenge: Challenge = { numbers: [100, 75, 50, 25, 8, 3], target: 325 };
@@ -83,5 +83,27 @@ describe('previewOperation', () => {
     const state = { ...chosen, finished: true };
 
     expect(previewOperation(state, idOf(state, 75))).toBeNull();
+  });
+});
+
+describe('previewKind', () => {
+  it('is the target when the result is the target', () => {
+    expect(previewKind({ ok: true, value: 325 }, 325)).toBe('target');
+  });
+
+  it('is close when the result is 10 or less away, above or below', () => {
+    expect(previewKind({ ok: true, value: 335 }, 325)).toBe('close');
+    expect(previewKind({ ok: true, value: 315 }, 325)).toBe('close');
+    expect(previewKind({ ok: true, value: 324 }, 325)).toBe('close');
+  });
+
+  it('is far when the result is more than 10 away', () => {
+    expect(previewKind({ ok: true, value: 336 }, 325)).toBe('far');
+    expect(previewKind({ ok: true, value: 314 }, 325)).toBe('far');
+  });
+
+  it('is invalid when the operation is not allowed', () => {
+    expect(previewKind({ ok: false, reason: 'not-positive' }, 325)).toBe('invalid');
+    expect(previewKind({ ok: false, reason: 'not-exact' }, 325)).toBe('invalid');
   });
 });

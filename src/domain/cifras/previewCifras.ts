@@ -16,3 +16,15 @@ export function previewOperation(state: GameState, tileId: number) : OperationRe
 
     return applyOperation(left.value, operator, right.value);
 }
+
+export type PreviewKind = 'target' | 'close' | 'far' | 'invalid';
+
+// How a preview is shown: the target, close to it, far from it, not allowed.
+export function previewKind(result: OperationResult, target: number): PreviewKind {
+    if (!result.ok) {
+        return 'invalid';
+    }
+    const distance = Math.abs(result.value - target);
+    if (distance === 0) return 'target';
+    return distance <= 10 ? 'close' : 'far';
+}

@@ -3,6 +3,7 @@ import { getDailyChallenge } from '../../domain/cifras/challengeCifras';
 import { gameReducer, initialState } from '../../domain/cifras/gameCifras';
 import {calculateScore, getBestValue} from '../../domain/cifras/scoreCifras';
 import type { OperationError, Operator } from '../../domain/cifras/typesCifras';
+import { previewKind, previewOperation } from '../../domain/cifras/previewCifras';
 import styles from './NumbersGame.module.css';
 
 const OPERATORS: Array<{ operator: Operator; label: string; symbol: string }> = [
@@ -26,18 +27,26 @@ function NumbersGame() {
             <h2 className={styles.target}>Objetivo: {state.challenge.target}</h2>
             <h3>Números disponibles:</h3>
             <ul aria-label="Números" className={styles.numbersUl}>
-                {state.tiles.map((tile) => (
-                    <li key={tile.id} className = {styles.tileItem}>
-                        <button
-                            aria-pressed={tile.id === state.selectedId}
-                            onClick={() => dispatch({ type: 'selectTile', id: tile.id })}
-                            disabled={state.finished}
-                            className={styles.tile}
-                        >
-                            {tile.value}
-                        </button>
-                    </li>
-                ))}
+                {state.tiles.map((tile) => {
+                    const preview = previewOperation(state, tile.id);
+                    return (
+                        <li key={tile.id} className={styles.tileItem}>
+                            {preview !== null && (
+                                <span className={styles.preview} data-kind={previewKind(preview, state.challenge.target)}>
+                                    {preview.ok ? `= ${preview.value}` : 'no vale'}
+                                </span>
+                            )}
+                            <button
+                                aria-pressed={tile.id === state.selectedId}
+                                onClick={() => dispatch({ type: 'selectTile', id: tile.id })}
+                                disabled={state.finished}
+                                className={styles.tile}
+                            >
+                                {tile.value}
+                            </button>
+                        </li>
+                    );
+                })}
             </ul>
             <div role="group" aria-label="Operaciones" className={styles.operators}>
                 {OPERATORS.map(({ operator, label, symbol }) => (
