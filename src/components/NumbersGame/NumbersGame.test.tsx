@@ -23,11 +23,12 @@ function numberValues() {
     return numberButtons().map((button) => Number(button.textContent));
 }
 
-// The steps list may not be rendered while there are no steps.
+// The steps shown in the tree, from the top of each tree down.
+// The tree is not rendered while there are no steps.
 function stepTexts() {
-    const list = screen.queryByRole('list', { name: 'Pasos' });
+    const list = screen.queryByRole('list', { name: 'Cómo has llegado' });
     if (list === null) return [];
-    return within(list).queryAllByRole('listitem').map((item) => item.textContent);
+    return within(list).queryAllByRole('group').map((group) => group.getAttribute('aria-label'));
 }
 
 // The preview label above each number, or null if it has none.
@@ -149,6 +150,29 @@ describe('NumbersGame', () => {
         playFirstSum();
 
         expect(numberButtons().map((_, index) => previewOf(index)).every((preview) => preview === null)).toBe(true);
+    });
+
+    it('shows the tree below the operators and above the buttons', () => {
+        render(<NumbersGame />);
+        const operators = screen.getByRole('group', { name: 'Operaciones' });
+        const tree = screen.getByRole('region', { name: 'Cómo has llegado' });
+        const undo = screen.getByRole('button', { name: 'Deshacer' });
+
+        expect(operators.compareDocumentPosition(tree) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+        expect(tree.compareDocumentPosition(undo) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    });
+
+    it('shows the steps as a tree', () => {
+        render(<NumbersGame />);
+        const [a, b, c] = challenge.numbers;
+
+        playFirstSum();
+        // The result is now the last number; add the next starting number to it.
+        clickNumber(numberButtons().length - 1);
+        clickButton('Sumar');
+        clickNumber(0);
+
+        expect(stepTexts()).toEqual([`${a + b} + ${c} = ${a + b + c}`, `${a} + ${b} = ${a + b}`]);
     });
 
     it('shows a message when a subtraction is not positive', () => {

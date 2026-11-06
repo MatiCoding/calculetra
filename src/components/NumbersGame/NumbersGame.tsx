@@ -4,6 +4,8 @@ import { gameReducer, initialState } from '../../domain/cifras/gameCifras';
 import {calculateScore, getBestValue} from '../../domain/cifras/scoreCifras';
 import type { OperationError, Operator } from '../../domain/cifras/typesCifras';
 import { previewKind, previewOperation } from '../../domain/cifras/previewCifras';
+import { buildTree } from '../../domain/cifras/treeCifras';
+import SolutionTree from '../SolutionTree/SolutionTree';
 import styles from './NumbersGame.module.css';
 
 const OPERATORS: Array<{ operator: Operator; label: string; symbol: string }> = [
@@ -66,6 +68,8 @@ function NumbersGame() {
                 {ERROR_MESSAGES[state.error]}
             </p>}
 
+            <SolutionTree trees={buildTree(state.steps)} />
+            
             <div className={styles.actions}>
                 <button onClick={() => dispatch({ type: 'undo' })} disabled={state.steps.length === 0 || state.finished} className={styles.secondary}>
                     Deshacer
