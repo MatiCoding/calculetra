@@ -50,3 +50,12 @@ export function substitute(state: GameState, oldTileId: number, newTileId: numbe
         finished: steps.some((step) => step.result.value === state.challenge.target),
     };
 }
+
+export function swapCandidate(state: GameState): Tile | null {
+    if (state.finished || state.operator !== null || state.steps.length === 0){
+        return null;
+    }
+    const selected = state.tiles.find((tile) => tile.id === state.selectedId);
+    if (selected === undefined || selected.id >= state.challenge.numbers.length) return null;
+    return selected;
+}

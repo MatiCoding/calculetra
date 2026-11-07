@@ -168,10 +168,12 @@
     opacity: 0.5;
 }
 
-.steps {
-    padding: 0;
-    list-style-position: inside;
-    font-family: ui-monospace, Consolas, monospace;
+.hint {
+    margin: 0;
+    min-height: 1.3em;
+    color: var(--color-muted);
+    font-size: 0.9rem;
+    text-align: center;
 }
 
 .result {

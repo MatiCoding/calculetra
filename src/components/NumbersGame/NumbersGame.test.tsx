@@ -199,6 +199,93 @@ describe('NumbersGame', () => {
         expect(result.disabled).toBe(true);
     });
 
+    it('tells the player what to do', () => {
+        render(<NumbersGame />);
+        const hint = () => screen.getByRole('status').textContent;
+        const [a] = challenge.numbers;
+
+        expect(hint()).toBe('Elige un número.');
+        clickNumber(0);
+        expect(hint()).toBe(`Elige qué hacer con ${a}.`);
+        clickButton('Sumar');
+        expect(hint()).toBe('Encima de cada número ves lo que daría. Toca uno.');
+    });
+
+    it('tells the player that a number can be swapped once there is a tree', () => {
+        render(<NumbersGame />);
+        const c = challenge.numbers[2];
+
+        playFirstSum();
+        clickNumber(0);
+
+        expect(screen.getByRole('status').textContent).toBe(
+            `Elige qué hacer con ${c}, o toca un número del árbol para cambiarlo por ${c}.`,
+        );
+    });
+
+    it('swaps a number by tapping it on the board and then in the tree', () => {
+        render(<NumbersGame />);
+        const [a, b, c] = challenge.numbers;
+
+        playFirstSum();
+        // numbers[2] is now the first number on the board.
+        clickNumber(0);
+        clickButton(`Cambiar ${b} por ${c}`);
+
+        expect(stepTexts()).toEqual([`${a} + ${c} = ${a + c}`]);
+        expect(numberValues()).toEqual([b, ...challenge.numbers.slice(3), a + c]);
+        expect(screen.queryByRole('button', { name: /^Cambiar/ })).toBeNull();
+    });
+
+    it('highlights nothing in the tree until a free starting number is selected', () => {
+        render(<NumbersGame />);
+
+        playFirstSum();
+        expect(screen.queryByRole('button', { name: /^Cambiar/ })).toBeNull();
+
+        // The result of the sum is not a starting number.
+        clickNumber(numberButtons().length - 1);
+        expect(screen.queryByRole('button', { name: /^Cambiar/ })).toBeNull();
+    });
+
+    it('explains why a swap does not work and changes nothing', () => {
+        render(<NumbersGame />);
+        const byValue = challenge.numbers.map((value, index) => ({ value, index })).toSorted((x, y) => x.value - y.value);
+        const smallest = byValue[0];
+        const secondBiggest = byValue[4];
+        const biggest = byValue[5];
+
+        // secondBiggest − smallest is fine, but secondBiggest − biggest is not.
+        clickNumber(secondBiggest.index);
+        clickButton('Restar');
+        clickNumber(smallest.index);
+        const before = stepTexts();
+        const valuesBefore = numberValues();
+        clickNumber(numberValues().indexOf(biggest.value));
+        clickButton(`Cambiar ${smallest.value} por ${biggest.value}`);
+
+        expect(screen.getByRole('alert').textContent).toBe(
+            `Con ${biggest.value} no sale: el resultado tiene que ser mayor que 0.`,
+        );
+        expect(stepTexts()).toEqual(before);
+        expect(numberValues()).toEqual(valuesBefore);
+    });
+
+    it('hides the message of a failed swap when the player does something else', () => {
+        render(<NumbersGame />);
+        const byValue = challenge.numbers.map((value, index) => ({ value, index })).toSorted((x, y) => x.value - y.value);
+        const [smallest, , , , secondBiggest, biggest] = byValue;
+
+        clickNumber(secondBiggest.index);
+        clickButton('Restar');
+        clickNumber(smallest.index);
+        clickNumber(numberValues().indexOf(biggest.value));
+        clickButton(`Cambiar ${smallest.value} por ${biggest.value}`);
+        clickNumber(0);
+
+        expect(screen.queryByRole('alert')).toBeNull();
+    });
+
     it('shows a message when a subtraction is not positive', () => {
         render(<NumbersGame />);
         const smallest = challenge.numbers.indexOf(Math.min(...challenge.numbers));

@@ -3,7 +3,7 @@ import { cleanup, fireEvent, render, screen, within } from '@testing-library/rea
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { gameReducer, initialState } from '../../domain/cifras/gameCifras';
 import { buildTree } from '../../domain/cifras/treeCifras';
-import type { Challenge, GameState, Operator } from '../../domain/cifras/typesCifras';
+import type { Challenge, GameState, Operator, Tile } from '../../domain/cifras/typesCifras';
 import SolutionTree from './SolutionTree';
 
 const challenge: Challenge = { numbers: [100, 75, 50, 25, 8, 3], target: 325 };
@@ -22,8 +22,19 @@ function play(state: GameState, a: number, operator: Operator, b: number): GameS
     return gameReducer(withOperator, { type: 'selectTile', id: idOf(withOperator, b) });
 }
 
-function renderTree(state: GameState, { onUndo = () => {}, disabled = false } = {}) {
-    render(<SolutionTree trees={buildTree(state.steps)} onUndo={onUndo} disabled={disabled} />);
+function renderTree(
+    state: GameState,
+    { onUndo = () => {}, swapTile = null as Tile | null, onSwap = () => {}, disabled = false } = {},
+) {
+    render(
+        <SolutionTree
+            trees={buildTree(state.steps)}
+            onUndo={onUndo}
+            swapTile={swapTile}
+            onSwap={onSwap}
+            disabled={disabled}
+        />,
+    );
 }
 
 // The steps of the tree, from the top of each tree down.
@@ -91,5 +102,30 @@ describe('SolutionTree', () => {
         renderTree(play(initialState(challenge), 100, '×', 3), { disabled: true });
 
         expect((screen.getByRole('button', { name: 'Deshacer 100 × 3 = 300' }) as HTMLButtonElement).disabled).toBe(true);
+    });
+
+    it('lets the starting numbers be swapped when there is a number to swap them for', () => {
+        const onSwap = vi.fn();
+        const first = play(initialState(challenge), 100, '×', 3);
+        renderTree(play(first, 300, '+', 25), { swapTile: { id: 4, value: 8 }, onSwap });
+
+        expect(screen.getByRole('button', { name: 'Cambiar 100 por 8' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'Cambiar 3 por 8' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'Cambiar 25 por 8' })).toBeTruthy();
+
+        fireEvent.click(screen.getByRole('button', { name: 'Cambiar 25 por 8' }));
+        expect(onSwap).toHaveBeenCalledWith(challenge.numbers.indexOf(25));
+    });
+
+    it('does not let the results be swapped', () => {
+        renderTree(play(initialState(challenge), 100, '×', 3), { swapTile: { id: 4, value: 8 } });
+
+        expect(screen.queryByRole('button', { name: 'Cambiar 300 por 8' })).toBeNull();
+    });
+
+    it('does not let anything be swapped when there is no number to swap', () => {
+        renderTree(play(initialState(challenge), 100, '×', 3));
+
+        expect(screen.queryByRole('button', { name: /^Cambiar/ })).toBeNull();
     });
 });

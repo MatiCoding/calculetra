@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { gameReducer, initialState } from './gameCifras';
+import { swapCandidate } from './substituteCifras';
 import type { Challenge, GameState, Operator } from './typesCifras';
 
 const challenge: Challenge = { numbers: [100, 75, 50, 25, 8, 3], target: 325 };
@@ -208,5 +209,48 @@ describe('substitute', () => {
     swap(played, 75, 25);
 
     expect(played).toEqual(copy);
+  });
+});
+
+describe('swapCandidate', () => {
+  it('is the selected starting number when there is a tree', () => {
+    const played = play(initialState(challenge), 100, '+', 75);
+    const state = gameReducer(played, { type: 'selectTile', id: startingId(25) });
+
+    expect(swapCandidate(state)).toEqual({ id: startingId(25), value: 25 });
+  });
+
+  it('is null when nothing is selected', () => {
+    const played = play(initialState(challenge), 100, '+', 75);
+
+    expect(swapCandidate(played)).toBeNull();
+  });
+
+  it('is null when there is no tree yet', () => {
+    const state = gameReducer(initialState(challenge), { type: 'selectTile', id: startingId(25) });
+
+    expect(swapCandidate(state)).toBeNull();
+  });
+
+  it('is null once an operator is chosen', () => {
+    const played = play(initialState(challenge), 100, '+', 75);
+    const selected = gameReducer(played, { type: 'selectTile', id: startingId(25) });
+    const state = gameReducer(selected, { type: 'selectOperator', operator: '+' });
+
+    expect(swapCandidate(state)).toBeNull();
+  });
+
+  it('is null when the selected number is a result', () => {
+    const played = play(initialState(challenge), 100, '+', 75);
+    const state = gameReducer(played, { type: 'selectTile', id: idOf(played, 175) });
+
+    expect(swapCandidate(state)).toBeNull();
+  });
+
+  it('is null once the game is finished', () => {
+    const played = play(initialState(challenge), 100, '+', 75);
+    const selected = gameReducer(played, { type: 'selectTile', id: startingId(25) });
+
+    expect(swapCandidate({ ...selected, finished: true })).toBeNull();
   });
 });

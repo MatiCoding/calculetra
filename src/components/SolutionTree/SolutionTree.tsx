@@ -1,13 +1,16 @@
-import type { TreeNode } from '../../domain/cifras/typesCifras';
+import type { Tile, TreeNode } from '../../domain/cifras/typesCifras';
 import styles from './SolutionTree.module.css';
 
 type Props = {
     trees: Array<TreeNode>;
     onUndo: (resultId: number) => void;
+    // The free number the starting numbers of the tree can be swapped for.
+    swapTile: Tile | null;
+    onSwap: (oldTileId: number) => void;
     disabled: boolean;
 };
 
-function SolutionTree({ trees, onUndo, disabled }: Props) {
+function SolutionTree({ trees, ...nodeProps }: Props) {
     return (
         <section aria-labelledby="solution-tree-title" className={styles.box}>
             <h3 id="solution-tree-title" className={styles.title}>Cómo has llegado</h3>
@@ -17,7 +20,7 @@ function SolutionTree({ trees, onUndo, disabled }: Props) {
                 <ul aria-label="Cómo has llegado" className={styles.trees}>
                     {trees.map((tree) => (
                         <li key={tree.tile.id}>
-                            <Node node={tree} onUndo={onUndo} disabled={disabled} />
+                            <Node node={tree} {...nodeProps} />
                         </li>
                     ))}
                 </ul>
@@ -29,9 +32,22 @@ function SolutionTree({ trees, onUndo, disabled }: Props) {
 type NodeProps = Omit<Props, 'trees'> & { node: TreeNode };
 
 // Draws a node and, if it is a result, the two numbers it hangs from.
-function Node({ node, onUndo, disabled }: NodeProps) {
+// Draws a node and, if it is a result, the two numbers it hangs from.
+function Node({ node, onUndo, swapTile, onSwap, disabled }: NodeProps) {
     if (node.kind === 'leaf') {
-        return <span className={styles.leaf}>{node.tile.value}</span>;
+        if (swapTile === null) {
+            return <span className={styles.leaf}>{node.tile.value}</span>;
+        }
+        return (
+            <button
+                type="button"
+                aria-label={`Cambiar ${node.tile.value} por ${swapTile.value}`}
+                onClick={() => onSwap(node.tile.id)}
+                className={`${styles.leaf} ${styles.swappable}`}
+            >
+                {node.tile.value}
+            </button>
+        );
     }
 
     const label = `${node.left.tile.value} ${node.operator} ${node.right.tile.value} = ${node.tile.value}`;
@@ -46,13 +62,13 @@ function Node({ node, onUndo, disabled }: NodeProps) {
             >
                 {node.tile.value}
             </button>
-                        <div className={styles.children}>
+            <div className={styles.children}>
                 <div className={styles.branch}>
-                    <Node node={node.left} onUndo={onUndo} disabled={disabled} />
+                    <Node node={node.left} onUndo={onUndo} swapTile={swapTile} onSwap={onSwap} disabled={disabled} />
                 </div>
                 <span className={styles.operator} aria-hidden="true">{node.operator}</span>
                 <div className={styles.branch}>
-                    <Node node={node.right} onUndo={onUndo} disabled={disabled} />
+                    <Node node={node.right} onUndo={onUndo} swapTile={swapTile} onSwap={onSwap} disabled={disabled} />
                 </div>
             </div>
         </div>

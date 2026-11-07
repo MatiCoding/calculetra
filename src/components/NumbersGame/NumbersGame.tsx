@@ -2,9 +2,10 @@ import { useReducer } from 'react';
 import { getDailyChallenge } from '../../domain/cifras/challengeCifras';
 import { gameReducer, initialState } from '../../domain/cifras/gameCifras';
 import {calculateScore, getBestValue} from '../../domain/cifras/scoreCifras';
-import type { OperationError, Operator } from '../../domain/cifras/typesCifras';
+import type { OperationError, Operator, GameState, Tile } from '../../domain/cifras/typesCifras';
 import { previewKind, previewOperation } from '../../domain/cifras/previewCifras';
 import { buildTree } from '../../domain/cifras/treeCifras';
+import { swapCandidate } from '../../domain/cifras/substituteCifras';
 import SolutionTree from '../SolutionTree/SolutionTree';
 import styles from './NumbersGame.module.css';
 
@@ -20,14 +21,43 @@ const ERROR_MESSAGES: Record<OperationError, string> = {
     'not-exact': 'La división tiene que ser exacta.',
 };
 
+// What the player can do now, shown under the target.
+function hintText(state: GameState, swapTile: Tile | null): string {
+    if (state.finished) {
+        return '';
+    }
+    const selected = state.tiles.find((tile) => tile.id === state.selectedId);
+    if (selected === undefined) {
+        return 'Elige un número.';
+    }
+    if (state.operator !== null) {
+        return 'Encima de cada número ves lo que daría. Toca uno.';
+    }
+    if (swapTile !== null) {
+        return `Elige qué hacer con ${selected.value}, o toca un número del árbol para cambiarlo por ${selected.value}.`;
+    }
+    return `Elige qué hacer con ${selected.value}.`;
+}
+
+// The message of the last mistake, if there is one.
+function errorText(state: GameState): string | null {
+    if (state.substituteError !== null) {
+        const { value, reason } = state.substituteError;
+        return `Con ${value} no sale: ${ERROR_MESSAGES[reason].toLowerCase()}`;
+    }
+    return state.error === null ? null : ERROR_MESSAGES[state.error];
+}
+
 function NumbersGame() {
     const [state, dispatch] = useReducer(gameReducer, undefined, () => initialState(getDailyChallenge(new Date())));
     const bestValue = getBestValue(state);
+    const swapTile = swapCandidate(state);
+    const error = errorText(state);
 
     return (
         <div className={styles.container}>
             <h2 className={styles.target}>Objetivo: {state.challenge.target}</h2>
-            <h3>Números disponibles:</h3>
+            <p role="status" className={styles.hint}>{hintText(state, swapTile)}</p>
             <ul aria-label="Números" className={styles.numbersUl}>
                 {state.tiles.map((tile) => {
                     const preview = previewOperation(state, tile.id);
@@ -64,13 +94,17 @@ function NumbersGame() {
                     </button>
                 ))}
             </div>
-            {state.error !== null && <p role="alert" className={styles.error}>
-                {ERROR_MESSAGES[state.error]}
-            </p>}
+            {error !== null && <p role="alert" className={styles.error}>{error}</p>}
 
             <SolutionTree
                 trees={buildTree(state.steps)}
                 onUndo={(resultId) => dispatch({ type: 'undoTo', resultId })}
+                swapTile={swapTile}
+                onSwap={(oldTileId) => {
+                    if (swapTile !== null) {
+                        dispatch({ type: 'substitute', oldTileId, newTileId: swapTile.id });
+                    }
+                }}                
                 disabled={state.finished}
             />
 
@@ -98,14 +132,6 @@ function NumbersGame() {
                     </dl>
                 </section>
             )}
-
-            <ol aria-label="Pasos" className={styles.steps}>
-                {state.steps.map((step) => (
-                    <li key={step.result.id}>
-                        {step.left.value} {step.operator} {step.right.value} = {step.result.value}
-                    </li>
-                ))}
-            </ol>
         </div>
     );
 }
