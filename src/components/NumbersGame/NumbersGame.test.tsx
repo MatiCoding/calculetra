@@ -286,6 +286,95 @@ describe('NumbersGame', () => {
         expect(screen.queryByRole('alert')).toBeNull();
     });
 
+    describe('dragging a number onto the tree', () => {
+        const elementFromPoint = document.elementFromPoint;
+
+        afterEach(() => {
+            document.elementFromPoint = elementFromPoint;
+        });
+
+        // jsdom does not lay out the page, so the element under the pointer is faked.
+        function pointAt(element: Element | null) {
+            document.elementFromPoint = vi.fn(() => element);
+        }
+
+        function dragNumber(index: number, onto: () => Element | null) {
+            const tile = numberButtons()[index];
+            fireEvent.pointerDown(tile, { clientX: 10, clientY: 10 });
+            // The first move starts the drag, and the numbers of the tree can then be found.
+            pointAt(null);
+            fireEvent.pointerMove(window, { clientX: 30, clientY: 30 });
+            pointAt(onto());
+            fireEvent.pointerMove(window, { clientX: 200, clientY: 300 });
+            fireEvent.pointerUp(window, { clientX: 200, clientY: 300 });
+            // A real browser also sends a click after the pointer goes up.
+            fireEvent.click(tile);
+        }
+
+        it('swaps the numbers when it is dropped on a starting number of the tree', () => {
+            render(<NumbersGame />);
+            const [a, b, c] = challenge.numbers;
+
+            playFirstSum();
+            dragNumber(0, () => screen.getByRole('button', { name: `Cambiar ${b} por ${c}` }));
+
+            expect(stepTexts()).toEqual([`${a} + ${c} = ${a + c}`]);
+            // The click after the drag does not select the tile.
+            expect(numberButtons().every((button) => button.getAttribute('aria-pressed') === 'false')).toBe(true);
+        });
+
+        it('highlights the numbers of the tree while dragging', () => {
+            render(<NumbersGame />);
+            const [a, , c] = challenge.numbers;
+
+            playFirstSum();
+            fireEvent.pointerDown(numberButtons()[0], { clientX: 10, clientY: 10 });
+            pointAt(null);
+            fireEvent.pointerMove(window, { clientX: 40, clientY: 40 });
+
+            expect(screen.getByRole('button', { name: `Cambiar ${a} por ${c}` })).toBeTruthy();
+
+            fireEvent.pointerUp(window, { clientX: 40, clientY: 40 });
+            expect(screen.queryByRole('button', { name: /^Cambiar/ })).toBeNull();
+        });
+
+        it('changes nothing when it is dropped outside the tree', () => {
+            render(<NumbersGame />);
+
+            playFirstSum();
+            const before = stepTexts();
+            dragNumber(0, () => null);
+
+            expect(stepTexts()).toEqual(before);
+        });
+
+        it('does not drag a calculated result', () => {
+            render(<NumbersGame />);
+
+            playFirstSum();
+            fireEvent.pointerDown(numberButtons()[numberButtons().length - 1], { clientX: 10, clientY: 10 });
+            pointAt(null);
+            fireEvent.pointerMove(window, { clientX: 40, clientY: 40 });
+
+            expect(screen.queryByRole('button', { name: /^Cambiar/ })).toBeNull();
+            fireEvent.pointerUp(window);
+        });
+
+        it('treats a press that barely moves as a normal tap', () => {
+            render(<NumbersGame />);
+
+            playFirstSum();
+            const tile = numberButtons()[0];
+            pointAt(null);
+            fireEvent.pointerDown(tile, { clientX: 10, clientY: 10 });
+            fireEvent.pointerMove(window, { clientX: 12, clientY: 11 });
+            fireEvent.pointerUp(window, { clientX: 12, clientY: 11 });
+            fireEvent.click(tile);
+
+            expect(numberButtons()[0].getAttribute('aria-pressed')).toBe('true');
+        });
+    });
+
     it('shows a message when a subtraction is not positive', () => {
         render(<NumbersGame />);
         const smallest = challenge.numbers.indexOf(Math.min(...challenge.numbers));

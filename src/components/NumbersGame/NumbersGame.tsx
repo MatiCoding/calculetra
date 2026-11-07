@@ -5,7 +5,8 @@ import {calculateScore, getBestValue} from '../../domain/cifras/scoreCifras';
 import type { OperationError, Operator, GameState, Tile } from '../../domain/cifras/typesCifras';
 import { previewKind, previewOperation } from '../../domain/cifras/previewCifras';
 import { buildTree } from '../../domain/cifras/treeCifras';
-import { swapCandidate } from '../../domain/cifras/substituteCifras';
+import { canDragToTree, swapCandidate } from '../../domain/cifras/substituteCifras';
+import { useDragToSwap } from './useDragToSwap';
 import SolutionTree from '../SolutionTree/SolutionTree';
 import styles from './NumbersGame.module.css';
 
@@ -53,6 +54,9 @@ function NumbersGame() {
     const bestValue = getBestValue(state);
     const swapTile = swapCandidate(state);
     const error = errorText(state);
+    const { drag, startPress, wasDragged } = useDragToSwap((oldTileId, newTileId) =>
+        dispatch({ type: 'substitute', oldTileId, newTileId }),
+    );
 
     return (
         <div className={styles.container}>
@@ -70,9 +74,18 @@ function NumbersGame() {
                             )}
                             <button
                                 aria-pressed={tile.id === state.selectedId}
-                                onClick={() => dispatch({ type: 'selectTile', id: tile.id })}
+                                onPointerDown={(event) => {
+                                    if (canDragToTree(state, tile.id)) {
+                                        startPress(event, tile);
+                                    }
+                                }}
+                                onClick={() => {
+                                    if (!wasDragged()) {
+                                        dispatch({ type: 'selectTile', id: tile.id });
+                                    }
+                                }}
                                 disabled={state.finished}
-                                className={styles.tile}
+                                className={`${styles.tile} ${drag?.tile.id === tile.id ? styles.dragging : ''}`}
                             >
                                 {tile.value}
                             </button>
@@ -99,7 +112,8 @@ function NumbersGame() {
             <SolutionTree
                 trees={buildTree(state.steps)}
                 onUndo={(resultId) => dispatch({ type: 'undoTo', resultId })}
-                swapTile={swapTile}
+                swapTile={drag?.tile ?? swapTile}
+                overId={drag?.overId ?? null}
                 onSwap={(oldTileId) => {
                     if (swapTile !== null) {
                         dispatch({ type: 'substitute', oldTileId, newTileId: swapTile.id });
@@ -107,6 +121,16 @@ function NumbersGame() {
                 }}                
                 disabled={state.finished}
             />
+            
+            {drag !== null && (
+                <span
+                    aria-hidden="true"
+                    className={`${styles.tile} ${styles.ghost}`}
+                    style={{ left: drag.x - drag.offsetX, top: drag.y - drag.offsetY }}
+                >
+                    {drag.tile.value}
+                </span>
+            )}            
 
             <div className={styles.actions}>
                 <button onClick={() => dispatch({ type: 'undo' })} disabled={state.steps.length === 0 || state.finished} className={styles.secondary}>

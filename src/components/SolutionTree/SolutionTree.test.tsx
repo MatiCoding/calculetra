@@ -24,7 +24,7 @@ function play(state: GameState, a: number, operator: Operator, b: number): GameS
 
 function renderTree(
     state: GameState,
-    { onUndo = () => {}, swapTile = null as Tile | null, onSwap = () => {}, disabled = false } = {},
+    { onUndo = () => {}, swapTile = null as Tile | null, onSwap = () => {}, overId = null as number | null, disabled = false } = {},
 ) {
     render(
         <SolutionTree
@@ -32,6 +32,7 @@ function renderTree(
             onUndo={onUndo}
             swapTile={swapTile}
             onSwap={onSwap}
+            overId={overId}
             disabled={disabled}
         />,
     );
@@ -127,5 +128,13 @@ describe('SolutionTree', () => {
         renderTree(play(initialState(challenge), 100, '×', 3));
 
         expect(screen.queryByRole('button', { name: /^Cambiar/ })).toBeNull();
+    });
+
+    it('marks each swappable number with its id, so a dragged tile can find it', () => {
+        renderTree(play(initialState(challenge), 100, '×', 3), { swapTile: { id: 4, value: 8 } });
+
+        expect(screen.getByRole('button', { name: 'Cambiar 100 por 8' }).getAttribute('data-leaf')).toBe(
+            String(challenge.numbers.indexOf(100)),
+        );
     });
 });

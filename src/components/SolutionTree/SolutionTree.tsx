@@ -7,6 +7,7 @@ type Props = {
     // The free number the starting numbers of the tree can be swapped for.
     swapTile: Tile | null;
     onSwap: (oldTileId: number) => void;
+    overId: number | null;
     disabled: boolean;
 };
 
@@ -32,8 +33,7 @@ function SolutionTree({ trees, ...nodeProps }: Props) {
 type NodeProps = Omit<Props, 'trees'> & { node: TreeNode };
 
 // Draws a node and, if it is a result, the two numbers it hangs from.
-// Draws a node and, if it is a result, the two numbers it hangs from.
-function Node({ node, onUndo, swapTile, onSwap, disabled }: NodeProps) {
+function Node({ node, onUndo, swapTile, onSwap, disabled, overId }: NodeProps) {
     if (node.kind === 'leaf') {
         if (swapTile === null) {
             return <span className={styles.leaf}>{node.tile.value}</span>;
@@ -43,7 +43,8 @@ function Node({ node, onUndo, swapTile, onSwap, disabled }: NodeProps) {
                 type="button"
                 aria-label={`Cambiar ${node.tile.value} por ${swapTile.value}`}
                 onClick={() => onSwap(node.tile.id)}
-                className={`${styles.leaf} ${styles.swappable}`}
+                data-leaf={node.tile.id}
+                className={`${styles.leaf} ${styles.swappable} ${overId === node.tile.id ? styles.over : ''}`}
             >
                 {node.tile.value}
             </button>
@@ -64,11 +65,11 @@ function Node({ node, onUndo, swapTile, onSwap, disabled }: NodeProps) {
             </button>
             <div className={styles.children}>
                 <div className={styles.branch}>
-                    <Node node={node.left} onUndo={onUndo} swapTile={swapTile} onSwap={onSwap} disabled={disabled} />
+                    <Node node={node.left} onUndo={onUndo} swapTile={swapTile} onSwap={onSwap} overId={overId} disabled={disabled} />
                 </div>
                 <span className={styles.operator} aria-hidden="true">{node.operator}</span>
                 <div className={styles.branch}>
-                    <Node node={node.right} onUndo={onUndo} swapTile={swapTile} onSwap={onSwap} disabled={disabled} />
+                    <Node node={node.right} onUndo={onUndo} swapTile={swapTile} onSwap={onSwap} overId={overId} disabled={disabled} />
                 </div>
             </div>
         </div>

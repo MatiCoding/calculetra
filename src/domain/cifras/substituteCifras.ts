@@ -59,3 +59,8 @@ export function swapCandidate(state: GameState): Tile | null {
     if (selected === undefined || selected.id >= state.challenge.numbers.length) return null;
     return selected;
 }
+
+export function canDragToTree(state: GameState, tileId: number):boolean {
+    if (state.finished || state.steps.length === 0) return false;
+    return state.tiles.some((tile) => tile.id === tileId && tile.id < state.challenge.numbers.length);
+}
