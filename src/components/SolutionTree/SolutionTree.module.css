@@ -1,0 +1,245 @@
+.box {
+    --tree-line: rgba(31, 36, 48, 0.25);
+    padding: 18px;
+    box-sizing: border-box;
+    width: 100%;
+    margin-top: 8px;
+    min-height: 200px;
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    background-color: var(--color-card);
+    text-align: left;
+}
+
+.title {
+    margin: 0 0 4px;
+    font-size: 1.1rem;
+}
+
+.description {
+    margin: 0 0 14px;
+    color: var(--color-muted);
+    font-size: 0.88rem;
+}
+
+.empty {
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 0.9rem;
+}
+
+/* A wide tree scrols inside the box */
+.trees {
+    list-style: none;
+    margin: 0;
+    padding: 6px 6px 14px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: safe center;
+    gap: 22px;
+    overflow-x: auto;
+}
+
+.node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.children{
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    margin-top: 12px;
+}
+
+.children::before {
+    content: '';
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    height: 12px;
+    border-left: 2px solid var(--tree-line);
+    translate: -1px 0;
+}
+
+.branch {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    padding: 14px 5px 0;
+}
+
+.branch::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    height: 14px;
+    border-top: 2px solid var(--tree-line);
+}
+
+.branch:first-child::before {
+    left: 50%;
+    right: 0;
+    border-left: 2px solid var(--tree-line);
+    border-top-left-radius: 10px;
+}
+
+.branch:last-child::before {
+    left: 0;
+    right: 50%;
+    border-right: 2px solid var(--tree-line);
+    border-top-right-radius: 10px;
+}
+
+.leaf, .result {
+    box-sizing: border-box;
+    display: grid;
+    place-items: center;
+    min-width: 42px;
+    height: 42px;
+    padding-inline: 4px;
+    border-radius: 21px;
+    font-weight: 800;
+    font-size: 1.05rem;
+    color: var(--color-text);
+    box-shadow: 0 4px 0 var(--orange-dark);
+}
+
+.leaf {
+    background-color: var(--color-number);
+}
+
+.swappable {
+    border: none;
+    font-family: inherit;
+    cursor: pointer;
+    box-shadow: 0 0 0 3px var(--color-letter), 0 4px 0 var(--orange-dark);
+}
+
+.swappable.over {
+    scale: 1.2;
+    box-shadow: 0 0 0 4px var(--blue-dark), 0 4px 0 var(--orange-dark);
+}
+
+.swappable:focus-visible {
+    outline: 3px solid var(--color-text);
+    outline-offset: 2px;
+}
+
+.result {
+    border: none;
+    font-family: inherit;
+    cursor: pointer;
+    background-color: var(--color-result);
+}
+
+.result:hover:not(:disabled) {
+    box-shadow: 0 0 0 3px var(--color-danger), 0 4px 0 var(--orange-dark);
+}
+
+.result:focus-visible {
+    outline: 3px solid var(--color-text);
+    outline-offset: 2px;
+}
+
+.result:disabled {
+    cursor: default;
+}
+
+.operator {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    translate: -50% -50%;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    background-color: var(--color-letter);
+    color: white;
+    font-weight: 800;
+    font-size: 0.85rem;
+}
+
+/* A new result grows into the tree. */
+.fresh {
+    animation: grow 500ms var(--spring) both;
+    transform-origin: top;
+}
+
+@keyframes grow {
+    from {
+        scale: 0.4;
+        opacity: 0;
+    }
+}
+
+/* The numbers that can be swapped wiggle, except the one under the dragged tile. */
+.swappable {
+    transition: scale 150ms ease, box-shadow 150ms ease;
+    animation: wiggle 1s ease-in-out infinite;
+}
+
+.swappable.over {
+    animation: none;
+}
+
+@keyframes wiggle {
+    50% {
+        rotate: -5deg;
+    }
+}
+
+/* After a swap, the numbers that changed flash for a moment. */
+.changed {
+    animation: flash 700ms var(--spring);
+}
+
+@keyframes flash {
+    0% {
+        scale: 0.6;
+        background-color: var(--color-letter);
+        color: white;
+    }
+}
+
+/* After a swap that does not work, the tree shakes. */
+.shake {
+    animation: shake 400ms;
+}
+
+@keyframes shake {
+    20%, 60% {
+        translate: -6px 0;
+    }
+    40%, 80% {
+        translate: 6px 0;
+    }
+}
+
+@media (max-width: 420px) {
+    .box {
+        padding: 14px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .fresh, .swappable, .changed, .shake {
+        animation: none;
+    }
+
+    .swappable {
+        transition: none;
+    }
+}
+
+@media (min-width: 900px) {
+    .box {
+        grid-area: tree;
+        align-self: start;
+        margin-top: 0;
+    }
+}

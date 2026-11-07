@@ -6,6 +6,15 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- Cifras: after you pick a number and an operator, every other number shows the result it would give. It turns orange when it is 10 or less away from the target, blue when it is the target, and says "no vale" when the operation is not allowed.
+- Cifras: a "Cómo has llegado" box with a tree of your operations. Tap a result to undo that branch, and only that branch.
+- Cifras: swap a starting number in the tree for a free one, by dragging it onto the tree or by tapping both. Every operation that depends on it is calculated again, and if any stops being valid a message explains why.
+- Cifras: when you open the game from the home page, the orange shrinks onto the six tiles and their numbers appear.
+
+### Changed
+- Cifras has a new look, like the rest of the app: "Reto nº N · objetivo" above the target, bigger tiles and buttons, and a beige background. On wide screens the board is on the left and the tree on the right, so you do not have to scroll. The tree replaces the old list of steps.
+
 ## [0.5.1] - 2026-11-05
 
 ### Changed

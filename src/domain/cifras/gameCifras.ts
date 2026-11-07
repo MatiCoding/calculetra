@@ -1,5 +1,6 @@
 import { applyOperation } from './operation';
 import type { Challenge, GameAction, GameState, Tile } from './typesCifras';
+import { substitute } from './substituteCifras';
 
 export function initialState(challenge: Challenge): GameState {
     return {
@@ -9,11 +10,22 @@ export function initialState(challenge: Challenge): GameState {
         selectedId: null,
         operator: null,
         error: null,
+        substituteError: null,
         finished: false,
+        changedIds: [],
     };
 }
 
 export function gameReducer(state: GameState, action: GameAction): GameState {
+    const next = reduce(state, action);
+    // The message of a failed swap only lasts until the player does something else.
+    if (action.type === 'substitute' || (next.substituteError === null && next.changedIds.length === 0)){
+        return next;
+    }
+    return {...next, substituteError: null, changedIds: []};
+}
+
+export function reduce(state: GameState, action: GameAction): GameState {
     if (state.finished && action.type !== 'reset') {
         return state;
     }
@@ -54,6 +66,40 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 error: null,
             };
         }
+        case 'undoTo': {
+            const index = state.steps.findIndex((step) => step.result.id === action.resultId);
+            if (index === -1) {
+                return state;
+            }
+
+            // The result and every later result that was made from it, directly or not.
+            const removedIds = new Set([action.resultId]);
+            for (const step of state.steps.slice(index + 1)) {
+                if (removedIds.has(step.left.id) || removedIds.has(step.right.id)) {
+                    removedIds.add(step.result.id);
+                }
+            }
+
+            const removedSteps = state.steps.filter((step) => removedIds.has(step.result.id));
+            const freedTiles = removedSteps
+                .flatMap((step) => [step.left, step.right])
+                .filter((tile) => !removedIds.has(tile.id));
+            const tiles = [
+                ...state.tiles.filter((tile) => !removedIds.has(tile.id)),
+                ...freedTiles,
+            ].toSorted((a, b) => a.id - b.id);
+
+            return {
+                ...state,
+                tiles,
+                steps: state.steps.filter((step) => !removedIds.has(step.result.id)),
+                selectedId: null,
+                operator: null,
+                error: null,
+            };
+        }
+        case 'substitute':
+            return substitute(state, action.oldTileId, action.newTileId);        
         case 'reset':
             return initialState(state.challenge);
         case 'finish':

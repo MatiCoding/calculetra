@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { fakeDialog } from './test/fakeDialog';
@@ -45,7 +45,7 @@ describe('App routes', () => {
   it('shows the Cifras game on /cifras', () => {
     renderAt('/cifras');
 
-    expect(screen.getByText(/Objetivo/)).toBeTruthy();
+    expect(screen.getByRole('heading', { name: /Objetivo/ })).toBeTruthy();
   });
 
   it('opens the Cifras game from its card on the home page', () => {
@@ -55,7 +55,30 @@ describe('App routes', () => {
 
     fireEvent.click(playButton('Cifras'));
 
-    expect(screen.getByText(/Objetivo/)).toBeTruthy();
+    expect(screen.getByRole('heading', { name: /Objetivo/ })).toBeTruthy();
+  });
+
+  it('plays the entrance of Cifras only when it comes from the home page', () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    renderAt('/');
+
+    // The Cifras card is in the centre, so a click grows it and then opens the game.
+    fireEvent.click(screen.getByRole('button', { name: /Seis números/ }));
+    act(() => vi.advanceTimersByTime(500));
+
+    expect(screen.getByRole('heading', { name: /Objetivo/ })).toBeTruthy();
+    expect(screen.getAllByTestId('intro-magnet')).toHaveLength(6);
+
+    // When the entrance ends, the orange circles go away.
+    act(() => vi.advanceTimersByTime(1400));
+    expect(screen.queryAllByTestId('intro-magnet')).toHaveLength(0);
+    vi.useRealTimers();
+  });
+
+  it('does not play the entrance when /cifras is opened directly', () => {
+    renderAt('/cifras');
+
+    expect(screen.queryAllByTestId('intro-magnet')).toHaveLength(0);
   });
 
   it('opens the Letras game from its card on the home page', () => {

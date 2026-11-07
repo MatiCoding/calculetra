@@ -64,7 +64,7 @@ function HomePage() {
 
     useEffect(() => {
         if (!opening) return
-        const timer = setTimeout(() => navigate(PATHS[opening.game]), GROW_MS)
+        const timer = setTimeout(() => navigate(PATHS[opening.game], { state: { intro: true } }), GROW_MS)
         return () => clearTimeout(timer)
     }, [opening, navigate])
 
