@@ -27,6 +27,7 @@ export function substitute(state: GameState, oldTileId: number, newTileId: numbe
                 operator: null,
                 error: null,
                 substituteError: { value: newTile.value, reason: result.reason },
+                changedIds : [],
             };
         }
         const resultTile = { id: step.result.id, value: result.value };
@@ -39,6 +40,11 @@ export function substitute(state: GameState, oldTileId: number, newTileId: numbe
         .map((tile) => (tile.id === newTile.id ? oldTile : latest(tile)))
         .toSorted((a, b) => a.id - b.id);
 
+    const changedIds = [
+        newTile.id,
+        ...steps.filter((step, index) => step.result.value !== state.steps[index].result.value).map((step) => step.result.id),
+    ];   
+
     return {
         ...state,
         tiles,
@@ -48,6 +54,7 @@ export function substitute(state: GameState, oldTileId: number, newTileId: numbe
         error: null,
         substituteError: null,
         finished: steps.some((step) => step.result.value === state.challenge.target),
+        changedIds,
     };
 }
 

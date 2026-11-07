@@ -114,6 +114,9 @@ function NumbersGame() {
                 onUndo={(resultId) => dispatch({ type: 'undoTo', resultId })}
                 swapTile={drag?.tile ?? swapTile}
                 overId={drag?.overId ?? null}
+                freshId={state.steps.at(-1)?.result.id ?? null}
+                changedIds={state.changedIds}
+                shake={state.substituteError !== null}                
                 onSwap={(oldTileId) => {
                     if (swapTile !== null) {
                         dispatch({ type: 'substitute', oldTileId, newTileId: swapTile.id });

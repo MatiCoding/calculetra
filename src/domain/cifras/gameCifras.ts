@@ -12,16 +12,17 @@ export function initialState(challenge: Challenge): GameState {
         error: null,
         substituteError: null,
         finished: false,
+        changedIds: [],
     };
 }
 
 export function gameReducer(state: GameState, action: GameAction): GameState {
     const next = reduce(state, action);
     // The message of a failed swap only lasts until the player does something else.
-    if (action.type === 'substitute' || next.substituteError === null){
+    if (action.type === 'substitute' || (next.substituteError === null && next.changedIds.length === 0)){
         return next;
     }
-    return {...next, substituteError: null};
+    return {...next, substituteError: null, changedIds: []};
 }
 
 export function reduce(state: GameState, action: GameAction): GameState {

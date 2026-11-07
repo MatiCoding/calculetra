@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import type { ComponentProps } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { gameReducer, initialState } from '../../domain/cifras/gameCifras';
 import { buildTree } from '../../domain/cifras/treeCifras';
-import type { Challenge, GameState, Operator, Tile } from '../../domain/cifras/typesCifras';
+import type { Challenge, GameState, Operator } from '../../domain/cifras/typesCifras';
 import SolutionTree from './SolutionTree';
 
 const challenge: Challenge = { numbers: [100, 75, 50, 25, 8, 3], target: 325 };
@@ -22,18 +23,21 @@ function play(state: GameState, a: number, operator: Operator, b: number): GameS
     return gameReducer(withOperator, { type: 'selectTile', id: idOf(withOperator, b) });
 }
 
-function renderTree(
-    state: GameState,
-    { onUndo = () => {}, swapTile = null as Tile | null, onSwap = () => {}, overId = null as number | null, disabled = false } = {},
-) {
+type Options = Partial<Omit<ComponentProps<typeof SolutionTree>, 'trees'>>;
+
+function renderTree(state: GameState, options: Options = {}) {
     render(
         <SolutionTree
             trees={buildTree(state.steps)}
-            onUndo={onUndo}
-            swapTile={swapTile}
-            onSwap={onSwap}
-            overId={overId}
-            disabled={disabled}
+            onUndo={() => {}}
+            swapTile={null}
+            onSwap={() => {}}
+            overId={null}
+            freshId={null}
+            changedIds={[]}
+            shake={false}
+            disabled={false}
+            {...options}
         />,
     );
 }
@@ -136,5 +140,28 @@ describe('SolutionTree', () => {
         expect(screen.getByRole('button', { name: 'Cambiar 100 por 8' }).getAttribute('data-leaf')).toBe(
             String(challenge.numbers.indexOf(100)),
         );
+    });
+
+    // CSS modules add a hash to each class name, so the tests look for the name inside it.
+    it('marks the newest result so it grows into the tree', () => {
+        const first = play(initialState(challenge), 100, '×', 3);
+        const state = play(first, 300, '+', 25);
+        renderTree(state, { freshId: state.steps[1].result.id });
+
+        expect(screen.getByRole('group', { name: '300 + 25 = 325' }).className).toMatch(/fresh/);
+        expect(screen.getByRole('group', { name: '100 × 3 = 300' }).className).not.toMatch(/fresh/);
+    });
+
+    it('marks the numbers that changed in the last swap so they flash', () => {
+        const state = play(initialState(challenge), 100, '×', 3);
+        renderTree(state, { changedIds: [state.steps[0].result.id] });
+
+        expect(screen.getByRole('button', { name: 'Deshacer 100 × 3 = 300' }).className).toMatch(/changed/);
+    });
+
+    it('shakes the tree after a swap that does not work', () => {
+        renderTree(play(initialState(challenge), 100, '×', 3), { shake: true });
+
+        expect(screen.getByRole('list', { name: 'Cómo has llegado' }).className).toMatch(/shake/);
     });
 });

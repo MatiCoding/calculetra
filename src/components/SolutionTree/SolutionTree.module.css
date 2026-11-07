@@ -161,3 +161,69 @@
     font-weight: 800;
     font-size: 0.8rem;
 }
+
+/* A new result grows into the tree. */
+.fresh {
+    animation: grow 500ms var(--spring) both;
+    transform-origin: top;
+}
+
+@keyframes grow {
+    from {
+        scale: 0.4;
+        opacity: 0;
+    }
+}
+
+/* The numbers that can be swapped wiggle, except the one under the dragged tile. */
+.swappable {
+    transition: scale 150ms ease, box-shadow 150ms ease;
+    animation: wiggle 1s ease-in-out infinite;
+}
+
+.swappable.over {
+    animation: none;
+}
+
+@keyframes wiggle {
+    50% {
+        rotate: -5deg;
+    }
+}
+
+/* After a swap, the numbers that changed flash for a moment. */
+.changed {
+    animation: flash 700ms var(--spring);
+}
+
+@keyframes flash {
+    0% {
+        scale: 0.6;
+        background-color: var(--color-letter);
+        color: white;
+    }
+}
+
+/* After a swap that does not work, the tree shakes. */
+.shake {
+    animation: shake 400ms;
+}
+
+@keyframes shake {
+    20%, 60% {
+        translate: -6px 0;
+    }
+    40%, 80% {
+        translate: 6px 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .fresh, .swappable, .changed, .shake {
+        animation: none;
+    }
+
+    .swappable {
+        transition: none;
+    }
+}

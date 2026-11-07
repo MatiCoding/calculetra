@@ -16,6 +16,7 @@ export type GameState = {
     operator: Operator | null,
     error: OperationError | null,
     substituteError: SubstituteError | null,
+    changedIds: Array<number>,   // The tiles that changed in the last swap: the new number and the results with a new value.
     finished: boolean
 }
 export type GameAction =

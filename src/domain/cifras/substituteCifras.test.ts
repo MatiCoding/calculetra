@@ -212,6 +212,36 @@ describe('substitute', () => {
   });
 });
 
+describe('changedIds', () => {
+  it('starts empty', () => {
+    expect(initialState(challenge).changedIds).toEqual([]);
+  });
+
+  it('has the new number and the results whose value changed after a swap', () => {
+    const first = play(initialState(challenge), 100, '+', 75);
+    const second = play(first, 8, '×', 3);
+    const third = play(second, 175, '-', 24);
+    const state = swap(third, 75, 50);
+
+    // 100 + 50 = 150 and 150 − 24 = 126 change; 8 × 3 = 24 does not.
+    expect(state.changedIds).toEqual([startingId(50), state.steps[0].result.id, state.steps[2].result.id]);
+  });
+
+  it('is empty when a swap fails', () => {
+    const played = play(initialState(challenge), 50, '-', 25);
+
+    expect(swap(played, 25, 75).changedIds).toEqual([]);
+  });
+
+  it('is emptied when the player does something else', () => {
+    const played = play(initialState(challenge), 100, '+', 75);
+    const swapped = swap(played, 75, 25);
+    const state = gameReducer(swapped, { type: 'selectTile', id: startingId(75) });
+
+    expect(state.changedIds).toEqual([]);
+  });
+});
+
 describe('swapCandidate', () => {
   it('is the selected starting number when there is a tree', () => {
     const played = play(initialState(challenge), 100, '+', 75);

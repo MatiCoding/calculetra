@@ -36,6 +36,14 @@
     background-color: var(--color-card);
     color: var(--color-text);
     border: 1px solid var(--border);
+    animation: peek 250ms var(--srping) both;
+}
+
+@keyframes peek {
+    from {
+        translate: -50% 0;
+        opacity: 0;
+    }
 }
 
 .preview[data-kind="close"] {
@@ -79,6 +87,13 @@
 
 .tile.calculated {
     background-color: var(--color-result);
+    animation: pop 450ms var(--spring) both;
+}
+
+@keyframes pop {
+    from {
+        scale: 0;
+    }
 }
 
 .tile[aria-pressed="true"] {
@@ -228,5 +243,9 @@
 @media (prefers-reduced-motion: reduce) {
     .tile, .operatorButton, .primary, .secondary {
         transition: none;
+    }
+
+    .tile.calculated, .preview {
+        animation: none;
     }
 }
