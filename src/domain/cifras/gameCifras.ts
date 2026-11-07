@@ -1,5 +1,6 @@
 import { applyOperation } from './operation';
 import type { Challenge, GameAction, GameState, Tile } from './typesCifras';
+import { substitute } from './substituteCifras';
 
 export function initialState(challenge: Challenge): GameState {
     return {
@@ -9,11 +10,21 @@ export function initialState(challenge: Challenge): GameState {
         selectedId: null,
         operator: null,
         error: null,
+        substituteError: null,
         finished: false,
     };
 }
 
 export function gameReducer(state: GameState, action: GameAction): GameState {
+    const next = reduce(state, action);
+    // The message of a failed swap only lasts until the player does something else.
+    if (action.type === 'substitute' || next.substituteError === null){
+        return next;
+    }
+    return {...next, substituteError: null};
+}
+
+export function reduce(state: GameState, action: GameAction): GameState {
     if (state.finished && action.type !== 'reset') {
         return state;
     }
@@ -86,7 +97,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 error: null,
             };
         }
-        
+        case 'substitute':
+            return substitute(state, action.oldTileId, action.newTileId);        
         case 'reset':
             return initialState(state.challenge);
         case 'finish':
