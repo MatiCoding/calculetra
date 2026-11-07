@@ -85,7 +85,7 @@ function NumbersGame() {
                                     }
                                 }}
                                 disabled={state.finished}
-                                className={`${styles.tile} ${drag?.tile.id === tile.id ? styles.dragging : ''}`}
+                                className={`${styles.tile} ${tile.id >= state.challenge.numbers.length ? styles.calculated : ''} ${drag?.tile.id === tile.id ? styles.dragging : ''}`}
                             >
                                 {tile.value}
                             </button>

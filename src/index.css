@@ -7,6 +7,10 @@
     --color-number: #e8a317;
     --color-accent: #1e5aa8;
     --color-danger: #b42318;
+    --blue-dark: #154483;
+    --orange-dark: #b57d0c;
+    --color-result: #f6c75a;
+    --border: rgba(31, 36, 48, 0.14);
 }
 
 body {

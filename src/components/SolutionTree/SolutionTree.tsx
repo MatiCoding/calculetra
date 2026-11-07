@@ -15,8 +15,12 @@ function SolutionTree({ trees, ...nodeProps }: Props) {
     return (
         <section aria-labelledby="solution-tree-title" className={styles.box}>
             <h3 id="solution-tree-title" className={styles.title}>Cómo has llegado</h3>
+            <p className={styles.description}>
+                Pulsa un resultado para deshacer esa rama. Arrastra un número libre encima de otro del árbol
+                para cambiarlo y se recalcula todo lo que cuelga de él.
+            </p>
             {trees.length === 0 ? (
-                <p className={styles.empty}>Aquí verás de dónde sale cada número que calcules.</p>
+                <p className={styles.empty}>Aún no has hecho ninguna operación.</p>
             ) : (
                 <ul aria-label="Cómo has llegado" className={styles.trees}>
                     {trees.map((tree) => (
