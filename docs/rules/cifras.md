@@ -26,9 +26,39 @@ When an operation is rejected, the board does not change, an error message is sh
 
 Picking the selected number again deselects it.
 
+### Result preview
+
+After you pick a number and an operator, every other number on the board shows a small label above it with the result it would give (`= 600`), before you pick it:
+
+- **Orange:** the result is 10 or less away from the target.
+- **Blue:** the result is the target.
+- **Crossed out ("no vale"):** the operation is not allowed.
+
+### Cómo has llegado (the solution tree)
+
+Below the board (to its right on wide screens), the **Cómo has llegado** box shows a tree for each number you have calculated. Each result hangs from the two numbers it was made from, with the operator between them.
+
+Tapping a result in the tree undoes that branch: the operation that made it and every later operation that used it, directly or not. Its numbers go back to the board. The other branches stay as they are, even if they were made later.
+
+### Swapping a number
+
+You can try a small change without undoing and redoing every step. For example: "what if I use the 25 instead of the 75?".
+
+- **By dragging:** drag a free starting number from the board onto a starting number in the tree.
+- **By tapping:** tap a free starting number on the board (without picking an operator), then tap a number in the tree.
+
+While you drag, or after you tap, the numbers in the tree that can be swapped are highlighted. On mobile, dragging near the top or bottom edge of the screen scrolls the page so the tree can be reached.
+
+The two numbers swap places: the new one goes into the tree and the old one goes back to the board. Every operation that depends on it is calculated again, and the results whose value changed flash for a moment.
+
+- Only starting numbers can be swapped, not calculated results.
+- If any operation stops being valid after the swap (a result of 0 or less, or a division that is not exact), nothing changes and a message explains why, for example "Con 25 no sale: el resultado tiene que ser mayor que 0".
+- If a new result is the target, the game ends as usual.
+
 ## Buttons
 
 - **Deshacer (Undo)** removes the last operation and puts its two numbers back on the board. You can undo step by step back to the start.
+- **A result in the tree** undoes that branch of the tree (see [Cómo has llegado](#como-has-llegado-the-solution-tree)).
 - **Reiniciar (Reset)** goes back to the original 6 numbers and clears all operations. It works even after the game has finished.
 - **Terminar (Finish)** ends the game with the numbers you have.
 
@@ -39,7 +69,7 @@ The game ends when:
 - you reach the target exactly (it finishes on its own), or
 - you press **Terminar**.
 
-Once the game has finished you cannot undo or keep playing. You can only reset.
+Once the game has finished you cannot undo, swap numbers or keep playing. You can only reset.
 
 > **Not implemented yet:** the game does not finish on its own when only one number is left on the board. You have to press **Terminar**. This is planned for a future version.
 
