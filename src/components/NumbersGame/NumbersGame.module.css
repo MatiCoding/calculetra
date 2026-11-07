@@ -1,23 +1,44 @@
-.target {
-    font-size: 2rem;
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    max-width: 720px;
+    margin: 0 auto;
+    padding-inline: 16px;
+    font-family: 'Inter Variable', sans-serif;
 }
 
-.container {
-    padding-inline: 16px;
+.eyebrow {
+    margin: 0;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-muted);
 }
+
+.target {
+    margin: 0;
+    font-size: 3rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+
 
 .numbersUl {
     list-style: none;
-    padding: 32px 0 0;
+    margin: 0;
+    padding: 30px 0 0;
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
-    gap: 10px;
-    margin-inline: auto;
+    align-items: flex-end;
+    gap: 12px;
 }
 
 .tileItem {
-    flex: 0 1 72px;
-    min-width: 0;
     position: relative;
 }
 
@@ -29,14 +50,14 @@
     white-space: nowrap;
     padding: 3px 8px;
     border-radius: 999px;
-    font-size: clamp(0.625rem, 2.5vw, 0.8rem);
+    font-size: 0.8rem;
     font-weight: 800;
     font-variant-numeric: tabular-nums;
     line-height: 1.2;
     background-color: var(--color-card);
     color: var(--color-text);
     border: 1px solid var(--border);
-    animation: peek 250ms var(--srping) both;
+    animation: peek 250ms var(--spring) both;
 }
 
 @keyframes peek {
@@ -65,6 +86,7 @@
 }
 
 .tile {
+    --size: 56px;
     border: none;
     font: inherit;
     padding: 0;
@@ -72,16 +94,17 @@
     display: grid;
     place-items: center;
     cursor: pointer;
-    width: 100%;
-    aspect-ratio: 1;
+    width: var(--size);
+    height: var(--size);
     border-radius: 50%;
     background-color: var(--color-number);
     color: var(--color-text);
     font-weight: 800;
-    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
-    font-size: clamp(1rem, 4vw, 1.5rem);
+    font-size: calc(var(--size) * 0.4);
+    box-shadow: 0 4px 0 var(--orange-dark);
 
     transition: translate 150ms ease, box-shadow 150ms ease;
+    /* On touch screens, moving the finger drags the tile instead of scrolling. */
     touch-action: none;
 }
 
@@ -98,7 +121,7 @@
 
 .tile[aria-pressed="true"] {
     box-shadow: 0 0 0 3px var(--color-letter),
-                0 6px 0 rgba(0, 0, 0, 0.2);
+                0 6px 0 var(--orange-dark);
     translate: 0 -4px;
 }
 
@@ -107,9 +130,9 @@
 }
 
 .ghost {
+    --size: 60px;
     position: fixed;
     z-index: 40;
-    width: 60px;
     pointer-events: none;
     scale: 1.1;
     rotate: -6deg;
@@ -123,73 +146,77 @@
 }
 
 .operatorButton {
-    width: 48px;
-    height: 48px;
-    border-radius: 4px;
+    width: 46px;
+    height: 46px;
+    border-radius: 8px;
     background-color: var(--color-letter);
     color: white;
     border: none;
     font: inherit;
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     font-weight: 700;
     cursor: pointer;
-    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 0 var(--blue-dark);
 
-    transition: translate 150ms ease, box-shadow 150ms ease;
+    transition: translate 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
 }
 
 .operatorButton[aria-pressed="true"] {
     background-color: white;
     color: var(--color-letter);
     box-shadow: 0 0 0 3px var(--color-letter),
-                0 6px 0 rgba(0, 0, 0, 0.2);
+                0 6px 0 var(--blue-dark);
     translate: 0 -4px;
 }
 
 .error {
-    color: #b42318;
+    margin: 0;
+    min-height: 1.4em;
+    color: var(--color-danger);
     font-weight: 600;
 }
 
 .actions {
     display: flex;
     justify-content: center;
-    gap: 12px;
+    gap: 10px;
     flex-wrap: wrap;
-    margin-top: 16px;
 }
 
 .primary, .secondary {
     cursor: pointer;
     font: inherit;
-    font-weight: 600;
-    padding: 12px 20px;
     border-radius: 12px;
-    transition: opacity 150ms ease, background-color 150ms ease;
+    transition: translate 150ms ease, box-shadow 150ms ease;
 }
 
 .primary {
-    background-color: var(--color-accent);
+    border: none;
+    padding: 12px 22px;
+    font-weight: 700;
+    background-color: var(--color-letter);
     color: white;
-    border: 1px solid transparent;
+    box-shadow: 0 4px 0 var(--blue-dark);
 }
 
 .primary:hover:not(:disabled) {
-    opacity: 0.85;
+    translate: 0 -2px;
+    box-shadow: 0 6px 0 var(--blue-dark);
+}
+
+.primary:active:not(:disabled) {
+    translate: 0 3px;
+    box-shadow: 0 1px 0 var(--blue-dark);
 }
 
 .secondary {
+    padding: 10px 16px;
+    font-weight: 600;
     background-color: transparent;
     color: var(--color-text);
-    border: 1px solid rgba(31, 36, 48, 0.15);
+    border: 1px solid var(--border);
 }
 
-.secondary:hover:not(:disabled) {
-    background-color: rgba(31, 36, 48, 0.05);
-}
-
-.tile:focus-visible,
-.operatorButton:focus-visible,
 .primary:focus-visible,
 .secondary:focus-visible {
     outline: 3px solid var(--color-text);
@@ -238,6 +265,20 @@
 .result .score {
     font-size: 3rem;
     color: var(--color-letter);
+}
+
+@media (max-width: 420px) {
+    .container {
+        gap: 10px;
+    }
+
+    .tile {
+        --size: 48px;
+    }
+
+    .ghost {
+        --size: 50px;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {

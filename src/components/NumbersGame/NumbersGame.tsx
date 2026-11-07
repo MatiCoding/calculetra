@@ -1,5 +1,5 @@
 import { useReducer } from 'react';
-import { getDailyChallenge } from '../../domain/cifras/challengeCifras';
+import { getChallengeNumber, getDailyChallenge } from '../../domain/cifras/challengeCifras';
 import { gameReducer, initialState } from '../../domain/cifras/gameCifras';
 import {calculateScore, getBestValue} from '../../domain/cifras/scoreCifras';
 import type { OperationError, Operator, GameState, Tile } from '../../domain/cifras/typesCifras';
@@ -60,7 +60,10 @@ function NumbersGame() {
 
     return (
         <div className={styles.container}>
-            <h2 className={styles.target}>Objetivo: {state.challenge.target}</h2>
+            <p className={styles.eyebrow}>Reto nº {getChallengeNumber(new Date())} · objetivo</p>
+            <h2 className={styles.target} aria-label={`Objetivo: ${state.challenge.target}`}>
+                {state.challenge.target}
+            </h2>
             <p role="status" className={styles.hint}>{hintText(state, swapTile)}</p>
             <ul aria-label="Números" className={styles.numbersUl}>
                 {state.tiles.map((tile) => {
@@ -107,7 +110,7 @@ function NumbersGame() {
                     </button>
                 ))}
             </div>
-            {error !== null && <p role="alert" className={styles.error}>{error}</p>}
+            <p role="alert" className={styles.error}>{error}</p>
 
             <SolutionTree
                 trees={buildTree(state.steps)}

@@ -1,8 +1,9 @@
 .box {
     --tree-line: rgba(31, 36, 48, 0.25);
-    margin: 16px auto 0;
     padding: 18px;
-    max-width: 720px;
+    box-sizing: border-box;
+    width: 100%;
+    margin-top: 8px;
     min-height: 200px;
     border: 1px solid var(--border);
     border-radius: 22px;
@@ -92,6 +93,7 @@
 }
 
 .leaf, .result {
+    box-sizing: border-box;
     display: grid;
     place-items: center;
     min-width: 42px;
@@ -101,7 +103,7 @@
     font-weight: 800;
     font-size: 1.05rem;
     color: var(--color-text);
-    box-shadow: 0 4px 0 var(--orange_dark);
+    box-shadow: 0 4px 0 var(--orange-dark);
 }
 
 .leaf {
@@ -112,12 +114,12 @@
     border: none;
     font-family: inherit;
     cursor: pointer;
-    box-shadow: 0 0 0 4px var(--blue-dark), 0 4px 0 var(--orange-dark);
+    box-shadow: 0 0 0 3px var(--color-letter), 0 4px 0 var(--orange-dark);
 }
 
 .swappable.over {
     scale: 1.2;
-    box-shadow: 0 0 0 4px var(--color-letter);
+    box-shadow: 0 0 0 4px var(--blue-dark), 0 4px 0 var(--orange-dark);
 }
 
 .swappable:focus-visible {
@@ -153,13 +155,13 @@
     z-index: 1;
     display: grid;
     place-items: center;
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     border-radius: 6px;
     background-color: var(--color-letter);
     color: white;
     font-weight: 800;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
 }
 
 /* A new result grows into the tree. */
@@ -215,6 +217,12 @@
     }
     40%, 80% {
         translate: 6px 0;
+    }
+}
+
+@media (max-width: 420px) {
+    .box {
+        padding: 14px;
     }
 }
 

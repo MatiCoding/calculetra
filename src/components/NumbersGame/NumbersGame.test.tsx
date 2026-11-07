@@ -283,7 +283,7 @@ describe('NumbersGame', () => {
         clickButton(`Cambiar ${smallest.value} por ${biggest.value}`);
         clickNumber(0);
 
-        expect(screen.queryByRole('alert')).toBeNull();
+        expect(screen.getByRole('alert').textContent).toBe('');
     });
 
     describe('dragging a number onto the tree', () => {
@@ -410,7 +410,7 @@ describe('NumbersGame', () => {
         clickNumber(biggest);
         clickNumber(0);
 
-        expect(screen.queryByRole('alert')).toBeNull();
+        expect(screen.getByRole('alert').textContent).toBe('');
     });
 
     it('undoes the last step', () => {

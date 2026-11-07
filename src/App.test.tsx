@@ -45,7 +45,7 @@ describe('App routes', () => {
   it('shows the Cifras game on /cifras', () => {
     renderAt('/cifras');
 
-    expect(screen.getByText(/Objetivo/)).toBeTruthy();
+    expect(screen.getByRole('heading', { name: /Objetivo/ })).toBeTruthy();
   });
 
   it('opens the Cifras game from its card on the home page', () => {
@@ -55,7 +55,7 @@ describe('App routes', () => {
 
     fireEvent.click(playButton('Cifras'));
 
-    expect(screen.getByText(/Objetivo/)).toBeTruthy();
+    expect(screen.getByRole('heading', { name: /Objetivo/ })).toBeTruthy();
   });
 
   it('opens the Letras game from its card on the home page', () => {
