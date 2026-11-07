@@ -321,12 +321,52 @@
     }
 }
 
+/* Entrance from the home page: the orange that filled the screen shrinks
+   until it is the size of a tile, and the six tiles come out of it to their place. */
+.cover {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    background-color: var(--color-number);
+    clip-path: circle(100vmax at 50% 50%);
+    animation:
+        shrink 450ms ease-in forwards,
+        hide 0s 600ms forwards;
+}
+
+@keyframes shrink {
+    to {
+        clip-path: circle(28px at 50% 50%);
+    }
+}
+
+@keyframes hide {
+    to {
+        visibility: hidden;
+    }
+}
+
+.intro .tile {
+    position: relative;
+    z-index: 41;
+    animation: flyIn 700ms var(--spring) calc(450ms + var(--delay, 0ms)) both;
+}
+
+/* While a tile waits for its turn it is hidden, so the numbers do not show
+   before the orange has shrunk. */
+@keyframes flyIn {
+    from {
+        translate: var(--from-x, 0) var(--from-y, 0);
+        visibility: hidden;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .tile, .operatorButton, .primary, .secondary {
         transition: none;
     }
 
-    .tile.calculated, .preview {
+    .tile.calculated, .preview, .intro, .tile, .cover {
         animation: none;
     }
 }

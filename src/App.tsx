@@ -1,4 +1,5 @@
-import { Outlet, Route, Routes } from 'react-router'
+import { Outlet, Route, Routes, useLocation, useNavigate } from 'react-router'
+import { useEffect } from 'react'
 
 import Header from './components/Header/Header'
 import NumbersGame from './components/NumbersGame/NumbersGame'
@@ -15,6 +16,20 @@ import PrivacyPage from './components/PrivacyPage/PrivacyPage'
 import HomePage from './components/HomePage/HomePage'
 import BackToGames from './components/BackToGames/BackToGames'
 import LettersGame from './components/LettersGame/LettersGame'
+
+// Cifras plays its entrance only when it comes from the home page, which says so in the navigation state.
+function CifrasPage() {
+  const location = useLocation()
+  const navigate = useNavigate()
+  const intro = location.state?.intro === true
+
+  // Forget the state, so reloading the page does not play the entrance again.
+  useEffect(() => {
+    if (intro) navigate(location.pathname, { replace: true })
+  }, [intro, navigate, location.pathname])
+
+  return <NumbersGame intro={intro} />
+}
 
 function WithHeader() {
   return (
@@ -41,7 +56,7 @@ function App() {
               </>
             }
           />
-          <Route path="/cifras" element={<main><BackToGames /><NumbersGame /></main>} />
+          <Route path="/cifras" element={<main><BackToGames /><CifrasPage /></main>} />
           <Route path="/letras" element={<main><BackToGames /><LettersGame /></main>} />
           <Route path="/account" element={<main><RequireAuth><AccountPage /></RequireAuth></main>} />
           <Route path="/forgot-password" element={<main><ForgotPasswordForm /></main>} />

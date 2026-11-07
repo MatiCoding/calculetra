@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { getDailyChallenge } from '../../domain/cifras/challengeCifras';
 import { gameReducer, initialState } from '../../domain/cifras/gameCifras';
@@ -284,6 +284,33 @@ describe('NumbersGame', () => {
         clickNumber(0);
 
         expect(screen.getByRole('alert').textContent).toBe('');
+    });
+
+    describe('entrance from the home page', () => {
+        it('has no orange cover by default', () => {
+            render(<NumbersGame />);
+
+            expect(screen.queryByTestId('intro-cover')).toBeNull();
+        });
+
+        it('covers the page with orange and lets each tile fly a bit later than the one before', () => {
+            render(<NumbersGame intro />);
+
+            expect(screen.getByTestId('intro-cover')).toBeTruthy();
+            expect(numberButtons().map((tile) => tile.style.getPropertyValue('--delay')))
+                .toEqual(['0ms', '30ms', '60ms', '90ms', '120ms', '150ms']);
+        });
+
+        it('removes the cover when the entrance ends', () => {
+            vi.useFakeTimers({ toFake: ['Date', 'setTimeout', 'clearTimeout'] });
+            render(<NumbersGame intro />);
+
+            act(() => vi.advanceTimersByTime(1499));
+            expect(screen.getByTestId('intro-cover')).toBeTruthy();
+
+            act(() => vi.advanceTimersByTime(1));
+            expect(screen.queryByTestId('intro-cover')).toBeNull();
+        });
     });
 
     describe('dragging a number onto the tree', () => {

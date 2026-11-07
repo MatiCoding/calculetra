@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { fakeDialog } from './test/fakeDialog';
@@ -56,6 +56,29 @@ describe('App routes', () => {
     fireEvent.click(playButton('Cifras'));
 
     expect(screen.getByRole('heading', { name: /Objetivo/ })).toBeTruthy();
+  });
+
+  it('plays the entrance of Cifras only when it comes from the home page', () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    renderAt('/');
+
+    // The Cifras card is in the centre, so a click grows it and then opens the game.
+    fireEvent.click(screen.getByRole('button', { name: /Seis números/ }));
+    act(() => vi.advanceTimersByTime(500));
+
+    expect(screen.getByRole('heading', { name: /Objetivo/ })).toBeTruthy();
+    expect(screen.getByTestId('intro-cover')).toBeTruthy();
+
+    // When the entrance ends, the orange cover goes away.
+    act(() => vi.advanceTimersByTime(1500));
+    expect(screen.queryByTestId('intro-cover')).toBeNull();
+    vi.useRealTimers();
+  });
+
+  it('does not play the entrance when /cifras is opened directly', () => {
+    renderAt('/cifras');
+
+    expect(screen.queryByTestId('intro-cover')).toBeNull();
   });
 
   it('opens the Letras game from its card on the home page', () => {
