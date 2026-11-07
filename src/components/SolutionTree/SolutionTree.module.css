@@ -235,3 +235,11 @@
         transition: none;
     }
 }
+
+@media (min-width: 900px) {
+    .box {
+        grid-area: tree;
+        align-self: start;
+        margin-top: 0;
+    }
+}

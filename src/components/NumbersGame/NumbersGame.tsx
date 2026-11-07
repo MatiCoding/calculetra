@@ -60,57 +60,59 @@ function NumbersGame() {
 
     return (
         <div className={styles.container}>
-            <p className={styles.eyebrow}>Reto nº {getChallengeNumber(new Date())} · objetivo</p>
-            <h2 className={styles.target} aria-label={`Objetivo: ${state.challenge.target}`}>
-                {state.challenge.target}
-            </h2>
-            <p role="status" className={styles.hint}>{hintText(state, swapTile)}</p>
-            <ul aria-label="Números" className={styles.numbersUl}>
-                {state.tiles.map((tile) => {
-                    const preview = previewOperation(state, tile.id);
-                    return (
-                        <li key={tile.id} className={styles.tileItem}>
-                            {preview !== null && (
-                                <span className={styles.preview} data-kind={previewKind(preview, state.challenge.target)}>
-                                    {preview.ok ? `= ${preview.value}` : 'no vale'}
-                                </span>
-                            )}
-                            <button
-                                aria-pressed={tile.id === state.selectedId}
-                                onPointerDown={(event) => {
-                                    if (canDragToTree(state, tile.id)) {
-                                        startPress(event, tile);
-                                    }
-                                }}
-                                onClick={() => {
-                                    if (!wasDragged()) {
-                                        dispatch({ type: 'selectTile', id: tile.id });
-                                    }
-                                }}
-                                disabled={state.finished}
-                                className={`${styles.tile} ${tile.id >= state.challenge.numbers.length ? styles.calculated : ''} ${drag?.tile.id === tile.id ? styles.dragging : ''}`}
-                            >
-                                {tile.value}
-                            </button>
-                        </li>
-                    );
-                })}
-            </ul>
-            <div role="group" aria-label="Operaciones" className={styles.operators}>
-                {OPERATORS.map(({ operator, label, symbol }) => (
-                    <button
-                        key={operator}
-                        aria-label={label}
-                        aria-pressed={operator === state.operator}
-                        onClick={() => dispatch({ type: 'selectOperator', operator })}
-                        disabled={state.finished}
-                        className={styles.operatorButton}
-                    >
-                        {symbol}
-                    </button>
-                ))}
+            <div className={styles.top}>
+                <p className={styles.eyebrow}>Reto nº {getChallengeNumber(new Date())} · objetivo</p>
+                <h2 className={styles.target} aria-label={`Objetivo: ${state.challenge.target}`}>
+                    {state.challenge.target}
+                </h2>
+                <p role="status" className={styles.hint}>{hintText(state, swapTile)}</p>
+                <ul aria-label="Números" className={styles.numbersUl}>
+                    {state.tiles.map((tile) => {
+                        const preview = previewOperation(state, tile.id);
+                        return (
+                            <li key={tile.id} className={styles.tileItem}>
+                                {preview !== null && (
+                                    <span className={styles.preview} data-kind={previewKind(preview, state.challenge.target)}>
+                                        {preview.ok ? `= ${preview.value}` : 'no vale'}
+                                    </span>
+                                )}
+                                <button
+                                    aria-pressed={tile.id === state.selectedId}
+                                    onPointerDown={(event) => {
+                                        if (canDragToTree(state, tile.id)) {
+                                            startPress(event, tile);
+                                        }
+                                    }}
+                                    onClick={() => {
+                                        if (!wasDragged()) {
+                                            dispatch({ type: 'selectTile', id: tile.id });
+                                        }
+                                    }}
+                                    disabled={state.finished}
+                                    className={`${styles.tile} ${tile.id >= state.challenge.numbers.length ? styles.calculated : ''} ${drag?.tile.id === tile.id ? styles.dragging : ''}`}
+                                >
+                                    {tile.value}
+                                </button>
+                            </li>
+                        );
+                    })}
+                </ul>
+                <div role="group" aria-label="Operaciones" className={styles.operators}>
+                    {OPERATORS.map(({ operator, label, symbol }) => (
+                        <button
+                            key={operator}
+                            aria-label={label}
+                            aria-pressed={operator === state.operator}
+                            onClick={() => dispatch({ type: 'selectOperator', operator })}
+                            disabled={state.finished}
+                            className={styles.operatorButton}
+                        >
+                            {symbol}
+                        </button>
+                    ))}
+                </div>
+                <p role="alert" className={styles.error}>{error}</p>
             </div>
-            <p role="alert" className={styles.error}>{error}</p>
 
             <SolutionTree
                 trees={buildTree(state.steps)}
@@ -137,31 +139,33 @@ function NumbersGame() {
                     {drag.tile.value}
                 </span>
             )}            
+            
+            <div className={styles.bottom}>
+                <div className={styles.actions}>
+                    <button onClick={() => dispatch({ type: 'undo' })} disabled={state.steps.length === 0 || state.finished} className={styles.secondary}>
+                        Deshacer
+                    </button>
+                    <button onClick={() => dispatch({ type: 'finish' })} disabled={state.finished} className={styles.primary}>
+                        Terminar
+                    </button>
+                    <button onClick={() => dispatch({ type: 'reset' })} className={styles.secondary}>
+                        Reiniciar
+                    </button>
+                </div>
 
-            <div className={styles.actions}>
-                <button onClick={() => dispatch({ type: 'undo' })} disabled={state.steps.length === 0 || state.finished} className={styles.secondary}>
-                    Deshacer
-                </button>
-                <button onClick={() => dispatch({ type: 'finish' })} disabled={state.finished} className={styles.primary}>
-                    Terminar
-                </button>
-                <button onClick={() => dispatch({ type: 'reset' })} className={styles.secondary}>
-                    Reiniciar
-                </button>
+                {state.finished && (
+                    <section aria-label="Resultado" className={styles.result}>
+                        <dl>
+                            <dt>Puntos</dt>
+                            <dd className={styles.score}>{calculateScore(state.challenge.target, bestValue)}</dd>
+                            <dt>Mejor número</dt>
+                            <dd>{bestValue}</dd>
+                            <dt>Distancia</dt>
+                            <dd>{Math.abs(bestValue - state.challenge.target)}</dd>
+                        </dl>
+                    </section>
+                )}
             </div>
-
-            {state.finished && (
-                <section aria-label="Resultado" className={styles.result}>
-                    <dl>
-                        <dt>Puntos</dt>
-                        <dd className={styles.score}>{calculateScore(state.challenge.target, bestValue)}</dd>
-                        <dt>Mejor número</dt>
-                        <dd>{bestValue}</dd>
-                        <dt>Distancia</dt>
-                        <dd>{Math.abs(bestValue - state.challenge.target)}</dd>
-                    </dl>
-                </section>
-            )}
         </div>
     );
 }
