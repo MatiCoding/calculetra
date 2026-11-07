@@ -67,18 +67,18 @@ describe('App routes', () => {
     act(() => vi.advanceTimersByTime(500));
 
     expect(screen.getByRole('heading', { name: /Objetivo/ })).toBeTruthy();
-    expect(screen.getByTestId('intro-cover')).toBeTruthy();
+    expect(screen.getAllByTestId('intro-magnet')).toHaveLength(6);
 
-    // When the entrance ends, the orange cover goes away.
-    act(() => vi.advanceTimersByTime(1500));
-    expect(screen.queryByTestId('intro-cover')).toBeNull();
+    // When the entrance ends, the orange circles go away.
+    act(() => vi.advanceTimersByTime(1400));
+    expect(screen.queryAllByTestId('intro-magnet')).toHaveLength(0);
     vi.useRealTimers();
   });
 
   it('does not play the entrance when /cifras is opened directly', () => {
     renderAt('/cifras');
 
-    expect(screen.queryByTestId('intro-cover')).toBeNull();
+    expect(screen.queryAllByTestId('intro-magnet')).toHaveLength(0);
   });
 
   it('opens the Letras game from its card on the home page', () => {

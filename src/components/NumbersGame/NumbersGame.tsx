@@ -1,4 +1,4 @@
-import { useLayoutEffect, useReducer, useRef, useState } from 'react';
+import { useEffect, useReducer, useState } from 'react';
 import { getChallengeNumber, getDailyChallenge } from '../../domain/cifras/challengeCifras';
 import { gameReducer, initialState } from '../../domain/cifras/gameCifras';
 import {calculateScore, getBestValue} from '../../domain/cifras/scoreCifras';
@@ -49,8 +49,12 @@ function errorText(state: GameState): string | null {
     return state.error === null ? null : ERROR_MESSAGES[state.error];
 }
 
-// How long the entrance from the home page lasts: the orange shrinks and then the tiles fly to their place.
-const INTRO_MS = 1500;
+// How long the entrance from the home page lasts: the orange shrinks onto the tiles and their numbers appear.
+const INTRO_MS = 1400;
+// Each orange circle starts a bit later than the one before.
+const MAGNET_GAP_MS = 40;
+// How long a circle takes to shrink into its tile.
+const MAGNET_MS = 750;
 
 type Props = {
     intro?: boolean;
@@ -58,28 +62,14 @@ type Props = {
 
 function NumbersGame({ intro = false }: Props) {
     const [playingIntro, setPlayingIntro] = useState(intro);
-    const boardRef = useRef<HTMLUListElement>(null);
 
-    // Before the first paint, every tile learns how far it is from the centre of the screen,
-    // so the animation can start there and fly to its place.
-    useLayoutEffect(() => {
+    // When the entrance ends, the circles are removed.
+    useEffect(() => {
         if (!playingIntro) return;
-        const tiles = boardRef.current?.querySelectorAll('button') ?? [];
-        tiles.forEach((tile, index) => {
-            const rect = tile.getBoundingClientRect();
-            tile.style.setProperty('--from-x', `${window.innerWidth / 2 - (rect.left + rect.width / 2)}px`);
-            tile.style.setProperty('--from-y', `${window.innerHeight / 2 - (rect.top + rect.height / 2)}px`);
-            tile.style.setProperty('--delay', `${index * 30}ms`);
-        });
         const timer = setTimeout(() => setPlayingIntro(false), INTRO_MS);
-        return () => {
-            clearTimeout(timer);
-            tiles.forEach((tile) => {
-                tile.style.removeProperty('--from-x');
-                tile.style.removeProperty('--from-y');
-            });
-        };
+        return () => clearTimeout(timer);
     }, [playingIntro]);
+
     const [state, dispatch] = useReducer(gameReducer, undefined, () => initialState(getDailyChallenge(new Date())));
     const bestValue = getBestValue(state);
     const swapTile = swapCandidate(state);
@@ -90,7 +80,6 @@ function NumbersGame({ intro = false }: Props) {
 
     return (
         <div className={`${styles.container} ${playingIntro ? styles.intro : ''}`}>
-    {playingIntro && <div className={styles.cover} data-testid="intro-cover" aria-hidden="true" />}
             <div className={styles.top}>
                 <p className={styles.eyebrow}>Reto nº {getChallengeNumber(new Date())} · objetivo</p>
                 <h2 className={styles.target} aria-label={`Objetivo: ${state.challenge.target}`}>
@@ -98,7 +87,7 @@ function NumbersGame({ intro = false }: Props) {
                 </h2>
                 <p role="status" className={styles.hint}>{hintText(state, swapTile)}</p>
                 <ul aria-label="Números" className={styles.numbersUl}>
-                    {state.tiles.map((tile) => {
+                    {state.tiles.map((tile, index) => {
                         const preview = previewOperation(state, tile.id);
                         return (
                             <li key={tile.id} className={styles.tileItem}>
@@ -120,10 +109,19 @@ function NumbersGame({ intro = false }: Props) {
                                         }
                                     }}
                                     disabled={state.finished}
+                                    style={playingIntro ? { animationDelay: `${MAGNET_MS + index * MAGNET_GAP_MS}ms` } : undefined}
                                     className={`${styles.tile} ${tile.id >= state.challenge.numbers.length ? styles.calculated : ''} ${drag?.tile.id === tile.id ? styles.dragging : ''}`}
                                 >
                                     {tile.value}
                                 </button>
+                                {playingIntro && (
+                                    <span
+                                        className={styles.magnet}
+                                        data-testid="intro-magnet"
+                                        aria-hidden="true"
+                                        style={{ animationDelay: `${index * MAGNET_GAP_MS}ms` }}
+                                    />
+                                )}
                             </li>
                         );
                     })}
@@ -152,15 +150,15 @@ function NumbersGame({ intro = false }: Props) {
                 overId={drag?.overId ?? null}
                 freshId={state.steps.at(-1)?.result.id ?? null}
                 changedIds={state.changedIds}
-                shake={state.substituteError !== null}                
+                shake={state.substituteError !== null}
                 onSwap={(oldTileId) => {
                     if (swapTile !== null) {
                         dispatch({ type: 'substitute', oldTileId, newTileId: swapTile.id });
                     }
-                }}                
+                }}
                 disabled={state.finished}
             />
-            
+
             {drag !== null && (
                 <span
                     aria-hidden="true"
@@ -169,8 +167,8 @@ function NumbersGame({ intro = false }: Props) {
                 >
                     {drag.tile.value}
                 </span>
-            )}            
-            
+            )}
+
             <div className={styles.bottom}>
                 <div className={styles.actions}>
                     <button onClick={() => dispatch({ type: 'undo' })} disabled={state.steps.length === 0 || state.finished} className={styles.secondary}>

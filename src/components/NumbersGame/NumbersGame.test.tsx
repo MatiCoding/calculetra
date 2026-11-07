@@ -287,29 +287,41 @@ describe('NumbersGame', () => {
     });
 
     describe('entrance from the home page', () => {
-        it('has no orange cover by default', () => {
+        function magnets() {
+            return screen.queryAllByTestId('intro-magnet');
+        }
+
+        it('has no orange circles by default', () => {
             render(<NumbersGame />);
 
-            expect(screen.queryByTestId('intro-cover')).toBeNull();
+            expect(magnets()).toHaveLength(0);
         });
 
-        it('covers the page with orange and lets each tile fly a bit later than the one before', () => {
+        it('puts one orange circle on each tile, each one a bit later than the one before', () => {
             render(<NumbersGame intro />);
 
-            expect(screen.getByTestId('intro-cover')).toBeTruthy();
-            expect(numberButtons().map((tile) => tile.style.getPropertyValue('--delay')))
-                .toEqual(['0ms', '30ms', '60ms', '90ms', '120ms', '150ms']);
+            expect(magnets()).toHaveLength(6);
+            expect(magnets().map((magnet) => magnet.style.animationDelay))
+                .toEqual(['0ms', '40ms', '80ms', '120ms', '160ms', '200ms']);
         });
 
-        it('removes the cover when the entrance ends', () => {
+        it('shows the number of each tile when its circle arrives', () => {
+            render(<NumbersGame intro />);
+
+            expect(numberButtons().map((tile) => tile.style.animationDelay))
+                .toEqual(['750ms', '790ms', '830ms', '870ms', '910ms', '950ms']);
+        });
+
+        it('removes the circles when the entrance ends', () => {
             vi.useFakeTimers({ toFake: ['Date', 'setTimeout', 'clearTimeout'] });
             render(<NumbersGame intro />);
 
-            act(() => vi.advanceTimersByTime(1499));
-            expect(screen.getByTestId('intro-cover')).toBeTruthy();
+            act(() => vi.advanceTimersByTime(1399));
+            expect(magnets()).toHaveLength(6);
 
             act(() => vi.advanceTimersByTime(1));
-            expect(screen.queryByTestId('intro-cover')).toBeNull();
+            expect(magnets()).toHaveLength(0);
+            expect(numberButtons()[0].style.animationDelay).toBe('');
         });
     });
 

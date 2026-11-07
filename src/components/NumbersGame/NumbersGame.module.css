@@ -321,52 +321,62 @@
     }
 }
 
-/* Entrance from the home page: the orange that filled the screen shrinks
-   until it is the size of a tile, and the six tiles come out of it to their place. */
-.cover {
-    position: fixed;
-    inset: 0;
+/* Entrance from the home page. The screen is full of orange because the card
+   grew until it filled it. That orange is really six huge circles, one centred
+   on each tile, so together they cover everything. They shrink until each one
+   is the size of its tile, and then the numbers appear. */
+:global(body):has(.intro) {
+    overflow: hidden;
+}
+
+.magnet {
+    position: absolute;
+    left: 50%;
+    top: 50%;
     z-index: 40;
+    /* 150vmax of radius reaches every corner of the screen from any tile. */
+    width: 300vmax;
+    height: 300vmax;
+    translate: -50% -50%;
+    border-radius: 50%;
     background-color: var(--color-number);
-    clip-path: circle(100vmax at 50% 50%);
-    animation:
-        shrink 450ms ease-in forwards,
-        hide 0s 600ms forwards;
+    pointer-events: none;
+    animation: magnet 750ms cubic-bezier(0.65, 0, 0.35, 1) both;
 }
 
-@keyframes shrink {
+@keyframes magnet {
     to {
-        clip-path: circle(28px at 50% 50%);
-    }
-}
-
-@keyframes hide {
-    to {
+        width: 100%;
+        height: 100%;
         visibility: hidden;
     }
 }
 
+/* The number of each tile appears with a little bounce when its circle arrives. */
 .intro .tile {
-    position: relative;
-    z-index: 41;
-    animation: flyIn 700ms var(--spring) calc(450ms + var(--delay, 0ms)) both;
+    animation: land 450ms var(--spring) both;
 }
 
-/* While a tile waits for its turn it is hidden, so the numbers do not show
-   before the orange has shrunk. */
-@keyframes flyIn {
+@keyframes land {
     from {
-        translate: var(--from-x, 0) var(--from-y, 0);
-        visibility: hidden;
+        color: transparent;
+    }
+    40% {
+        scale: 1.12;
     }
 }
+
 
 @media (prefers-reduced-motion: reduce) {
     .tile, .operatorButton, .primary, .secondary {
         transition: none;
     }
 
-    .tile.calculated, .preview, .intro, .tile, .cover {
+    .tile.calculated, .preview, .intro, .tile {
         animation: none;
+    }
+
+    .magnet {
+        display: none;
     }
 }
