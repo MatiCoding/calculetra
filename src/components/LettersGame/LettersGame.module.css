@@ -80,6 +80,14 @@
     }
 }
 
+.counter {
+    min-height: 1.5em;
+    margin: 16px 0 24px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-muted);
+}
+
 .letters {
     list-style: none;
     padding: 0;

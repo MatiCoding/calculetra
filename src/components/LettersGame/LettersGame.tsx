@@ -6,6 +6,7 @@ import { canSubmit } from '../../domain/letras/wordLetras';
 import styles from './LettersGame.module.css';
 
 const SLOTS = 9;
+const MIN_LETTERS = 3;
 
 type Props = {
     loadWords?: () => Promise<Set<string>>;
@@ -56,6 +57,12 @@ function LettersGame({ loadWords = loadDictionary }: Props) {
     const finished = state.result !== null;
     const slots = Array.from({length: SLOTS }, (_, index) => word[index]);
 
+    let counter = '';
+    if (word.length > 0 && !finished) {
+        counter = `${word.length} ${word.length === 1 ? 'letra' : 'letras'}`;
+        if (word.length < MIN_LETTERS) counter += ` · mínimo ${MIN_LETTERS}`;
+    }
+
     function submit() {
         if (dictionary !== null) dispatch({ type: 'submit', dictionary });
     }
@@ -71,6 +78,8 @@ function LettersGame({ loadWords = loadDictionary }: Props) {
                     </span>
                 ))}
             </output>
+            
+            <p data-testid="counter" className={styles.counter}>{counter}</p>
 
             <ul aria-label="Letras" className={styles.letters}>
                 {state.tiles.map((tile) => (
