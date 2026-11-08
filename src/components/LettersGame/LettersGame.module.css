@@ -7,17 +7,77 @@
     font-size: 1.5rem;
 }
 
-.word {
-    display: block;
-    min-height: 3.5rem;
-    max-width: 560px;
-    margin: 0 auto 24px;
-    padding-bottom: 8px;
-    border-bottom: 3px dashed rgba(31, 36, 48, 0.2);
-    font-size: clamp(1.75rem, 8vw, 2.5rem);
+.board{
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    width: fit-content;
+    margin: 0 auto;
+    padding: 14px;
+    background-color: var(--color-card);
+    border-radius: 20px;
+    box-shadow: 0 2px 0 rgba(30, 90, 168, 0.08), 0 12px 30px -18px rgba(30, 90, 168, 0.45);
+    transition: box-shadow 400ms ease;
+}
+
+.slot {
+    --size: clamp(30px, 8.6vw, 54px);
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: var(--size);
+    height: var(--size);
+    border-radius: 12px;
+    background-color: #e3e9f2;
+    box-shadow: inset 0 3px 6px rgba(30, 90, 168, 0.18);
+}
+
+.slot:nth-child(3)::after {
+    content: '';
+    position: absolute;
+    bottom: -9px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background-color: var(--color-letter);
+    opacity: 0.4;
+}
+
+.letter {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    font-size: calc(var(--size) * 0.5);
     font-weight: 800;
-    letter-spacing: 0.15em;
-    color: var(--color-letter);
+    line-height: 1;
+    background-color: var(--color-letter);
+    color: white;
+    box-shadow: 0 4px 0 var(--blue-dark);
+    animation: drop 320ms var(--spring) both;
+    transition: background-color 300ms ease, box-shadow 300ms ease, color 300ms ease;    
+}
+
+@keyframes drop {
+    from {
+        translate: 0 -26px;
+        opacity: 0;
+        scale: 0.8;
+    }
+}
+
+@media (max-width: 420px) {
+    .board {
+        gap: 4px;
+        padding: 8px;
+        border-radius: 16px;
+    }
+
+    .slot {
+        --size: calc((100vw - 80px) / 9);
+        border-radius: 8px;
+    }
 }
 
 .letters {

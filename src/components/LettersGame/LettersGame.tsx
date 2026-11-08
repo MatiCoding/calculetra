@@ -5,6 +5,8 @@ import { gameReducer, getWord, initialState, isPicked } from '../../domain/letra
 import { canSubmit } from '../../domain/letras/wordLetras';
 import styles from './LettersGame.module.css';
 
+const SLOTS = 9;
+
 type Props = {
     loadWords?: () => Promise<Set<string>>;
 };
@@ -52,6 +54,7 @@ function LettersGame({ loadWords = loadDictionary }: Props) {
     const word = getWord(state);
     const letters = state.tiles.map((tile) => tile.letter);
     const finished = state.result !== null;
+    const slots = Array.from({length: SLOTS }, (_, index) => word[index]);
 
     function submit() {
         if (dictionary !== null) dispatch({ type: 'submit', dictionary });
@@ -61,7 +64,13 @@ function LettersGame({ loadWords = loadDictionary }: Props) {
         <div className={styles.container}>
             <h2 className={styles.title}>Forma la palabra más larga</h2>
 
-            <output aria-label="Tu palabra" className={styles.word}>{word}</output>
+            <output aria-label="Tu palabra" className={styles.board}>
+                {slots.map((letter, index) => (
+                    <span key={index} data-testid="slot" className={styles.slot}>
+                        {letter !== undefined && <span className={styles.letter}>{letter}</span>}
+                    </span>
+                ))}
+            </output>
 
             <ul aria-label="Letras" className={styles.letters}>
                 {state.tiles.map((tile) => (

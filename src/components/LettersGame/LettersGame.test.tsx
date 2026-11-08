@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { getDailyLetters } from '../../domain/letras/challengeLetras';
 import LettersGame from './LettersGame';
@@ -12,7 +12,7 @@ let letters: Array<string>;
 // Renders the game with a fake dictionary and waits until it is loaded.
 async function renderGame(words: Array<string> = []) {
     render(<LettersGame loadWords={async () => new Set(words)} />);
-    await waitFor(() => expect(screen.queryByText('Cargando diccionario…')).toBeNull());
+    await waitFor(() => expect(screen.queryByText('Cargando diccionario...')).toBeNull());
 }
 
 function letterButtons() {
@@ -35,8 +35,36 @@ function button(name: string) {
     return screen.getByRole('button', { name });
 }
 
+function board() {
+    return screen.getByRole('status', { name: 'Tu palabra' });
+}
+
+// The letter in each of the 9 slots, '' for an empty slot. The "+1" is not part of the letter.
+function slotLetters() {
+    return within(board())
+        .getAllByTestId('slot')
+        .map((slot) => slot.firstElementChild?.textContent ?? '');
+}
+
 function shownWord() {
-    return screen.getByRole('status', { name: 'Tu palabra' }).textContent;
+    return slotLetters().join('');
+}
+
+function counter() {
+    return screen.getByTestId('counter').textContent;
+}
+
+// Lets every hop, "+1" and point count finish.
+function finishAnimations() {
+    act(() => {
+        vi.advanceTimersByTime(5000);
+    });
+}
+
+// Sends the word and waits until the result is shown.
+function send() {
+    clickButton('Enviar');
+    finishAnimations();
 }
 
 function isDisabled(element: HTMLElement) {
@@ -51,7 +79,7 @@ function resultValues() {
 
 describe('LettersGame', () => {
     beforeEach(() => {
-        vi.useFakeTimers({ toFake: ['Date'] });
+        vi.useFakeTimers({ toFake: ['Date', 'setTimeout', 'clearTimeout', 'setInterval', 'clearInterval'], shouldAdvanceTime: true });
         vi.setSystemTime(TODAY);
         letters = getDailyLetters(TODAY);
     });
@@ -122,6 +150,65 @@ describe('LettersGame', () => {
         expect(isDisabled(button('Borrar todo'))).toBe(false);
     });
 
+    describe('board', () => {
+        it('shows 9 empty slots at the start', async () => {
+            await renderGame();
+
+            expect(slotLetters()).toEqual(['', '', '', '', '', '', '', '', '']);
+        });
+
+        it('puts each picked letter in the next empty slot', async () => {
+            await renderGame();
+
+            clickLetters(4, 1);
+
+            expect(slotLetters()).toEqual([letters[4], letters[1], '', '', '', '', '', '', '']);
+        });
+
+        it('empties the slots from the right when removing letters', async () => {
+            await renderGame();
+            clickLetters(0, 1, 2);
+
+            clickButton('Borrar letra');
+            expect(slotLetters()).toEqual([letters[0], letters[1], '', '', '', '', '', '', '']);
+
+            clickButton('Borrar todo');
+            expect(slotLetters()).toEqual(['', '', '', '', '', '', '', '', '']);
+        });
+
+        it('starts in the playing state', async () => {
+            await renderGame();
+
+            expect(board().dataset.status).toBe('playing');
+        });
+    });
+
+    describe('counter', () => {
+        it('is empty while there are no letters', async () => {
+            await renderGame();
+
+            expect(counter()).toBe('');
+        });
+
+        it('shows the minimum while the word is too short', async () => {
+            await renderGame();
+
+            clickLetter(0);
+            expect(counter()).toBe('1 letra · mínimo 3');
+
+            clickLetter(1);
+            expect(counter()).toBe('2 letras · mínimo 3');
+        });
+
+        it('hides the minimum once the word is long enough', async () => {
+            await renderGame();
+
+            clickLetters(0, 1, 2, 3);
+
+            expect(counter()).toBe('4 letras');
+        });
+    });
+
     describe('sending the word', () => {
         it('cannot send a word shorter than 3 letters', async () => {
             await renderGame();
@@ -138,7 +225,7 @@ describe('LettersGame', () => {
             await renderGame([word]);
             clickLetters(0, 1, 2, 3);
 
-            clickButton('Enviar');
+            send();
 
             expect(resultValues()).toEqual([word, 'Sí, está en el diccionario', '4', '4']);
         });
@@ -147,7 +234,7 @@ describe('LettersGame', () => {
             await renderGame([letters.join('')]);
             clickLetters(0, 1, 2, 3, 4, 5, 6, 7, 8);
 
-            clickButton('Enviar');
+            send();
 
             expect(resultValues()).toEqual([letters.join(''), 'Sí, está en el diccionario', '9', '18']);
         });
@@ -156,7 +243,7 @@ describe('LettersGame', () => {
             await renderGame([]);
             clickLetters(0, 1, 2);
 
-            clickButton('Enviar');
+            send();
 
             expect(resultValues()).toEqual([letters.slice(0, 3).join(''), 'No está en el diccionario', '3', '0']);
         });
@@ -165,9 +252,64 @@ describe('LettersGame', () => {
             await renderGame([]);
             clickLetters(0, 1, 2);
 
-            clickButton('Enviar');
+            send();
 
             expect(screen.getAllByRole('button').every(isDisabled)).toBe(true);
+        });
+
+        it('waits for the tiles to hop before showing the result', async () => {
+            const word = letters.slice(0, 3).join('');
+            await renderGame([word]);
+            clickLetters(0, 1, 2);
+
+            clickButton('Enviar');
+
+            expect(screen.queryByRole('region', { name: 'Resultado' })).toBeNull();
+            finishAnimations();
+            expect(screen.getByRole('region', { name: 'Resultado' })).toBeTruthy();
+        });
+
+        it('marks a valid word and counts the points up', async () => {
+            const word = letters.slice(0, 4).join('');
+            await renderGame([word]);
+            clickLetters(0, 1, 2, 3);
+
+            clickButton('Enviar');
+
+            expect(board().dataset.status).toBe('valid');
+            expect(counter()).toBe('0 puntos');
+            finishAnimations();
+            expect(counter()).toBe('4 puntos');
+        });
+
+        it('keeps the word in the slots after sending', async () => {
+            const word = letters.slice(0, 4).join('');
+            await renderGame([word]);
+            clickLetters(0, 1, 2, 3);
+
+            send();
+
+            expect(shownWord()).toBe(word);
+        });
+
+        it('marks a word with all 9 letters', async () => {
+            await renderGame([letters.join('')]);
+            clickLetters(0, 1, 2, 3, 4, 5, 6, 7, 8);
+
+            send();
+
+            expect(board().dataset.status).toBe('full');
+            expect(counter()).toBe('18 puntos');
+        });
+
+        it('marks a word that is not in the dictionary', async () => {
+            await renderGame([]);
+            clickLetters(0, 1, 2);
+
+            send();
+
+            expect(board().dataset.status).toBe('invalid');
+            expect(counter()).toBe('No está en el diccionario');
         });
 
         it('does not show a result before sending', async () => {
@@ -244,6 +386,7 @@ describe('LettersGame', () => {
             letters.slice(0, 3).forEach((letter) => press(letter));
 
             press('Enter');
+            finishAnimations();
 
             expect(resultValues()).toEqual([word, 'Sí, está en el diccionario', '3', '3']);
         });
