@@ -168,6 +168,7 @@
 
 .tile {
     --tile-size: 56px;
+    display: block;
     position: relative;
     overflow: hidden;
     width: var(--tile-size);
@@ -243,6 +244,14 @@
     40% {
         scale: 1.08;
     }
+}
+
+.actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 24px;
 }
 
 .primary, .secondary {

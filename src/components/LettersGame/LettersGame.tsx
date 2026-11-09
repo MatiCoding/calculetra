@@ -98,7 +98,7 @@ function LettersGame({ loadWords = loadDictionary }: Props) {
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [dictionary]);
+    }, [dictionary, spinning]);
 
     const [revealed, setRevealed] = useState(false);
     const [points, setPoints] = useState(0);
