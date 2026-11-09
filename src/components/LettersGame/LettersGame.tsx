@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useState } from 'react';
+import { useEffect, useReducer, useState, type CSSProperties } from 'react';
 import { getDailyLetters } from '../../domain/letras/challengeLetras';
 import { loadDictionary } from '../../domain/letras/dictionaryLetras';
 import { gameReducer, getWord, initialState, isPicked } from '../../domain/letras/gameLetras';
@@ -15,6 +15,11 @@ type BoardStatus = 'playing' | 'valid' | 'full' | 'invalid';
 
 function prefersReducedMotion(): boolean {
     return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+}
+
+// Puts the index of each tile into the CSS variable --i, for animation-delay.
+function delayStyle(index:number): CSSProperties {
+    return { '--i': index } as CSSProperties;
 }
 
 type Props = {
@@ -120,7 +125,16 @@ function LettersGame({ loadWords = loadDictionary }: Props) {
             <output aria-label="Tu palabra" data-status={status} className={styles.board}>
                 {slots.map((letter, index) => (
                     <span key={index} data-testid="slot" className={styles.slot}>
-                        {letter !== undefined && <span className={styles.letter}>{letter}</span>}
+                        {letter !== undefined && (
+                            <span style={delayStyle(index)} className={styles.letter}>
+                                {letter}
+                            </span>
+                        )}
+                        {letter !== undefined && (status === 'valid' || status === 'full') && (
+                            <span aria-hidden="true" style={delayStyle(index)} className={styles.plus}>
+                                +1
+                            </span>
+                        )}
                     </span>
                 ))}
             </output>

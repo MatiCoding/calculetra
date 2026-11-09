@@ -67,6 +67,66 @@
     }
 }
 
+/* After sending, the tiles hop one by one. --i is the tile's position, and 150ms is HOP_STEP. */
+.board[data-status='valid'] .letter,
+.board[data-status='full'] .letter,
+.board[data-status='invalid'] .letter {
+    animation: hop 420ms var(--spring) both;
+    animation-delay: calc(var(--i) * 150ms);
+}
+
+@keyframes hop {
+    40% {
+        translate: 0 -12px;
+        scale: 1.08;
+    }
+}
+
+/* Valid: white with a blue border, like a pressed button. */
+.board[data-status='valid'] .letter {
+    background-color: white;
+    color: var(--color-letter);
+    box-shadow: inset 0 0 0 3px var(--color-letter), 0 4px 0 var(--blue-dark);
+}
+
+/* All 9 letters: dark blue tiles and a blue ring around the board. */
+.board[data-status='full'] {
+    box-shadow: 0 0 0 3px var(--color-letter), 0 12px 30px -14px rgba(30, 90, 168, 0.6);
+}
+
+.board[data-status='full'] .letter {
+    background-color: var(--blue-dark);
+    box-shadow: 0 4px 0 #0d2d58;
+}
+
+/* Not in the dictionary: grey. */
+.board[data-status='invalid'] .letter {
+    background-color: #9b958a;
+    box-shadow: 0 4px 0 #7c766b;
+}
+
+.plus {
+    position: absolute;
+    top: -6px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--color-letter);
+    opacity: 0;
+    pointer-events: none;
+    animation: plus 900ms ease both;
+    animation-delay: calc(var(--i) * 150ms + 120ms);
+}
+
+@keyframes plus {
+    20% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        translate: 0 -26px;
+    }
+}
+
 @media (max-width: 420px) {
     .board {
         gap: 4px;
@@ -229,5 +289,13 @@
 @media (prefers-reduced-motion: reduce) {
     .tile, .primary, .secondary {
         transition: none;
+    }
+
+    .letter, .board[data-status] .letter {
+        animation: none;
+    }
+
+    .plus {
+        display: none;
     }
 }
