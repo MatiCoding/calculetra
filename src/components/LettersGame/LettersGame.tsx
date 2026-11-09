@@ -8,6 +8,15 @@ import styles from './LettersGame.module.css';
 const SLOTS = 9;
 const MIN_LETTERS = 3;
 
+const HOP_STEP = 150;  // Time between one tile's hop and the next ones, in ms.
+const HOP_END = 700;    // Extra time after the last hop before the result appears, in ms.
+
+type BoardStatus = 'playing' | 'valid' | 'full' | 'invalid';
+
+function prefersReducedMotion(): boolean {
+    return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+}
+
 type Props = {
     loadWords?: () => Promise<Set<string>>;
 };
@@ -52,13 +61,50 @@ function LettersGame({ loadWords = loadDictionary }: Props) {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [dictionary]);
 
+    const [revealed, setRevealed] = useState(false);
+    const [points, setPoints] = useState(0);
+    const result = state.result;
+
+    // Shows the result sectoin once the tiles have finished hopping.
+    useEffect(() => {
+        if (result === null) return;
+        const delay = prefersReducedMotion() ? 0 : HOP_STEP * result.word.length + HOP_END;
+        const timer = setTimeout(() => setRevealed(true), delay);
+        return () => clearTimeout(timer);
+    }, [result]);
+
+    // Counts the points up, one by one.
+    useEffect(() => {
+        if (result === null || !result.isValid || prefersReducedMotion()) return;
+        const score = result.score;
+        const step = score === 18 ? HOP_STEP / 2 : HOP_STEP;
+        let count = 0;
+        const timer = setInterval(() => {
+            count += 1;
+            setPoints(count);
+            if (count === score) clearInterval(timer);
+        }, step);
+        return () => clearInterval(timer);
+    }, [result]);
+
     const word = getWord(state);
     const letters = state.tiles.map((tile) => tile.letter);
-    const finished = state.result !== null;
+    const finished = result !== null;
     const slots = Array.from({length: SLOTS }, (_, index) => word[index]);
 
+    let status: BoardStatus = 'playing';
+    if (result !== null) {
+        if (!result.isValid) status = 'invalid';
+        else if (result.score === 18) status = 'full';
+        else status = 'valid';
+    }
+
+    const shownPoints = result !== null && prefersReducedMotion() ? result.score : points;
+
     let counter = '';
-    if (word.length > 0 && !finished) {
+    if (status === 'invalid') {
+        counter = 'No está en el diccionario';
+    } else if (word.length > 0 && !finished) {
         counter = `${word.length} ${word.length === 1 ? 'letra' : 'letras'}`;
         if (word.length < MIN_LETTERS) counter += ` · mínimo ${MIN_LETTERS}`;
     }
@@ -71,7 +117,7 @@ function LettersGame({ loadWords = loadDictionary }: Props) {
         <div className={styles.container}>
             <h2 className={styles.title}>Forma la palabra más larga</h2>
 
-            <output aria-label="Tu palabra" className={styles.board}>
+            <output aria-label="Tu palabra" data-status={status} className={styles.board}>
                 {slots.map((letter, index) => (
                     <span key={index} data-testid="slot" className={styles.slot}>
                         {letter !== undefined && <span className={styles.letter}>{letter}</span>}
@@ -79,7 +125,15 @@ function LettersGame({ loadWords = loadDictionary }: Props) {
                 ))}
             </output>
             
-            <p data-testid="counter" className={styles.counter}>{counter}</p>
+            <p data-testid="counter" className={styles.counter}>
+                {status === 'valid' || status === 'full' ? (
+                    <>
+                        <b>{shownPoints}</b> {shownPoints === 1 ? 'punto' : 'puntos'}
+                    </>
+                ) : (
+                    counter
+                )}
+            </p>
 
             <ul aria-label="Letras" className={styles.letters}>
                 {state.tiles.map((tile) => (
@@ -113,17 +167,17 @@ function LettersGame({ loadWords = loadDictionary }: Props) {
                 <p role="alert" className={styles.error}>No se ha podido cargar el diccionario. Recarga la página para jugar.</p>
             )}
 
-            {state.result !== null && (
+            {result !== null && revealed && (
                 <section aria-label="Resultado" className={styles.result}>
                     <dl>
                         <dt>Palabra</dt>
-                        <dd>{state.result.word}</dd>
+                        <dd>{result.word}</dd>
                         <dt>¿Vale?</dt>
-                        <dd>{state.result.isValid ? 'Sí, está en el diccionario' : 'No está en el diccionario'}</dd>
+                        <dd>{result.isValid ? 'Sí, está en el diccionario' : 'No está en el diccionario'}</dd>
                         <dt>Letras</dt>
-                        <dd>{state.result.word.length}</dd>
+                        <dd>{result.word.length}</dd>
                         <dt>Puntos</dt>
-                        <dd className={styles.score}>{state.result.score}</dd>
+                        <dd className={styles.score}>{result.score}</dd>
                     </dl>
                 </section>
             )}
