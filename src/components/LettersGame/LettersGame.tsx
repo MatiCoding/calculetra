@@ -11,6 +11,11 @@ const MIN_LETTERS = 3;
 const HOP_STEP = 150;  // Time between one tile's hop and the next ones, in ms.
 const HOP_END = 700;    // Extra time after the last hop before the result appears, in ms.
 
+// The day's letters spin like slot-machine reels: all start together and stop left to right.
+const SPIN_BASE = 650;  // How long the first reel spins, in ms.
+const SPIN_STEP = 190;  // How much longer each next reel spins, in ms.
+const REEL_ALPHABET = 'ABCDEFGHIJLMNÑOPQRSTUVXYZ';  // Same letters as the Letter's bag (no K and W).
+
 type BoardStatus = 'playing' | 'valid' | 'full' | 'invalid';
 
 function prefersReducedMotion(): boolean {
@@ -22,6 +27,23 @@ function delayStyle(index:number): CSSProperties {
     return { '--i': index } as CSSProperties;
 }
 
+// How long the reel of the key at this position spins.
+function spinTime(index: number): number {
+    return SPIN_BASE + index * SPIN_STEP;
+}
+
+// The letters that pass through a key while it spins: random ones, and the real one at the end.
+function createReel(letter: string, index: number): Array<string> {
+    const length = 9 + index * 5;
+    const random = Array.from({length}, () => REEL_ALPHABET[Math.floor(Math.random()*REEL_ALPHABET.length)]);
+    return [...random, letter];
+}
+
+// Gives the CSS the length of the reel (--n) and how long it spins (--t).
+function reelStyle(reel: Array<string>, index: number) : CSSProperties {
+    return {'--n': reel.length, '--t': `${spinTime(index)}ms`} as CSSProperties;
+}
+
 type Props = {
     loadWords?: () => Promise<Set<string>>;
 };
@@ -30,6 +52,18 @@ function LettersGame({ loadWords = loadDictionary }: Props) {
     const [state, dispatch] = useReducer(gameReducer, undefined, () => initialState(getDailyLetters(new Date())));
     const [dictionary, setDictionary] = useState<Set<string> | null>(null);
     const [loadFailed, setLoadFailed] = useState(false);
+
+    const[reels] = useState(() => state.tiles.map((tile, index) => createReel(tile.letter, index)));
+    const [landed, setLanded] = useState(() => (prefersReducedMotion() ? state.tiles.length : 0));  // How many keys have stopped spinning. They stop from left to right.
+    const spinning = landed < state.tiles.length;
+
+    // Stops the reels one by one.
+    useEffect(() => {
+        if (prefersReducedMotion()) return;
+        const timers = reels.map((_, index) => setTimeout(() => setLanded(index + 1), spinTime(index)));
+        return () => timers.forEach(clearTimeout);
+    }, [reels]);
+
 
     useEffect(() => {
         let ignore = false;
@@ -48,7 +82,7 @@ function LettersGame({ loadWords = loadDictionary }: Props) {
     // Physical keyboard:.
     useEffect(() => {
         function handleKeyDown(event: KeyboardEvent) {
-            if (event.ctrlKey || event.metaKey || event.altKey) return;
+            if (spinning || event.ctrlKey || event.metaKey || event.altKey) return;
 
             if (event.key === 'Backspace') {
                 event.preventDefault();
@@ -150,15 +184,25 @@ function LettersGame({ loadWords = loadDictionary }: Props) {
             </p>
 
             <ul aria-label="Letras" className={styles.letters}>
-                {state.tiles.map((tile) => (
+                {state.tiles.map((tile, index) => (
                     <li key={tile.id}>
                         <button
                             onClick={() => dispatch({ type: 'pick', id: tile.id })}
-                            disabled={isPicked(state, tile.id) || finished}
+                            disabled={spinning || isPicked(state, tile.id) || finished}
                             data-used={isPicked(state, tile.id)}
-                            className={styles.tile}
+                            data-spinning={spinning}
+                            aria-label={tile.letter}
+                            className={`${styles.tile} ${index < landed ? styles.landed : ''}`}
                         >
-                            {tile.letter}
+                            {index < landed ? (
+                                tile.letter
+                            ) : (
+                                <span aria-hidden="true" style={reelStyle(reels[index], index)} className={styles.reel}>
+                                    {reels[index].map((letter, position) => (
+                                        <span key={position}>{letter}</span>
+                                    ))}
+                                </span>
+                            )}
                         </button>
                     </li>
                 ))}

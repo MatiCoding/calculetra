@@ -9,10 +9,11 @@ const TODAY = new Date('2026-10-14T10:00:00Z');
 
 let letters: Array<string>;
 
-// Renders the game with a fake dictionary and waits until it is loaded.
+// Renders the game with a fake dictionary, and waits until it is loaded and the letters stop spinning.
 async function renderGame(words: Array<string> = []) {
     render(<LettersGame loadWords={async () => new Set(words)} />);
     await waitFor(() => expect(screen.queryByText('Cargando diccionario...')).toBeNull());
+    finishAnimations();
 }
 
 function letterButtons() {
@@ -54,7 +55,7 @@ function counter() {
     return screen.getByTestId('counter').textContent;
 }
 
-// Lets every hop, "+1" and point count finish.
+// Lets every spin, hop, "+1" and point count finish.
 function finishAnimations() {
     act(() => {
         vi.advanceTimersByTime(5000);
@@ -148,6 +149,45 @@ describe('LettersGame', () => {
 
         expect(isDisabled(button('Borrar letra'))).toBe(false);
         expect(isDisabled(button('Borrar todo'))).toBe(false);
+    });
+
+    describe('spinning the letters', () => {
+        it('disables every letter while they spin', () => {
+            render(<LettersGame loadWords={async () => new Set()} />);
+
+            expect(letterButtons().every(isDisabled)).toBe(true);
+        });
+
+        it('names each key with its letter while it spins', () => {
+            render(<LettersGame loadWords={async () => new Set()} />);
+
+            expect(letterButtons().map((b) => b.getAttribute('aria-label'))).toEqual(letters);
+        });
+
+        it('stops the keys from left to right', () => {
+            render(<LettersGame loadWords={async () => new Set()} />);
+
+            act(() => {
+                vi.advanceTimersByTime(700);
+            });
+
+            expect(letterButtons()[0].textContent).toBe(letters[0]);
+            expect(letterButtons()[8].textContent).not.toBe(letters[8]);
+        });
+
+        it('ignores the keyboard while they spin', () => {
+            render(<LettersGame loadWords={async () => new Set()} />);
+
+            fireEvent.keyDown(window, { key: letters[0] });
+
+            expect(shownWord()).toBe('');
+        });
+
+        it('enables the letters once they stop', async () => {
+            await renderGame();
+
+            expect(letterButtons().some(isDisabled)).toBe(false);
+        });
     });
 
     describe('board', () => {
@@ -323,6 +363,7 @@ describe('LettersGame', () => {
         it('cannot send while the dictionary is loading', () => {
             // A promise that never resolves: the dictionary never arrives.
             render(<LettersGame loadWords={() => new Promise(() => {})} />);
+            finishAnimations();
             clickLetters(0, 1, 2);
 
             expect(screen.getByText('Cargando diccionario...')).toBeTruthy();

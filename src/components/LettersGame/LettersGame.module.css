@@ -167,7 +167,10 @@
 }
 
 .tile {
-    width: 56px;
+    --tile-size: 56px;
+    position: relative;
+    overflow: hidden;
+    width: var(--tile-size);
     aspect-ratio: 1;
     border: none;
     border-radius: 8px;
@@ -200,12 +203,46 @@
     box-shadow: none;
 }
 
-.actions {
+/* While the reels spin the keys are disabled, but they must not look faded. */
+.tile[data-spinning="true"] {
+    opacity: 1;
+}
+
+.reel {
+    position: absolute;
+    inset: 0;
     display: flex;
-    justify-content: center;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin-top: 24px;
+    flex-direction: column;
+    animation: spin var(--t) cubic-bezier(0.2, 0.75, 0.3, 1.12) both;
+}
+
+.reel span {
+    flex: none;
+    height: var(--tile-size);
+    display: grid;
+    place-items: center;
+}
+
+.reel span:not(:last-child) {
+    opacity: 0.75;
+    filter: blur(0.6px);
+}
+
+@keyframes spin {
+    to {
+        translate: 0 calc((var(--n) - 1) * var(--tile-size) * -1);
+    }
+}
+
+/* A small bounce when a key stops. */
+.landed {
+    animation: land 300ms var(--spring);
+}
+
+@keyframes land {
+    40% {
+        scale: 1.08;
+    }
 }
 
 .primary, .secondary {
@@ -298,4 +335,8 @@
     .plus {
         display: none;
     }
+
+    .landed {
+        animation: none;
+    }    
 }
