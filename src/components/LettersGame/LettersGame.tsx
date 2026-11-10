@@ -87,7 +87,7 @@ function LettersGame({ loadWords = loadDictionary, intro = false }: Props) {
     const [dictionary, setDictionary] = useState<Set<string> | null>(null);
     const [loadFailed, setLoadFailed] = useState(false);
 
-    const[reels] = useState(() => state.tiles.map((tile, index) => createReel(tile.letter, index)));
+    const[reels, setReels] = useState(() => state.tiles.map((tile, index) => createReel(tile.letter, index)));
     const [landed, setLanded] = useState(() => (prefersReducedMotion() ? state.tiles.length : 0));  // How many keys have stopped spinning. They stop from left to right.
     const spinning = landed < state.tiles.length;
 
@@ -181,6 +181,15 @@ function LettersGame({ loadWords = loadDictionary, intro = false }: Props) {
     } else if (word.length > 0 && !finished) {
         counter = `${word.length} ${word.length === 1 ? 'letra' : 'letras'}`;
         if (word.length < MIN_LETTERS) counter += ` · mínimo ${MIN_LETTERS}`;
+    }
+
+    // Starts the game over, the word, the result and the spin of the letters.
+    function playAgain() {
+        dispatch({type: 'restart'});
+        setRevealed(false);
+        setPoints(0);
+        setLanded(prefersReducedMotion() ? state.tiles.length: 0);
+        setReels(state.tiles.map((tile, index) => createReel(tile.letter, index)));
     }
 
     function submit() {
@@ -282,6 +291,9 @@ function LettersGame({ loadWords = loadDictionary, intro = false }: Props) {
                     <p className={styles.resultWord}>
                         {result.score} puntos con <b>{result.word}</b>
                     </p>
+                    <button onClick={playAgain} className={styles.primary}>
+                        Volver a jugar
+                    </button>
                     <NextChallenge />
                 </section>
             )}

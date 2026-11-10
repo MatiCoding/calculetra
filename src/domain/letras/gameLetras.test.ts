@@ -175,3 +175,21 @@ describe('submit', () => {
     expect(submit(finished)).toBe(finished);
   });
 });
+
+describe('restart', () => {
+  const dictionary = new Set(['CHAPELA']);
+
+  it('starts over with the same letters after sending', () => {
+    const finished = gameReducer(pick(initialState(LETTERS), 4, 3, 1, 0, 6, 8, 7), { type: 'submit', dictionary });
+
+    const state = gameReducer(finished, { type: 'restart' });
+
+    expect(state).toEqual(initialState(LETTERS));
+  });
+
+  it('also empties a word that was not sent yet', () => {
+    const state = gameReducer(pick(initialState(LETTERS), 0, 1), { type: 'restart' });
+
+    expect(getWord(state)).toBe('');
+  });
+});

@@ -354,8 +354,34 @@ describe('LettersGame', () => {
             send();
 
             expect(screen.queryByRole('list', { name: 'Letras' })).toBeNull();
-            expect(screen.queryAllByRole('button')).toHaveLength(0);
+            expect(screen.getAllByRole('button').map((b) => b.textContent)).toEqual(['Volver a jugar']);
             expect(screen.queryByTestId('counter')).toBeNull();
+        });
+
+        it('plays again from the start with the same letters', async () => {
+            await renderGame([]);
+            clickLetters(0, 1, 2);
+            send();
+
+            clickButton('Volver a jugar');
+
+            expect(screen.queryByRole('region', { name: 'Resultado' })).toBeNull();
+            expect(board().dataset.status).toBe('playing');
+            expect(shownWord()).toBe('');
+            expect(counter()).toBe('');
+        });
+
+        it('spins the letters again when playing again', async () => {
+            await renderGame([]);
+            clickLetters(0, 1, 2);
+            send();
+
+            clickButton('Volver a jugar');
+
+            expect(letterButtons().every(isDisabled)).toBe(true);
+            finishAnimations();
+            expect(letterButtons().map((b) => b.textContent)).toEqual(letters);
+            expect(letterButtons().some(isDisabled)).toBe(false);
         });
 
         it('shows how long until the next letters', async () => {
