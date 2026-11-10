@@ -17,8 +17,8 @@ import HomePage from './components/HomePage/HomePage'
 import BackToGames from './components/BackToGames/BackToGames'
 import LettersGame from './components/LettersGame/LettersGame'
 
-// Cifras plays its entrance only when it comes from the home page, which says so in the navigation state.
-function CifrasPage() {
+// A game plays its entrance only when it comes from the home page, which says so in the navigation state.
+function useIntro(): boolean {
   const location = useLocation()
   const navigate = useNavigate()
   const intro = location.state?.intro === true
@@ -28,7 +28,15 @@ function CifrasPage() {
     if (intro) navigate(location.pathname, { replace: true })
   }, [intro, navigate, location.pathname])
 
-  return <NumbersGame intro={intro} />
+  return intro
+}
+
+function CifrasPage() {
+  return <NumbersGame intro={useIntro()} />
+}
+
+function LetrasPage() {
+  return <LettersGame intro={useIntro()} />
 }
 
 function WithHeader() {
@@ -57,7 +65,7 @@ function App() {
             }
           />
           <Route path="/cifras" element={<main><BackToGames /><CifrasPage /></main>} />
-          <Route path="/letras" element={<main><BackToGames /><LettersGame /></main>} />
+          <Route path="/letras" element={<main><BackToGames /><LetrasPage /></main>} />
           <Route path="/account" element={<main><RequireAuth><AccountPage /></RequireAuth></main>} />
           <Route path="/forgot-password" element={<main><ForgotPasswordForm /></main>} />
           <Route path="/reset-password" element={<main><ResetPasswordPage /></main>} />

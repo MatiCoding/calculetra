@@ -12,4 +12,5 @@ export type GameAction =
     | {type: 'removeLast'}
     | { type: 'clear' }
     | { type: 'type', letter: string }
-    | { type: 'submit', dictionary: ReadonlySet<string> };
+    | { type: 'submit', dictionary: ReadonlySet<string> }
+    | {type: 'restart'};

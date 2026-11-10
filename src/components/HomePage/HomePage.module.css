@@ -1,3 +1,7 @@
+:global(body):has(.home) {
+    background-color: var(--color-bg);
+}
+
 .home {
     position: relative;
     isolation: isolate;

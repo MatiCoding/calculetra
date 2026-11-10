@@ -14,6 +14,8 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 - Cifras has a new look, like the rest of the app: "Reto nº N · objetivo" above the target, bigger tiles and buttons, and a beige background. On wide screens the board is on the left and the tree on the right, so you do not have to scroll. The tree replaces the old list of steps.
+- Letras has a new board: your word fills nine sunken slots, and each letter drops in as a blue tile. A counter under the board shows how many letters you have and the minimum of three. When you send, the tiles hop one by one: white with a blue border and a "+1" each if the word is valid, dark blue with a ring around the board if it uses all nine, and grey if it is not in the dictionary. After the hop, the keys go away and a card shows your points, a countdown to the next letters and a "Volver a jugar" button. Letras only uses blue, white and grey, and has the beige background and the font of the rest of the app.
+- Letras: the day's letters appear spinning like slot-machine reels and stop one by one, from left to right. When you open the game from the home page, the blue shrinks onto the nine keys first. Nothing moves if your system asks for reduced motion.
 
 ## [0.5.1] - 2026-11-05
 
