@@ -72,10 +72,10 @@ function isDisabled(element: HTMLElement) {
     return (element as HTMLButtonElement).disabled;
 }
 
-// The values of the result, in order: word, valid, letters, points.
-function resultValues() {
+// The lines of the result card, in order: heading, points, "N puntos con WORD" and the countdown.
+function resultLines() {
     const result = screen.getByRole('region', { name: 'Resultado' });
-    return Array.from(result.querySelectorAll('dd')).map((dd) => dd.textContent);
+    return Array.from(result.querySelectorAll('p')).map((p) => p.textContent);
 }
 
 describe('LettersGame', () => {
@@ -317,7 +317,7 @@ describe('LettersGame', () => {
 
             send();
 
-            expect(resultValues()).toEqual([word, 'Sí, está en el diccionario', '4', '4']);
+            expect(resultLines().slice(0, 3)).toEqual(['¡Vale!', '4', `4 puntos con ${word}`]);
         });
 
         it('gives 18 points for a word with all 9 letters', async () => {
@@ -326,7 +326,7 @@ describe('LettersGame', () => {
 
             send();
 
-            expect(resultValues()).toEqual([letters.join(''), 'Sí, está en el diccionario', '9', '18']);
+            expect(resultLines().slice(0, 3)).toEqual(['¡Las nueve!', '18', `18 puntos con ${letters.join('')}`]);
         });
 
         it('gives 0 points for a word that is not in the dictionary', async () => {
@@ -335,16 +335,36 @@ describe('LettersGame', () => {
 
             send();
 
-            expect(resultValues()).toEqual([letters.slice(0, 3).join(''), 'No está en el diccionario', '3', '0']);
+            expect(resultLines().slice(0, 3)).toEqual(['No está en el diccionario', '0', `0 puntos con ${letters.slice(0, 3).join('')}`]);
         });
 
         it('ends the game after sending: every button is disabled', async () => {
             await renderGame([]);
             clickLetters(0, 1, 2);
 
-            send();
+            clickButton('Enviar');
 
             expect(screen.getAllByRole('button').every(isDisabled)).toBe(true);
+        });
+
+        it('hides the letters, the buttons and the counter once the result is shown', async () => {
+            await renderGame([]);
+            clickLetters(0, 1, 2);
+
+            send();
+
+            expect(screen.queryByRole('list', { name: 'Letras' })).toBeNull();
+            expect(screen.queryAllByRole('button')).toHaveLength(0);
+            expect(screen.queryByTestId('counter')).toBeNull();
+        });
+
+        it('shows how long until the next letters', async () => {
+            await renderGame([]);
+            clickLetters(0, 1, 2);
+
+            send();
+
+            expect(resultLines()[3]).toMatch(/^Nuevas letras en \d{2}:\d{2}:\d{2}$/);
         });
 
         it('waits for the tiles to hop before showing the result', async () => {
@@ -368,7 +388,10 @@ describe('LettersGame', () => {
 
             expect(board().dataset.status).toBe('valid');
             expect(counter()).toBe('0 puntos');
-            finishAnimations();
+            // 4 points, one every 150 ms, before the result appears.
+            act(() => {
+                vi.advanceTimersByTime(600);
+            });
             expect(counter()).toBe('4 puntos');
         });
 
@@ -386,7 +409,11 @@ describe('LettersGame', () => {
             await renderGame([letters.join('')]);
             clickLetters(0, 1, 2, 3, 4, 5, 6, 7, 8);
 
-            send();
+            clickButton('Enviar');
+            // 18 points, one every 75 ms, before the result appears.
+            act(() => {
+                vi.advanceTimersByTime(1350);
+            });
 
             expect(board().dataset.status).toBe('full');
             expect(counter()).toBe('18 puntos');
@@ -396,7 +423,7 @@ describe('LettersGame', () => {
             await renderGame([]);
             clickLetters(0, 1, 2);
 
-            send();
+            clickButton('Enviar');
 
             expect(board().dataset.status).toBe('invalid');
             expect(counter()).toBe('No está en el diccionario');
@@ -479,7 +506,7 @@ describe('LettersGame', () => {
             press('Enter');
             finishAnimations();
 
-            expect(resultValues()).toEqual([word, 'Sí, está en el diccionario', '3', '3']);
+            expect(resultLines().slice(0, 3)).toEqual(['¡Vale!', '3', `3 puntos con ${word}`]);
         });
 
         it('does not send with Enter while the word is too short', async () => {

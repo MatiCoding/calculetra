@@ -3,6 +3,7 @@ import { getDailyLetters } from '../../domain/letras/challengeLetras';
 import { loadDictionary } from '../../domain/letras/dictionaryLetras';
 import { gameReducer, getWord, initialState, isPicked } from '../../domain/letras/gameLetras';
 import { canSubmit } from '../../domain/letras/wordLetras';
+import { formatCountdown, msUntilNextChallenge } from '../../domain/shared/date';
 import styles from './LettersGame.module.css';
 
 const SLOTS = 9;
@@ -51,6 +52,22 @@ const MAGNET_GAP_MS = 40;
 const MAGNET_MS = 750;
 // How long the whole entrance lasts: until the last circle has arrived.
 const INTRO_MS = MAGNET_MS + 8 * MAGNET_GAP_MS;
+
+// How long until the next letters, updated every second.
+function NextChallenge() {
+    const [now, setNow] = useState(() => new Date());
+
+    useEffect(() => {
+        const timer = setInterval(() => setNow(new Date()), 1000);
+        return () => clearInterval(timer);
+    }, []);
+
+    return (
+        <p className={styles.next}>
+            Nuevas letras en <b>{formatCountdown(msUntilNextChallenge(now))}</b>
+        </p>
+    )
+}
 
 type Props = {
     loadWords?: () => Promise<Set<string>>;
@@ -191,60 +208,65 @@ function LettersGame({ loadWords = loadDictionary, intro = false }: Props) {
                 ))}
             </output>
             
-            <p data-testid="counter" className={styles.counter}>
-                {status === 'valid' || status === 'full' ? (
-                    <>
-                        <b>{shownPoints}</b> {shownPoints === 1 ? 'punto' : 'puntos'}
-                    </>
-                ) : (
-                    counter
-                )}
-            </p>
-
-            <ul aria-label="Letras" className={styles.letters}>
-                {state.tiles.map((tile, index) => (
-                    <li key={tile.id}>
-                        <button
-                            onClick={() => dispatch({ type: 'pick', id: tile.id })}
-                            disabled={spinning || isPicked(state, tile.id) || finished}
-                            data-used={isPicked(state, tile.id)}
-                            data-spinning={spinning}
-                            aria-label={tile.letter}
-                            className={`${styles.tile} ${index < landed ? styles.landed : ''}`}
-                        >
-                            {index < landed ? (
-                                tile.letter
-                            ) : (
-                                <span aria-hidden="true" style={reelStyle(reels[index], index)} className={styles.reel}>
-                                    {reels[index].map((letter, position) => (
-                                        <span key={position}>{letter}</span>
-                                    ))}
-                                </span>
-                            )}
-                        </button>
-                        {playingIntro && (
-                            <span
-                                className={styles.magnet}
-                                data-testid="intro-magnet"
-                                aria-hidden="true"
-                                style={{ animationDelay: `${index * MAGNET_GAP_MS}ms` }}
-                            />
+            {!revealed && (
+                <>
+                    <p data-testid="counter" className={styles.counter}>
+                        {status === 'valid' || status === 'full' ? (
+                            <>
+                                <b>{shownPoints}</b> {shownPoints === 1 ? 'punto' : 'puntos'}
+                            </>
+                        ) : (
+                            counter
                         )}
-                    </li>
-                ))}
-            </ul>
+                    </p>
+                    
+                    <ul aria-label="Letras" className={styles.letters}>
+                        {state.tiles.map((tile, index) => (
+                            <li key={tile.id}>
+                                <button
+                                    onClick={() => dispatch({ type: 'pick', id: tile.id })}
+                                    disabled={spinning || isPicked(state, tile.id) || finished}
+                                    data-used={isPicked(state, tile.id)}
+                                    data-spinning={spinning}
+                                    aria-label={tile.letter}
+                                    className={`${styles.tile} ${index < landed ? styles.landed : ''}`}
+                                >
+                                    {index < landed ? (
+                                        tile.letter
+                                    ) : (
+                                        <span aria-hidden="true" style={reelStyle(reels[index], index)} className={styles.reel}>
+                                            {reels[index].map((letter, position) => (
+                                                <span key={position}>{letter}</span>
+                                            ))}
+                                        </span>
+                                    )}
+                                </button>
+                                {playingIntro && (
+                                    <span
+                                        className={styles.magnet}
+                                        data-testid="intro-magnet"
+                                        aria-hidden="true"
+                                        style={{ animationDelay: `${index * MAGNET_GAP_MS}ms` }}
+                                    />
+                                )}
+                            </li>
+                        ))}
+                    </ul>
+                    
+                    <div className={styles.actions}>
+                        <button onClick={() => dispatch({ type: 'removeLast' })} disabled={word === '' || finished} className={styles.secondary}>
+                            Borrar letra
+                        </button>
+                        <button onClick={() => dispatch({ type: 'clear' })} disabled={word === '' || finished} className={styles.secondary}>
+                            Borrar todo
+                        </button>
+                        <button onClick={submit} disabled={dictionary === null || !canSubmit(word, letters) || finished} className={styles.primary}>
+                            Enviar
+                        </button>
+                    </div>
 
-            <div className={styles.actions}>
-                <button onClick={() => dispatch({ type: 'removeLast' })} disabled={word === '' || finished} className={styles.secondary}>
-                    Borrar letra
-                </button>
-                <button onClick={() => dispatch({ type: 'clear' })} disabled={word === '' || finished} className={styles.secondary}>
-                    Borrar todo
-                </button>
-                <button onClick={submit} disabled={dictionary === null || !canSubmit(word, letters) || finished} className={styles.primary}>
-                    Enviar
-                </button>
-            </div>
+                </>
+            )} 
 
             {dictionary === null && !loadFailed && <p className={styles.status}>Cargando diccionario...</p>}
             {loadFailed && (
@@ -253,16 +275,14 @@ function LettersGame({ loadWords = loadDictionary, intro = false }: Props) {
 
             {result !== null && revealed && (
                 <section aria-label="Resultado" className={styles.result}>
-                    <dl>
-                        <dt>Palabra</dt>
-                        <dd>{result.word}</dd>
-                        <dt>¿Vale?</dt>
-                        <dd>{result.isValid ? 'Sí, está en el diccionario' : 'No está en el diccionario'}</dd>
-                        <dt>Letras</dt>
-                        <dd>{result.word.length}</dd>
-                        <dt>Puntos</dt>
-                        <dd className={styles.score}>{result.score}</dd>
-                    </dl>
+                    <p className={styles.resultHead} data-valid={result.isValid}>
+                        {!result.isValid ? 'No está en el diccionario' : result.score === 18 ? '¡Las nueve!' : '¡Vale!'}
+                    </p>
+                    <p className={styles.score} data-valid={result.isValid}>{result.score}</p>
+                    <p className={styles.resultWord}>
+                        {result.score} puntos con <b>{result.word}</b>
+                    </p>
+                    <NextChallenge />
                 </section>
             )}
         </div>
