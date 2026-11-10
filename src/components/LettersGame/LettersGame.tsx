@@ -44,11 +44,28 @@ function reelStyle(reel: Array<string>, index: number) : CSSProperties {
     return {'--n': reel.length, '--t': `${spinTime(index)}ms`} as CSSProperties;
 }
 
+// Entrance from the home page: the blue shrinks onto the nine keys, and then they spin.
+// Each blue circle starts a bit later than the one before.
+const MAGNET_GAP_MS = 40;
+// How long a circle takes to shrink into its key.
+const MAGNET_MS = 750;
+// How long the whole entrance lasts: until the last circle has arrived.
+const INTRO_MS = MAGNET_MS + 8 * MAGNET_GAP_MS;
+
 type Props = {
     loadWords?: () => Promise<Set<string>>;
+    intro?: boolean;
 };
 
-function LettersGame({ loadWords = loadDictionary }: Props) {
+function LettersGame({ loadWords = loadDictionary, intro = false }: Props) {
+    const [playingIntro, setPlayingIntro] = useState(intro);
+
+    // When the entrance ends, the circles are removed.
+    useEffect(() => {
+        if (!playingIntro) return;
+        const timer = setTimeout(() => setPlayingIntro(false), INTRO_MS);
+        return () => clearTimeout(timer);
+    }, [playingIntro]);
     const [state, dispatch] = useReducer(gameReducer, undefined, () => initialState(getDailyLetters(new Date())));
     const [dictionary, setDictionary] = useState<Set<string> | null>(null);
     const [loadFailed, setLoadFailed] = useState(false);
@@ -58,11 +75,12 @@ function LettersGame({ loadWords = loadDictionary }: Props) {
     const spinning = landed < state.tiles.length;
 
     // Stops the reels one by one.
+    // Stops the reels one by one. During the entrance they wait under the blue.
     useEffect(() => {
-        if (prefersReducedMotion()) return;
+        if (playingIntro || prefersReducedMotion()) return;
         const timers = reels.map((_, index) => setTimeout(() => setLanded(index + 1), spinTime(index)));
         return () => timers.forEach(clearTimeout);
-    }, [reels]);
+    }, [reels, playingIntro]);
 
 
     useEffect(() => {
@@ -153,7 +171,7 @@ function LettersGame({ loadWords = loadDictionary }: Props) {
     }
 
     return (
-        <div className={styles.container}>
+        <div className={`${styles.container} ${playingIntro ? styles.intro : ''}`}>
             <h2 className={styles.title}>Forma la palabra más larga</h2>
 
             <output aria-label="Tu palabra" data-status={status} className={styles.board}>
@@ -204,6 +222,14 @@ function LettersGame({ loadWords = loadDictionary }: Props) {
                                 </span>
                             )}
                         </button>
+                        {playingIntro && (
+                            <span
+                                className={styles.magnet}
+                                data-testid="intro-magnet"
+                                aria-hidden="true"
+                                style={{ animationDelay: `${index * MAGNET_GAP_MS}ms` }}
+                            />
+                        )}
                     </li>
                 ))}
             </ul>

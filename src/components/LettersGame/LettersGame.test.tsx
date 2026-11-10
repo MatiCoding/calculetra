@@ -190,6 +190,56 @@ describe('LettersGame', () => {
         });
     });
 
+    describe('entrance from the home page', () => {
+        function magnets() {
+            return screen.queryAllByTestId('intro-magnet');
+        }
+
+        it('has no blue circles by default', () => {
+            render(<LettersGame loadWords={async () => new Set()} />);
+
+            expect(magnets()).toHaveLength(0);
+        });
+
+        it('puts one blue circle on each key, each one a bit later than the one before', () => {
+            render(<LettersGame loadWords={async () => new Set()} intro />);
+
+            expect(magnets().map((magnet) => magnet.style.animationDelay))
+                .toEqual(['0ms', '40ms', '80ms', '120ms', '160ms', '200ms', '240ms', '280ms', '320ms']);
+        });
+
+        it('removes the circles when the entrance ends', () => {
+            render(<LettersGame loadWords={async () => new Set()} intro />);
+
+            act(() => {
+                vi.advanceTimersByTime(1069);
+            });
+            expect(magnets()).toHaveLength(9);
+
+            act(() => {
+                vi.advanceTimersByTime(1);
+            });
+            expect(magnets()).toHaveLength(0);
+        });
+
+        it('starts spinning the keys only when the entrance ends', () => {
+            render(<LettersGame loadWords={async () => new Set()} intro />);
+            act(() => {
+                vi.advanceTimersByTime(1070);
+            });
+
+            act(() => {
+                vi.advanceTimersByTime(649);
+            });
+            expect(letterButtons()[0].textContent).not.toBe(letters[0]);
+
+            act(() => {
+                vi.advanceTimersByTime(1);
+            });
+            expect(letterButtons()[0].textContent).toBe(letters[0]);
+        });
+    });
+
     describe('board', () => {
         it('shows 9 empty slots at the start', async () => {
             await renderGame();
