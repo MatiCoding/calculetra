@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { getDailyLetters } from '../../domain/letras/challengeLetras';
 import { getHintPositions } from '../../domain/letras/hintsLetras';
+import { fakeDialog } from '../../test/fakeDialog';
 import LettersGame from './LettersGame';
 
 // The letters depend on today's date, so the tests fix the date.
@@ -560,6 +561,8 @@ describe('LettersGame', () => {
         let longest: string;
         let positions: Array<number>;
 
+        beforeAll(fakeDialog);
+
         beforeEach(() => {
             longest = letters.slice(0, 5).join('');
             positions = getHintPositions(TODAY, longest.length);
@@ -569,15 +572,79 @@ describe('LettersGame', () => {
             return screen.getByRole('button', { name: /Pista/ });
         }
 
-        function askHint() {
-            fireEvent.click(hintButton());
+        function dialog() {
+            return screen.queryByRole('dialog');
         }
 
-        it('shows 3 hints left and what the next one costs', async () => {
+        // Clicks "Pista" and accepts the dialog.
+        function askHint() {
+            fireEvent.click(hintButton());
+            clickButton('Usar pista');
+        }
+
+        it('shows 3 hints left', async () => {
             await renderGame([longest]);
 
             expect(hintButton().textContent).toContain('quedan 3');
-            expect(screen.getByText('La siguiente resta 1 punto')).toBeTruthy();
+        });
+
+        it('asks first, saying what the hint costs', async () => {
+            await renderGame([longest]);
+
+            fireEvent.click(hintButton());
+
+            expect(dialog()?.textContent).toContain('¿Usar una pista? Te restará 1 punto.');
+            expect(slotLetters().every((letter) => letter === '')).toBe(true);
+        });
+
+        it('makes each hint cost one point more', async () => {
+            await renderGame([longest]);
+            askHint();
+
+            fireEvent.click(hintButton());
+
+            expect(dialog()?.textContent).toContain('Te restará 2 puntos.');
+        });
+
+        it('does nothing when the player cancels', async () => {
+            await renderGame([longest]);
+
+            fireEvent.click(hintButton());
+            clickButton('Cancelar');
+
+            expect(dialog()).toBeNull();
+            expect(slotLetters().every((letter) => letter === '')).toBe(true);
+            expect(hintButton().textContent).toContain('quedan 3');
+        });
+
+        it('only warns about erasing when there are letters written', async () => {
+            await renderGame([longest]);
+
+            fireEvent.click(hintButton());
+
+            expect(dialog()?.textContent).not.toContain('Se borrará lo que has escrito.');
+        });
+
+        it('warns that the written letters will be erased, and erases them', async () => {
+            await renderGame([longest]);
+            clickLetters(0, 1);
+
+            fireEvent.click(hintButton());
+            expect(dialog()?.textContent).toContain('Se borrará lo que has escrito.');
+            clickButton('Usar pista');
+
+            const expected = Array<string>(9).fill('');
+            expected[positions[0]] = longest[positions[0]];
+            expect(slotLetters()).toEqual(expected);
+        });
+
+        it('ignores the keyboard while the dialog is open', async () => {
+            await renderGame([longest]);
+
+            fireEvent.click(hintButton());
+            fireEvent.keyDown(window, { key: letters[0] });
+
+            expect(shownWord()).toBe('');
         });
 
         it('puts a letter of the longest word in its slot', async () => {
@@ -632,7 +699,6 @@ describe('LettersGame', () => {
             expect(slotLetters().filter((letter) => letter !== '')).toHaveLength(3);
             expect(isDisabled(hintButton())).toBe(true);
             expect(hintButton().textContent).toContain('quedan 0');
-            expect(screen.getByText('No quedan pistas')).toBeTruthy();
         });
 
         it('only shows the button to take the hints off once there is a hint', async () => {
@@ -656,6 +722,19 @@ describe('LettersGame', () => {
 
             expect(slotLetters()[positions[0]]).toBe(longest[positions[0]]);
             expect(letterButtons().filter(isDisabled)).toHaveLength(1);
+        });
+
+        it('asks before putting the hints back over written letters', async () => {
+            await renderGame([longest]);
+            askHint();
+            clickButton('Quitar pistas');
+            clickLetters(0, 1);
+
+            clickButton('Ver pistas');
+            expect(dialog()?.textContent).toContain('Se borrará lo que has escrito.');
+            clickButton('Poner pistas');
+
+            expect(slotLetters().filter((letter) => letter !== '')).toEqual([longest[positions[0]]]);
         });
 
         it('does not give the hint back for free: the count stays the same', async () => {
