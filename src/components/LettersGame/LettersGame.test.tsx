@@ -635,6 +635,38 @@ describe('LettersGame', () => {
             expect(screen.getByText('No quedan pistas')).toBeTruthy();
         });
 
+        it('only shows the button to take the hints off once there is a hint', async () => {
+            await renderGame([longest]);
+
+            expect(screen.queryByRole('button', { name: 'Quitar pistas' })).toBeNull();
+            askHint();
+            expect(button('Quitar pistas')).toBeTruthy();
+        });
+
+        it('takes the hint letters off the board and puts them back', async () => {
+            await renderGame([longest]);
+            askHint();
+
+            clickButton('Quitar pistas');
+
+            expect(shownWord()).toBe('');
+            expect(letterButtons().some(isDisabled)).toBe(false);
+
+            clickButton('Ver pistas');
+
+            expect(slotLetters()[positions[0]]).toBe(longest[positions[0]]);
+            expect(letterButtons().filter(isDisabled)).toHaveLength(1);
+        });
+
+        it('does not give the hint back for free: the count stays the same', async () => {
+            await renderGame([longest]);
+            askHint();
+
+            clickButton('Quitar pistas');
+
+            expect(hintButton().textContent).toContain('quedan 2');
+        });
+
         it('cannot ask for a hint while the dictionary is loading', () => {
             render(<LettersGame loadWords={() => new Promise(() => {})} />);
             finishAnimations();

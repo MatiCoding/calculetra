@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { gameReducer, getSlots, getWord, initialState, isHint, isPicked } from './gameLetras';
+import { gameReducer, getSlots, getWord, initialState, isHint, isPicked, usesAllHints } from './gameLetras';
 import type { GameState } from './typesLetras';
 
 const LETTERS = ['P', 'A', 'O', 'H', 'C', 'I', 'E', 'A', 'L'];
@@ -325,5 +325,73 @@ describe('restart with hints', () => {
     expect(state.picked).toEqual([]);
     expect(state.hints).toEqual(withHint.hints);
     expect(state.result).toBeNull();
+  });
+});
+
+describe('toggleHints', () => {
+  function hint(state: GameState, position: number, letter: string): GameState {
+    return gameReducer(state, { type: 'hint', position, letter });
+  }
+
+  function toggle(state: GameState): GameState {
+    return gameReducer(state, { type: 'toggleHints' });
+  }
+
+  it('takes the hint letters off the board and frees their tiles', () => {
+    const state = toggle(hint(initialState(LETTERS), 3, 'H'));
+
+    expect(state.hintsShown).toBe(false);
+    expect(getSlots(state).every((slot) => slot === null)).toBe(true);
+    expect(isPicked(state, 3)).toBe(false);
+  });
+
+  it('keeps the player letters when taking the hints off, without the gaps', () => {
+    // Hint H in slot 1, the player writes C A P: C H A P. Without the hint: C A P.
+    const state = toggle(pick(hint(initialState(LETTERS), 1, 'H'), 4, 1, 0));
+
+    expect(getWord(state)).toBe('CAP');
+  });
+
+  it('lets the player use a hint tile while the hints are off', () => {
+    const state = pick(toggle(hint(initialState(LETTERS), 3, 'H')), 3);
+
+    expect(getWord(state)).toBe('H');
+  });
+
+  it('keeps the hints paid: they still count in the result', () => {
+    const dictionary = new Set(['PEZ', 'CAP']);
+    const state = gameReducer(pick(toggle(hint(initialState(LETTERS), 1, 'H')), 4, 1, 0), { type: 'submit', dictionary });
+
+    expect(state.result?.hintPenalty).toBe(1);
+  });
+
+  it('can send a word shorter than the hints while they are off', () => {
+    const state = toggle(hint(initialState(LETTERS), 8, 'L'));
+    const withWord = pick(state, 4, 1, 0);
+
+    expect(usesAllHints(withWord)).toBe(true);
+  });
+
+  it('puts the hints back and erases the player letters', () => {
+    const hidden = pick(toggle(hint(initialState(LETTERS), 3, 'H')), 4, 3);
+    const state = toggle(hidden);
+
+    expect(state.hintsShown).toBe(true);
+    expect(state.picked).toEqual([]);
+    expect(getSlots(state)[3]).toBe('H');
+  });
+
+  it('puts the hints back when a new hint is given', () => {
+    const state = hint(toggle(hint(initialState(LETTERS), 3, 'H')), 0, 'C');
+
+    expect(state.hintsShown).toBe(true);
+    expect(getSlots(state)[3]).toBe('H');
+    expect(getSlots(state)[0]).toBe('C');
+  });
+
+  it('does nothing without hints', () => {
+    const before = initialState(LETTERS);
+
+    expect(toggle(before)).toBe(before);
   });
 });

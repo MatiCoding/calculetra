@@ -9,6 +9,7 @@ export function initialState(letters: Array<string>): GameState {
         tiles: letters.map((letter, index) => ({id: index, letter})),
         picked: [],
         hints: [],
+        hintsShown: true,
         result: null,
     };
 }
@@ -19,10 +20,11 @@ function letterOf(state: GameState, id: number): string{
 
 export function getSlots(state: GameState): Array<string | null> {
     const slots: Array<string | null> = state.tiles.map(() => null);
-    for (const hint of state.hints) {
-        slots[hint.position] = letterOf(state, hint.tileId);
-    }
-
+    if (state.hintsShown) {    
+        for (const hint of state.hints) {
+            slots[hint.position] = letterOf(state, hint.tileId);
+        }
+    }    
     let next = 0;
     for (let i = 0; i < slots.length && next < state.picked.length; i++){
         if (slots[i] === null) {
@@ -44,9 +46,16 @@ export function isHint(state: GameState, id: number): boolean {
     return state.hints.some((hint) => hint.tileId === id);
 }
 
-// A tile is used if the player picked it or a hint locked it.
+// A tile is used if the player picked it or a hint on the board locked it.
 export function isPicked(state:GameState, id: number): boolean {
-    return state.picked.includes(id) || isHint(state, id);
+    return state.picked.includes(id) || (state.hintsShown && isHint(state, id));
+}
+
+// Every hint letter on the board has to be part of the word. Hidden hints do not count.
+export function usesAllHints(state: GameState): boolean {
+    if (!state.hintsShown) return true;
+    const length = getWord(state).length;
+    return state.hints.every((hint) => hint.position < length);
 }
 
 export function gameReducer(state: GameState, action: GameAction): GameState {
@@ -85,15 +94,27 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             const isTaken = state.hints.some((hint) => hint.position === action.position);
             const tile = state.tiles.find((t) => t.letter === action.letter && !isHint(state, t.id));
             if (!isOnBoard || isTaken || tile === undefined || state.hints.length >= MAX_HINTS_LETRAS) return state;
-            return {...state, picked: [], hints: [...state.hints, {position: action.position, tileId: tile.id}] };
+            // A new hint also puts back the hints that were taken off.
+            return {
+                ...state,
+                picked: [],
+                hints: [...state.hints, {position: action.position, tileId: tile.id}],
+                hintsShown: true,
+            };
+        }
+
+        case 'toggleHints': {
+            if (state.hints.length === 0) return state;
+            // Taking the hints off keeps the player's letters, and their tiles are free again.
+            if (state.hintsShown) return { ...state, hintsShown: false };
+            // Putting them back erases the player's letters, like a new hint.
+            return { ...state, picked: [], hintsShown: true };
         }
 
         case 'submit': {
             const word = getWord(state);
             const letters = state.tiles.map((tile) => tile.letter);
-            // Every hint letter has to be part of the word.
-            const usesAllHints = state.hints.every((hint) => hint.position < word.length);
-            if (!canSubmit(word, letters) || !usesAllHints) {
+            if (!canSubmit(word, letters) || !usesAllHints(state)) {
                 return state;
             }
             const isValid = isInDictionary(word, action.dictionary);

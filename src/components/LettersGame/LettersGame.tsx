@@ -1,7 +1,7 @@
 import { useEffect, useReducer, useState, useMemo, type CSSProperties } from 'react';
 import { getDailyLetters } from '../../domain/letras/challengeLetras';
 import { loadDictionary } from '../../domain/letras/dictionaryLetras';
-import { gameReducer, getWord, initialState, isPicked, getSlots } from '../../domain/letras/gameLetras';
+import { gameReducer, getWord, initialState, isPicked, getSlots, usesAllHints } from '../../domain/letras/gameLetras';
 import { canSubmit } from '../../domain/letras/wordLetras';
 import { formatCountdown, msUntilNextChallenge } from '../../domain/shared/date';
 import { MAX_HINTS_LETRAS, findLongestWord, getHintPositions } from '../../domain/letras/hintsLetras';
@@ -183,7 +183,6 @@ function LettersGame({ loadWords = loadDictionary, intro = false }: Props) {
     const finished = result !== null;
     const slots = getSlots(state);
     const hasLetters = state.picked.length > 0;  // letters written by the player, not the hints
-    const usesAllHints = state.hints.every((hint) => hint.position < word.length);
 
     const hintsLeft = Math.min(MAX_HINTS_LETRAS, hintPositions.length) - state.hints.length;
 
@@ -232,7 +231,7 @@ function LettersGame({ loadWords = loadDictionary, intro = false }: Props) {
                 {slots.map((letter, index) => (
                     <span key={index} data-testid="slot" className={styles.slot}>
                         {letter !== null && (
-                            <span style={delayStyle(index)} data-hint={state.hints.some((hint) => hint.position === index)} className={styles.letter}>
+                            <span style={delayStyle(index)} data-hint={state.hintsShown && state.hints.some((hint) => hint.position === index)} className={styles.letter}>
                                 {letter}
                             </span>
                         )}
@@ -297,7 +296,7 @@ function LettersGame({ loadWords = loadDictionary, intro = false }: Props) {
                         <button onClick={() => dispatch({ type: 'clear' })} disabled={!hasLetters || finished} className={styles.secondary}>
                             Borrar todo
                         </button>
-                        <button onClick={submit} disabled={dictionary === null || !canSubmit(word, letters) || finished} className={styles.primary}>
+                        <button onClick={submit} disabled={dictionary === null || !canSubmit(word, letters) || !usesAllHints(state) || finished} className={styles.primary}>
                             Enviar
                         </button>
                     </div>
@@ -314,6 +313,15 @@ function LettersGame({ loadWords = loadDictionary, intro = false }: Props) {
                             </svg>
                             Pista · quedan {Math.max(hintsLeft, 0)}
                         </button>
+                        {state.hints.length > 0 && (
+                            <button
+                                onClick={() => dispatch({ type: 'toggleHints' })}
+                                disabled={spinning || finished}
+                                className={styles.secondary}
+                            >
+                                {state.hintsShown ? 'Quitar pistas' : 'Ver pistas'}
+                            </button>
+                        )}                        
                         <span className={styles.cost}>
                             {hintsLeft > 0 ? `La siguiente resta ${HINT_COST_LETRAS} punto` : 'No quedan pistas'}
                         </span>
