@@ -2,23 +2,51 @@ import type {GameAction, GameState } from './typesLetras';
 import { isInDictionary } from './dictionaryLetras';
 import { calculateScore } from './scoreLetras';
 import { canSubmit, normalizeWord } from './wordLetras';
+import {MAX_HINTS_LETRAS} from './hintsLetras';
 
 export function initialState(letters: Array<string>): GameState {
     return {
         tiles: letters.map((letter, index) => ({id: index, letter})),
         picked: [],
+        hints: [],
         result: null,
     };
 }
 
-export function getWord(state: GameState): string {
-    return state.picked
-        .map((id) => state.tiles.find((tile) => tile.id === id)?.letter ?? '')
-        .join('');
+function letterOf(state: GameState, id: number): string{
+    return state.tiles.find((tile) => tile.id === id)?.letter ?? '';
 }
 
+export function getSlots(state: GameState): Array<string | null> {
+    const slots: Array<string | null> = state.tiles.map(() => null);
+    for (const hint of state.hints) {
+        slots[hint.position] = letterOf(state, hint.tileId);
+    }
+
+    let next = 0;
+    for (let i = 0; i < slots.length && next < state.picked.length; i++){
+        if (slots[i] === null) {
+            slots[i] = letterOf(state, state.picked[next]);
+            next++;
+        }
+    }
+    return slots;
+}
+
+// The word on the board: the letters from the first slot up to the first empty one.
+export function getWord(state: GameState): string {
+    const slots = getSlots(state);
+    const end = slots.indexOf(null);
+    return slots.slice(0, end === -1 ? slots.length : end).join('');
+}
+
+export function isHint(state: GameState, id: number): boolean {
+    return state.hints.some((hint) => hint.tileId === id);
+}
+
+// A tile is used if the player picked it or a hint locked it.
 export function isPicked(state:GameState, id: number): boolean {
-    return state.picked.includes(id);
+    return state.picked.includes(id) || isHint(state, id);
 }
 
 export function gameReducer(state: GameState, action: GameAction): GameState {
@@ -50,6 +78,14 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 return state;
             }
             return { ...state, picked: [...state.picked, tile.id] };
+        }
+
+        case 'hint': {
+            const isOnBoard = action.position >= 0 && action.position < state.tiles.length;
+            const isTaken = state.hints.some((hint) => hint.position === action.position);
+            const tile = state.tiles.find((t) => t.letter === action.letter && !isHint(state, t.id));
+            if (!isOnBoard || isTaken || tile === undefined || state.hints.length >= MAX_HINTS_LETRAS) return state;
+            return {...state, picked: [], hints: [...state.hints, {position: action.position, tileId: tile.id}] };
         }
 
         case 'submit': {

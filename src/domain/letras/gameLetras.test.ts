@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { gameReducer, getWord, initialState, isPicked } from './gameLetras';
+import { gameReducer, getSlots, getWord, initialState, isHint, isPicked } from './gameLetras';
 import type { GameState } from './typesLetras';
 
 const LETTERS = ['P', 'A', 'O', 'H', 'C', 'I', 'E', 'A', 'L'];
@@ -191,5 +191,85 @@ describe('restart', () => {
     const state = gameReducer(pick(initialState(LETTERS), 0, 1), { type: 'restart' });
 
     expect(getWord(state)).toBe('');
+  });
+});
+
+describe('hint', () => {
+  function hint(state: GameState, position: number, letter: string): GameState {
+    return gameReducer(state, { type: 'hint', position, letter });
+  }
+
+  it('locks a tile with the letter in its slot', () => {
+    const state = hint(initialState(LETTERS), 3, 'H');
+
+    expect(getSlots(state)).toEqual([null, null, null, 'H', null, null, null, null, null]);
+    expect(state.hints).toEqual([{ position: 3, tileId: 3 }]);
+  });
+
+  it('marks the hint tile as used, so it cannot be picked or typed', () => {
+    const state = hint(initialState(LETTERS), 3, 'H');
+
+    expect(isHint(state, 3)).toBe(true);
+    expect(isPicked(state, 3)).toBe(true);
+    expect(pick(state, 3)).toBe(state);
+    expect(gameReducer(state, { type: 'type', letter: 'H' })).toBe(state);
+  });
+
+  it('fills the free slots around the hints with the player letters', () => {
+    // Hint H in slot 1, then the player picks C, A, P, E, L, A: C H A P E L A
+    const state = pick(hint(initialState(LETTERS), 1, 'H'), 4, 1, 0, 6, 8, 7);
+
+    expect(getWord(state)).toBe('CHAPELA');
+  });
+
+  it('only counts the word up to the first empty slot', () => {
+    // Hint in slot 4 and only two letters written: the H is not part of the word yet.
+    const state = pick(hint(initialState(LETTERS), 4, 'H'), 4, 1);
+
+    expect(getSlots(state)).toEqual(['C', 'A', null, null, 'H', null, null, null, null]);
+    expect(getWord(state)).toBe('CA');
+  });
+
+  it('erases the player letters and keeps the earlier hints', () => {
+    const withLetters = pick(hint(initialState(LETTERS), 0, 'C'), 3, 1);
+    const state = hint(withLetters, 5, 'E');
+
+    expect(state.picked).toEqual([]);
+    expect(state.hints).toEqual([
+      { position: 0, tileId: 4 },
+      { position: 5, tileId: 6 },
+    ]);
+  });
+
+  it('uses another tile when the same letter is given twice', () => {
+    const state = hint(hint(initialState(LETTERS), 2, 'A'), 6, 'A');
+
+    expect(state.hints.map((h) => h.tileId)).toEqual([1, 7]);
+  });
+
+  it('ignores a slot that already has a hint', () => {
+    const before = hint(initialState(LETTERS), 3, 'H');
+
+    expect(hint(before, 3, 'P')).toBe(before);
+  });
+
+  it('ignores a slot outside the board', () => {
+    const before = initialState(LETTERS);
+
+    expect(hint(before, -1, 'P')).toBe(before);
+    expect(hint(before, 9, 'P')).toBe(before);
+  });
+
+  it('ignores a letter with no free tile', () => {
+    const before = hint(initialState(LETTERS), 0, 'P');
+
+    expect(hint(before, 1, 'Z')).toBe(before);
+    expect(hint(before, 1, 'P')).toBe(before);
+  });
+
+  it('gives 3 hints at most', () => {
+    const three = hint(hint(hint(initialState(LETTERS), 0, 'P'), 1, 'A'), 2, 'L');
+
+    expect(hint(three, 3, 'O')).toBe(three);
   });
 });
