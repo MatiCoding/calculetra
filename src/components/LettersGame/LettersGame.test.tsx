@@ -2,6 +2,7 @@
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { getDailyLetters } from '../../domain/letras/challengeLetras';
+import { getHintPositions } from '../../domain/letras/hintsLetras';
 import LettersGame from './LettersGame';
 
 // The letters depend on today's date, so the tests fix the date.
@@ -553,4 +554,98 @@ describe('LettersGame', () => {
             expect(screen.queryByRole('region', { name: 'Resultado' })).toBeNull();
         });
     });
+
+    describe('hints', () => {
+        // The fake dictionary only has one word: the first 5 letters of the day, so it is the longest one.
+        let longest: string;
+        let positions: Array<number>;
+
+        beforeEach(() => {
+            longest = letters.slice(0, 5).join('');
+            positions = getHintPositions(TODAY, longest.length);
+        });
+
+        function hintButton() {
+            return screen.getByRole('button', { name: /Pista/ });
+        }
+
+        function askHint() {
+            fireEvent.click(hintButton());
+        }
+
+        it('shows 3 hints left and what the next one costs', async () => {
+            await renderGame([longest]);
+
+            expect(hintButton().textContent).toContain('quedan 3');
+            expect(screen.getByText('La siguiente resta 1 punto')).toBeTruthy();
+        });
+
+        it('puts a letter of the longest word in its slot', async () => {
+            await renderGame([longest]);
+
+            askHint();
+
+            const expected = Array<string>(9).fill('');
+            expected[positions[0]] = longest[positions[0]];
+            expect(slotLetters()).toEqual(expected);
+            expect(hintButton().textContent).toContain('quedan 2');
+        });
+
+        it('marks the hint letter as a hint and disables its key', async () => {
+            await renderGame([longest]);
+
+            askHint();
+
+            const slot = within(board()).getAllByTestId('slot')[positions[0]];
+            expect(slot.firstElementChild?.getAttribute('data-hint')).toBe('true');
+            expect(letterButtons().filter(isDisabled)).toHaveLength(1);
+        });
+
+        it('fills the other slots around the hint', async () => {
+            await renderGame([longest]);
+            askHint();
+
+            // The free keys, in order, fill the free slots in order.
+            const free = letterButtons().map((_, index) => index).filter((index) => !isDisabled(letterButtons()[index]));
+            clickLetters(...free.slice(0, 3));
+
+            expect(slotLetters().filter((letter) => letter !== '')).toHaveLength(4);
+            expect(slotLetters()[positions[0]]).toBe(longest[positions[0]]);
+        });
+
+        it('cannot delete a hint letter', async () => {
+            await renderGame([longest]);
+
+            askHint();
+
+            expect(isDisabled(button('Borrar letra'))).toBe(true);
+            expect(isDisabled(button('Borrar todo'))).toBe(true);
+        });
+
+        it('gives 3 hints at most, each one in a different slot', async () => {
+            await renderGame([longest]);
+
+            askHint();
+            askHint();
+            askHint();
+
+            expect(slotLetters().filter((letter) => letter !== '')).toHaveLength(3);
+            expect(isDisabled(hintButton())).toBe(true);
+            expect(hintButton().textContent).toContain('quedan 0');
+            expect(screen.getByText('No quedan pistas')).toBeTruthy();
+        });
+
+        it('cannot ask for a hint while the dictionary is loading', () => {
+            render(<LettersGame loadWords={() => new Promise(() => {})} />);
+            finishAnimations();
+
+            expect(isDisabled(hintButton())).toBe(true);
+        });
+
+        it('cannot ask for a hint when no word can be made', async () => {
+            await renderGame([]);
+
+            expect(isDisabled(hintButton())).toBe(true);
+        });
+    });    
 });

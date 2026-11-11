@@ -1,9 +1,11 @@
-import { useEffect, useReducer, useState, type CSSProperties } from 'react';
+import { useEffect, useReducer, useState, useMemo, type CSSProperties } from 'react';
 import { getDailyLetters } from '../../domain/letras/challengeLetras';
 import { loadDictionary } from '../../domain/letras/dictionaryLetras';
-import { gameReducer, getWord, initialState, isPicked } from '../../domain/letras/gameLetras';
+import { gameReducer, getWord, initialState, isPicked, getSlots } from '../../domain/letras/gameLetras';
 import { canSubmit } from '../../domain/letras/wordLetras';
 import { formatCountdown, msUntilNextChallenge } from '../../domain/shared/date';
+import { MAX_HINTS_LETRAS, findLongestWord, getHintPositions } from '../../domain/letras/hintsLetras';
+import { HINT_COST_LETRAS } from '../../domain/letras/scoreLetras';
 import styles from './LettersGame.module.css';
 
 const SLOTS = 9;
@@ -83,9 +85,23 @@ function LettersGame({ loadWords = loadDictionary, intro = false }: Props) {
         const timer = setTimeout(() => setPlayingIntro(false), INTRO_MS);
         return () => clearTimeout(timer);
     }, [playingIntro]);
-    const [state, dispatch] = useReducer(gameReducer, undefined, () => initialState(getDailyLetters(new Date())));
+
+    // The day is fixed when the game opens, so the letters and the hints are from the same day.
+    const [today] = useState(() => new Date());
+    const [dailyLetters] = useState(() => getDailyLetters(today));
+    const [state, dispatch] = useReducer(gameReducer, dailyLetters, initialState);
     const [dictionary, setDictionary] = useState<Set<string> | null>(null);
     const [loadFailed, setLoadFailed] = useState(false);
+    
+    const longestWord = useMemo(
+        () => (dictionary === null ? null : findLongestWord(dailyLetters, dictionary)),
+        [dictionary, dailyLetters],
+    )
+
+    const hintPositions = useMemo(
+        () => (longestWord === null ? [] : getHintPositions(today, longestWord.length)),
+        [longestWord, today],
+    )
 
     const[reels, setReels] = useState(() => state.tiles.map((tile, index) => createReel(tile.letter, index)));
     const [landed, setLanded] = useState(() => (prefersReducedMotion() ? state.tiles.length : 0));  // How many keys have stopped spinning. They stop from left to right.
@@ -149,9 +165,10 @@ function LettersGame({ loadWords = loadDictionary, intro = false }: Props) {
 
     // Counts the points up, one by one.
     useEffect(() => {
-        if (result === null || !result.isValid || prefersReducedMotion()) return;
+        // With hints a valid word can score 0, and then there is nothing to count.
+        if (result === null || !result.isValid || result.score === 0 || prefersReducedMotion()) return;
         const score = result.score;
-        const step = score === 18 ? HOP_STEP / 2 : HOP_STEP;
+        const step = result.word.length === SLOTS ? HOP_STEP / 2 : HOP_STEP;
         let count = 0;
         const timer = setInterval(() => {
             count += 1;
@@ -164,12 +181,16 @@ function LettersGame({ loadWords = loadDictionary, intro = false }: Props) {
     const word = getWord(state);
     const letters = state.tiles.map((tile) => tile.letter);
     const finished = result !== null;
-    const slots = Array.from({length: SLOTS }, (_, index) => word[index]);
+    const slots = getSlots(state);
+    const hasLetters = state.picked.length > 0;  // letters written by the player, not the hints
+    const usesAllHints = state.hints.every((hint) => hint.position < word.length);
+
+    const hintsLeft = Math.min(MAX_HINTS_LETRAS, hintPositions.length) - state.hints.length;
 
     let status: BoardStatus = 'playing';
     if (result !== null) {
         if (!result.isValid) status = 'invalid';
-        else if (result.score === 18) status = 'full';
+        else if (result.word.length === SLOTS) status = 'full';
         else status = 'valid';
     }
 
@@ -192,6 +213,13 @@ function LettersGame({ loadWords = loadDictionary, intro = false }: Props) {
         setReels(state.tiles.map((tile, index) => createReel(tile.letter, index)));
     }
 
+    // Puts the next letter of the longest word in its slot.
+    function giveHint() {
+        if (longestWord === null || hintsLeft <= 0) return;
+        const position = hintPositions[state.hints.length];
+        dispatch({ type: 'hint', position, letter: longestWord[position] });
+    }
+
     function submit() {
         if (dictionary !== null) dispatch({ type: 'submit', dictionary });
     }
@@ -203,12 +231,12 @@ function LettersGame({ loadWords = loadDictionary, intro = false }: Props) {
             <output aria-label="Tu palabra" data-status={status} className={styles.board}>
                 {slots.map((letter, index) => (
                     <span key={index} data-testid="slot" className={styles.slot}>
-                        {letter !== undefined && (
-                            <span style={delayStyle(index)} className={styles.letter}>
+                        {letter !== null && (
+                            <span style={delayStyle(index)} data-hint={state.hints.some((hint) => hint.position === index)} className={styles.letter}>
                                 {letter}
                             </span>
                         )}
-                        {letter !== undefined && (status === 'valid' || status === 'full') && (
+                        {letter !== null && (status === 'valid' || status === 'full') && (
                             <span aria-hidden="true" style={delayStyle(index)} className={styles.plus}>
                                 +1
                             </span>
@@ -263,10 +291,10 @@ function LettersGame({ loadWords = loadDictionary, intro = false }: Props) {
                     </ul>
                     
                     <div className={styles.actions}>
-                        <button onClick={() => dispatch({ type: 'removeLast' })} disabled={word === '' || finished} className={styles.secondary}>
+                        <button onClick={() => dispatch({ type: 'removeLast' })} disabled={!hasLetters || finished} className={styles.secondary}>
                             Borrar letra
                         </button>
-                        <button onClick={() => dispatch({ type: 'clear' })} disabled={word === '' || finished} className={styles.secondary}>
+                        <button onClick={() => dispatch({ type: 'clear' })} disabled={!hasLetters || finished} className={styles.secondary}>
                             Borrar todo
                         </button>
                         <button onClick={submit} disabled={dictionary === null || !canSubmit(word, letters) || finished} className={styles.primary}>
@@ -274,6 +302,22 @@ function LettersGame({ loadWords = loadDictionary, intro = false }: Props) {
                         </button>
                     </div>
 
+                    <div className={styles.hintBox}>
+                        <button
+                            onClick={giveHint}
+                            disabled={spinning || finished || longestWord === null || hintsLeft <= 0}
+                            className={`${styles.secondary} ${styles.hintButton}`}
+                        >
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.1V17h6v-.2c0-.8.4-1.6 1-2.1A7 7 0 0 0 12 2z" />
+                                <path d="M9 21h6" />
+                            </svg>
+                            Pista · quedan {Math.max(hintsLeft, 0)}
+                        </button>
+                        <span className={styles.cost}>
+                            {hintsLeft > 0 ? `La siguiente resta ${HINT_COST_LETRAS} punto` : 'No quedan pistas'}
+                        </span>
+                    </div>                    
                 </>
             )} 
 
