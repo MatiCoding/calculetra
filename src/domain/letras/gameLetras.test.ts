@@ -285,12 +285,12 @@ describe('submit with hints', () => {
     return gameReducer(state, { type: 'submit', dictionary });
   }
 
-  it('takes 1 point per hint away from the score', () => {
+  it('takes 1 point for the first hint and 2 for the second away from the score', () => {
     // Hints H (slot 1) and P (slot 3), then C, A, E, L, A: C H A P E L A
     const withHints = hint(hint(initialState(LETTERS), 1, 'H'), 3, 'P');
     const state = submit(pick(withHints, 4, 1, 6, 8, 7));
 
-    expect(state.result).toEqual({ word: 'CHAPELA', isValid: true, score: 5, hintPenalty: 2 });
+    expect(state.result).toEqual({ word: 'CHAPELA', isValid: true, score: 4, hintPenalty: 3 });
   });
 
   it('never gives less than 0 points', () => {

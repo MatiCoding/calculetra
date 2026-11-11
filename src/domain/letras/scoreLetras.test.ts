@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { calculateScore, hintPenalty, scoreWithHints } from './scoreLetras';
+import { calculateScore, nextHintCost, scoreWithHints } from './scoreLetras';
 
 describe('calculateScore', () => {
   it('gives one point per letter for a valid word', () => {
@@ -18,14 +18,11 @@ describe('calculateScore', () => {
   });
 });
 
-describe('hintPenalty', () => {
-  it('takes away nothing without hints', () => {
-    expect(hintPenalty(0)).toBe(0);
-  });
-
-  it('takes away 1 point per hint', () => {
-    expect(hintPenalty(1)).toBe(1);
-    expect(hintPenalty(3)).toBe(3);
+describe('nextHintCost', () => {
+  it('costs one point more each time', () => {
+    expect(nextHintCost(0)).toBe(1);
+    expect(nextHintCost(1)).toBe(2);
+    expect(nextHintCost(2)).toBe(3);
   });
 });
 
@@ -35,12 +32,12 @@ describe('scoreWithHints', () => {
   });
 
   it('takes the hints away from the score', () => {
-    expect(scoreWithHints(7, 2)).toBe(5);
-    expect(scoreWithHints(18, 3)).toBe(15);
+    expect(scoreWithHints(7, 2)).toBe(4);
+    expect(scoreWithHints(18, 3)).toBe(12);
   });
 
   it('never goes below 0', () => {
     expect(scoreWithHints(0, 3)).toBe(0);
-    expect(scoreWithHints(2, 3)).toBe(0);
+    expect(scoreWithHints(5, 3)).toBe(0);
   });
 });

@@ -7,11 +7,18 @@ export function calculateScore(word: string, isValid: boolean): number {
     return word.length;
 }
 
-export const HINT_COST_LETRAS = 1;
+// Each hint costs one point more than the one before: 1, 2 and 3.
+export function nextHintCost(hintsUsed: number): number {
+    return hintsUsed + 1;
+}
 
-// Points taken away for the hints used: 1 per hint.
+// Points taken away for the hints used: 1 + 2 + 3...
 export function hintPenalty(hintsUsed: number): number {
-    return hintsUsed * HINT_COST_LETRAS;
+    let total = 0;
+    for (let hint = 0; hint < hintsUsed; hint++) {
+        total += nextHintCost(hint);
+    }
+    return total;
 }
 
 // The final score after taking away the hints. It never goes below 0.

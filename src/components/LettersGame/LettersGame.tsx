@@ -5,7 +5,7 @@ import { gameReducer, getWord, initialState, isPicked, getSlots, usesAllHints } 
 import { canSubmit } from '../../domain/letras/wordLetras';
 import { formatCountdown, msUntilNextChallenge } from '../../domain/shared/date';
 import { MAX_HINTS_LETRAS, findLongestWord, getHintPositions } from '../../domain/letras/hintsLetras';
-import { HINT_COST_LETRAS } from '../../domain/letras/scoreLetras';
+import { nextHintCost } from '../../domain/letras/scoreLetras';
 import styles from './LettersGame.module.css';
 
 const SLOTS = 9;
@@ -185,6 +185,7 @@ function LettersGame({ loadWords = loadDictionary, intro = false }: Props) {
     const hasLetters = state.picked.length > 0;  // letters written by the player, not the hints
 
     const hintsLeft = Math.min(MAX_HINTS_LETRAS, hintPositions.length) - state.hints.length;
+    const nextCost = nextHintCost(state.hints.length);
 
     let status: BoardStatus = 'playing';
     if (result !== null) {
@@ -323,7 +324,7 @@ function LettersGame({ loadWords = loadDictionary, intro = false }: Props) {
                             </button>
                         )}                        
                         <span className={styles.cost}>
-                            {hintsLeft > 0 ? `La siguiente resta ${HINT_COST_LETRAS} punto` : 'No quedan pistas'}
+                            {hintsLeft > 0 ? `La siguiente resta ${nextCost} ${nextCost === 1 ? 'punto' : 'puntos'}` : 'No quedan pistas'}
                         </span>
                     </div>                    
                 </>
