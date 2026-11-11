@@ -149,14 +149,14 @@ describe('submit', () => {
     // C H A P E L A
     const state = submit(pick(initialState(LETTERS), 4, 3, 1, 0, 6, 8, 7));
 
-    expect(state.result).toEqual({ word: 'CHAPELA', isValid: true, score: 7 });
+    expect(state.result).toEqual({ word: 'CHAPELA', isValid: true, score: 7, hintPenalty: 0 });
   });
 
   it('gives 0 points for a word that is not in the dictionary', () => {
     // P A L O H C I E A
     const state = submit(pick(initialState(LETTERS), 0, 1, 8, 2, 3, 4, 5, 6, 7));
 
-    expect(state.result).toEqual({ word: 'PALOHCIEA', isValid: false, score: 0 });
+    expect(state.result).toEqual({ word: 'PALOHCIEA', isValid: false, score: 0, hintPenalty: 0 });
   });
 
   it('does not send a word shorter than 3 letters', () => {
@@ -271,5 +271,59 @@ describe('hint', () => {
     const three = hint(hint(hint(initialState(LETTERS), 0, 'P'), 1, 'A'), 2, 'L');
 
     expect(hint(three, 3, 'O')).toBe(three);
+  });
+});
+
+describe('submit with hints', () => {
+  const dictionary = new Set(['CHAPELA', 'PALOHCIEA']);
+
+  function hint(state: GameState, position: number, letter: string): GameState {
+    return gameReducer(state, { type: 'hint', position, letter });
+  }
+
+  function submit(state: GameState): GameState {
+    return gameReducer(state, { type: 'submit', dictionary });
+  }
+
+  it('takes 1 point per hint away from the score', () => {
+    // Hints H (slot 1) and P (slot 3), then C, A, E, L, A: C H A P E L A
+    const withHints = hint(hint(initialState(LETTERS), 1, 'H'), 3, 'P');
+    const state = submit(pick(withHints, 4, 1, 6, 8, 7));
+
+    expect(state.result).toEqual({ word: 'CHAPELA', isValid: true, score: 5, hintPenalty: 2 });
+  });
+
+  it('never gives less than 0 points', () => {
+    // A word that is not in the dictionary, with one hint: 0 - 1 stays 0.
+    const withHint = hint(initialState(LETTERS), 0, 'C');
+    const state = submit(pick(withHint, 1, 2));
+
+    expect(state.result).toEqual({ word: 'CAO', isValid: false, score: 0, hintPenalty: 1 });
+  });
+
+  it('does not send a word that leaves a hint out', () => {
+    // Hint in slot 5, but the word only reaches slot 2.
+    const before = pick(hint(initialState(LETTERS), 5, 'E'), 4, 3, 1);
+
+    expect(getWord(before)).toBe('CHA');
+    expect(submit(before)).toBe(before);
+  });
+
+  it('sends the word once it reaches the last hint', () => {
+    // Hint E in slot 4: C H A P E L A
+    const state = submit(pick(hint(initialState(LETTERS), 4, 'E'), 4, 3, 1, 0, 8, 7));
+
+    expect(state.result?.word).toBe('CHAPELA');
+  });
+});
+
+describe('restart with hints', () => {
+  it('keeps the hints and erases the player letters', () => {
+    const withHint = gameReducer(initialState(LETTERS), { type: 'hint', position: 2, letter: 'A' });
+    const state = gameReducer(pick(withHint, 4, 3), { type: 'restart' });
+
+    expect(state.picked).toEqual([]);
+    expect(state.hints).toEqual(withHint.hints);
+    expect(state.result).toBeNull();
   });
 });

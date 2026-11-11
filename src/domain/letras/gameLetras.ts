@@ -1,6 +1,6 @@
 import type {GameAction, GameState } from './typesLetras';
 import { isInDictionary } from './dictionaryLetras';
-import { calculateScore } from './scoreLetras';
+import { calculateScore, hintPenalty, scoreWithHints } from './scoreLetras';
 import { canSubmit, normalizeWord } from './wordLetras';
 import {MAX_HINTS_LETRAS} from './hintsLetras';
 
@@ -51,7 +51,7 @@ export function isPicked(state:GameState, id: number): boolean {
 
 export function gameReducer(state: GameState, action: GameAction): GameState {
     // Playing again staarts over with the same letters. It is the only action that works after sending.
-    if (action.type === 'restart') return initialState(state.tiles.map((tile) => tile.letter));
+    if (action.type === 'restart') return { ...initialState(state.tiles.map((tile) => tile.letter)), hints: state.hints };
     
     if (state.result !== null) return state;
 
@@ -91,11 +91,22 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         case 'submit': {
             const word = getWord(state);
             const letters = state.tiles.map((tile) => tile.letter);
-            if (!canSubmit(word, letters)) {
+            // Every hint letter has to be part of the word.
+            const usesAllHints = state.hints.every((hint) => hint.position < word.length);
+            if (!canSubmit(word, letters) || !usesAllHints) {
                 return state;
             }
             const isValid = isInDictionary(word, action.dictionary);
-            return { ...state, result: { word, isValid, score: calculateScore(word, isValid) } };
+            const hintsUsed = state.hints.length;
+            return {
+                ...state,
+                result: {
+                    word,
+                    isValid,
+                    score: scoreWithHints(calculateScore(word, isValid), hintsUsed),
+                    hintPenalty: hintPenalty(hintsUsed),
+                },
+            };
         }
         
         default: {
