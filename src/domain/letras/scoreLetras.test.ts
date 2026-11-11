@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { calculateScore } from './scoreLetras';
+import { calculateScore, hintPenalty, scoreWithHints } from './scoreLetras';
 
 describe('calculateScore', () => {
   it('gives one point per letter for a valid word', () => {
@@ -15,5 +15,32 @@ describe('calculateScore', () => {
   it('gives 0 points when the word is not in the dictionary', () => {
     expect(calculateScore('PALOHCIEA', false)).toBe(0);
     expect(calculateScore('HCI', false)).toBe(0);
+  });
+});
+
+describe('hintPenalty', () => {
+  it('takes away nothing without hints', () => {
+    expect(hintPenalty(0)).toBe(0);
+  });
+
+  it('takes away 1 point per hint', () => {
+    expect(hintPenalty(1)).toBe(1);
+    expect(hintPenalty(3)).toBe(3);
+  });
+});
+
+describe('scoreWithHints', () => {
+  it('keeps the score without hints', () => {
+    expect(scoreWithHints(7, 0)).toBe(7);
+  });
+
+  it('takes the hints away from the score', () => {
+    expect(scoreWithHints(7, 2)).toBe(5);
+    expect(scoreWithHints(18, 3)).toBe(15);
+  });
+
+  it('never goes below 0', () => {
+    expect(scoreWithHints(0, 3)).toBe(0);
+    expect(scoreWithHints(2, 3)).toBe(0);
   });
 });
