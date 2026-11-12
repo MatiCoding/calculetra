@@ -121,6 +121,14 @@ describe('LettersGame', () => {
         expect(letterButtons().filter(isDisabled)).toHaveLength(1);
     });
 
+    it('does not keep the focus on the delete buttons after a mouse click', async () => {
+        await renderGame();
+        clickLetters(0, 1);
+
+        expect(fireEvent.mouseDown(button('Borrar letra'))).toBe(false);
+        expect(fireEvent.mouseDown(button('Borrar todo'))).toBe(false);
+    });
+
     it('removes the last letter and makes it available again', async () => {
         await renderGame();
         clickLetters(0, 1);
@@ -744,6 +752,30 @@ describe('LettersGame', () => {
             clickButton('Quitar pistas');
 
             expect(hintButton().textContent).toContain('quedan 2');
+        });
+
+        it('does not keep the focus on the hint buttons after a mouse click, so Enter sends the word', async () => {
+            await renderGame([longest]);
+            askHint();
+
+            // fireEvent returns false when the component called preventDefault().
+            expect(fireEvent.mouseDown(hintButton())).toBe(false);
+            expect(fireEvent.mouseDown(button('Quitar pistas'))).toBe(false);
+        });
+
+        it('starts again without hints when playing again', async () => {
+            await renderGame([longest]);
+            askHint();
+            // Fills every free slot, so the word reaches the hint and can be sent.
+            const free = letterButtons().map((_, index) => index).filter((index) => !isDisabled(letterButtons()[index]));
+            clickLetters(...free);
+            send();
+
+            clickButton('Volver a jugar');
+            finishAnimations();
+
+            expect(slotLetters().every((letter) => letter === '')).toBe(true);
+            expect(hintButton().textContent).toContain('quedan 3');
         });
 
         it('cannot ask for a hint while the dictionary is loading', () => {

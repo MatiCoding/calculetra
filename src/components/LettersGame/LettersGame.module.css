@@ -329,12 +329,6 @@
     stroke-linejoin: round;
 }
 
-.cost {
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--color-muted);
-}
-
 .primary, .secondary {
     cursor: pointer;
     font: inherit;

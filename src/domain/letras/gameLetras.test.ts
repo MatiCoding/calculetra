@@ -318,13 +318,11 @@ describe('submit with hints', () => {
 });
 
 describe('restart with hints', () => {
-  it('keeps the hints and erases the player letters', () => {
+  it('starts again without hints, so each game pays for its own', () => {
     const withHint = gameReducer(initialState(LETTERS), { type: 'hint', position: 2, letter: 'A' });
     const state = gameReducer(pick(withHint, 4, 3), { type: 'restart' });
 
-    expect(state.picked).toEqual([]);
-    expect(state.hints).toEqual(withHint.hints);
-    expect(state.result).toBeNull();
+    expect(state).toEqual(initialState(LETTERS));
   });
 });
 

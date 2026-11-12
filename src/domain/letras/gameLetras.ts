@@ -60,7 +60,7 @@ export function usesAllHints(state: GameState): boolean {
 
 export function gameReducer(state: GameState, action: GameAction): GameState {
     // Playing again staarts over with the same letters. It is the only action that works after sending.
-    if (action.type === 'restart') return { ...initialState(state.tiles.map((tile) => tile.letter)), hints: state.hints };
+    if (action.type === 'restart') return initialState(state.tiles.map((tile) => tile.letter));
     
     if (state.result !== null) return state;
 
