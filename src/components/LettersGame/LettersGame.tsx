@@ -195,6 +195,10 @@ function LettersGame({ loadWords = loadDictionary, intro = false }: Props) {
     const hintsLeft = Math.min(MAX_HINTS_LETRAS, hintPositions.length) - state.hints.length;
     const nextCost = nextHintCost(state.hints.length);
 
+    // What a screen reader syas when a hint appears.
+    const lastHint = state.hints.at(-1);
+    const hintMessage = lastHint !== undefined && state.hintsShown ? `Pista: ${slots[lastHint.position]} en la casilla ${lastHint.position + 1}` : '';
+
     let status: BoardStatus = 'playing';
     if (result !== null) {
         if (!result.isValid) status = 'invalid';
@@ -349,6 +353,7 @@ function LettersGame({ loadWords = loadDictionary, intro = false }: Props) {
                 </>
             )} 
 
+            <p role="status" className={styles.srOnly}>{hintMessage}</p>
             {dictionary === null && !loadFailed && <p className={styles.status}>Cargando diccionario...</p>}
             {loadFailed && (
                 <p role="alert" className={styles.error}>No se ha podido cargar el diccionario. Recarga la página para jugar.</p>
@@ -357,12 +362,15 @@ function LettersGame({ loadWords = loadDictionary, intro = false }: Props) {
             {result !== null && revealed && (
                 <section aria-label="Resultado" className={styles.result}>
                     <p className={styles.resultHead} data-valid={result.isValid}>
-                        {!result.isValid ? 'No está en el diccionario' : result.score === 18 ? '¡Las nueve!' : '¡Vale!'}
+                        {!result.isValid ? 'No está en el diccionario' : result.word.length === SLOTS ? '¡Las nueve!' : '¡Vale!'}
                     </p>
                     <p className={styles.score} data-valid={result.isValid}>{result.score}</p>
                     <p className={styles.resultWord}>
                         {result.score} puntos con <b>{result.word}</b>
                     </p>
+                    {result.hintPenalty > 0 && (
+                        <p className={styles.penalty}>-{result.hintPenalty} por pistas</p>
+                    )}
                     <button onClick={playAgain} className={styles.primary}>
                         Volver a jugar
                     </button>

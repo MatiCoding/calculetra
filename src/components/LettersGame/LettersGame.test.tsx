@@ -778,6 +778,35 @@ describe('LettersGame', () => {
             expect(hintButton().textContent).toContain('quedan 3');
         });
 
+        it('tells screen readers which letter the hint gave and where', async () => {
+            await renderGame([longest]);
+
+            askHint();
+
+            const letter = longest[positions[0]];
+            expect(screen.getByText(`Pista: ${letter} en la casilla ${positions[0] + 1}`).getAttribute('role')).toBe('status');
+        });
+
+        it('shows the points taken away for hints in the result', async () => {
+            await renderGame([longest]);
+            askHint();
+            askHint();
+            // Fills every free slot, so the word reaches the hints and can be sent.
+            const free = letterButtons().map((_, index) => index).filter((index) => !isDisabled(letterButtons()[index]));
+            clickLetters(...free);
+            send();
+
+            expect(screen.getByText('-3 por pistas')).toBeTruthy();
+        });
+
+        it('does not talk about hints in the result when none were used', async () => {
+            await renderGame([longest]);
+            clickLetters(0, 1, 2);
+            send();
+
+            expect(screen.queryByText(/por pistas/)).toBeNull();
+        });
+
         it('cannot ask for a hint while the dictionary is loading', () => {
             render(<LettersGame loadWords={() => new Promise(() => {})} />);
             finishAnimations();
