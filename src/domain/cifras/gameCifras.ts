@@ -14,6 +14,7 @@ export function initialState(challenge: Challenge): GameState {
         finished: false,
         changedIds: [],
         hintsUsed: 0,
+        hints: [],
     };
 }
 
@@ -103,18 +104,20 @@ export function reduce(state: GameState, action: GameAction): GameState {
             return substitute(state, action.oldTileId, action.newTileId);        
         case 'hint':
             return applyHint(state, action.step);
-        case 'undoPlayerSteps': {
-            // Undoes the player's steps one by one. undoTo also takes away what was built on them.
-            let next = state;
-            let playerStep = next.steps.find((step) => !step.byHint);
-            while (playerStep !== undefined) {
-                next = reduce(next, { type: 'undoTo', resultId: playerStep.result.id });
-                playerStep = next.steps.find((step) => !step.byHint);
+        case 'undoPlayerSteps':
+            return undoSteps(state, false);
+        case 'removeHints':
+            return undoSteps(state, true);
+        case 'showHints': {
+            // The board from the start, with the paid hints done again. The player's steps go.
+            let next: GameState = { ...initialState(state.challenge), hintsUsed: state.hintsUsed, hints: state.hints };
+            for (const hint of state.hints) {
+                next = doHint(next, hint);
             }
             return next;
         }
         case 'reset':
-            return { ...initialState(state.challenge), hintsUsed: state.hintsUsed };
+            return { ...initialState(state.challenge), hintsUsed: state.hintsUsed, hints: state.hints };
         case 'finish':
             return { ...state, finished: true, selectedId: null, operator: null, error: null };
         default: {
@@ -137,15 +140,32 @@ function combine(state: GameState, secondId: number): GameState {
 }
 
 // Does the hint's operation with two tiles of the board that have those values.
-function applyHint(state: GameState, hint: HintStep): GameState {
+function doHint(state: GameState, hint: HintStep): GameState {
     const left = state.tiles.find((tile) => tile.value === hint.left);
     const right = state.tiles.find((tile) => tile.value === hint.right && tile !== left);
     if (left === undefined || right === undefined) {
         return state;
     }
-    const next = addStep(state, left, hint.operator, right, true);
-    // Only count the hint when its operation was really done.
-    return next.steps.length > state.steps.length ? { ...next, hintsUsed: state.hintsUsed + 1 } : next;
+    return addStep(state, left, hint.operator, right, true);
+}
+
+// A new hint. It is only paid and kept when its operation was really done.
+function applyHint(state: GameState, hint: HintStep): GameState {
+    const next = doHint(state, hint);
+    if (next.steps.length === state.steps.length) return next;
+    return { ...next, hintsUsed: state.hintsUsed + 1, hints: [...state.hints, hint] };
+}
+
+// Undoes the hints' steps (byHint true) or the player's (byHint false) one by one.
+// undoTo also takes away what was built on them.
+function undoSteps(state: GameState, byHint: boolean): GameState {
+    let next = state;
+    let step = next.steps.find((step) => step.byHint === byHint);
+    while (step !== undefined) {
+        next = reduce(next, { type: 'undoTo', resultId: step.result.id });
+        step = next.steps.find((step) => step.byHint === byHint);
+    }
+    return next;
 }
 
 // Puts the result of left operator right on the board, as a new step.

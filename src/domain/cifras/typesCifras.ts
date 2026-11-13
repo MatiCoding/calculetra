@@ -19,6 +19,7 @@ export type GameState = {
     substituteError: SubstituteError | null,
     changedIds: Array<number>,   // The tiles that changed in the last swap: the new number and the results with a new value.
     hintsUsed: number,           // Paid hints. Undoing or resetting does not give them back.
+    hints: Array<HintStep>,      // The paid hints' operations, in order, to put them back on the board.    
     finished: boolean
 }
 export type GameAction =
@@ -29,6 +30,8 @@ export type GameAction =
     | {type: 'substitute', oldTileId: number, newTileId: number}
     | { type: 'hint', step: HintStep }
     | { type: 'undoPlayerSteps' }
+    | { type: 'removeHints' }
+    | { type: 'showHints' }    
     | { type: 'reset' }
     | { type: 'finish' }
 

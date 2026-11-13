@@ -83,10 +83,12 @@ function NumbersGame({ intro = false }: Props) {
     // The best value that can be reached today. Solving takes a moment, so it is done once.
     const bestPossible = useMemo(() => solveCifras(challenge.numbers, challenge.target).value, [challenge]);
     // The open hint dialog. undo: the player's steps can not reach the best value, so they will be undone.
-    const [confirming, setConfirming] = useState<{ undo: boolean } | null>(null);
+    const [confirming, setConfirming] = useState<{ kind: 'hint', undo: boolean } | { kind: 'show' } | null>(null);
     const hintsLeft = MAX_HINTS_CIFRAS - state.hintsUsed;
     const nextCost = nextHintCost(state.hintsUsed);
     const lastHint = state.steps.filter((step) => step.byHint).at(-1);
+    // Paid hints that are not on the board: removed, undone or reset.
+    const hintsHidden = state.hintsUsed > 0 && lastHint === undefined;    
 
     const swapTile = swapCandidate(state);
     const error = errorText(state);
@@ -98,20 +100,44 @@ function NumbersGame({ intro = false }: Props) {
         return tiles.map((tile) => tile.value);
     }
 
-    // Asks first. If the player's steps can not reach the best value, the dialog warns that they will be undone.
-    function askHint() {
-        const hint = nextHint(values(state.tiles), challenge.target, bestPossible, today);
-        if (hint.kind === 'done') return;
-        setConfirming({ undo: hint.kind === 'unreachable' });
+    // The board the next hint starts from: with the paid hints back if they were taken away,
+    // or without the player's steps if they have to go.
+    function hintBoard(undo: boolean): GameState {
+        if (hintsHidden) return gameReducer(state, { type: 'showHints' });
+        return undo ? gameReducer(state, { type: 'undoPlayerSteps' }) : state;
     }
 
-    function giveHint() {
-        // The board the hint starts from: the player's steps undone, if they had to go.
-        const board = confirming?.undo ? gameReducer(state, { type: 'undoPlayerSteps' }) : state;
-        const hint = nextHint(values(board.tiles), challenge.target, bestPossible, today);
-        if (confirming?.undo) dispatch({ type: 'undoPlayerSteps' });
+    // Asks first. If the player's steps have to go, the dialog warns that they will be undone.
+    function askHint() {
+        const hint = nextHint(values(hintBoard(false).tiles), challenge.target, bestPossible, today);
+        if (hint.kind === 'done') return;
+        const undo = hint.kind === 'unreachable' || (hintsHidden && state.steps.length > 0);
+        setConfirming({ kind: 'hint', undo });
+    }
+
+    function giveHint(undo: boolean) {
+        const hint = nextHint(values(hintBoard(undo).tiles), challenge.target, bestPossible, today);
+        if (hintsHidden) dispatch({ type: 'showHints' });
+        else if (undo) dispatch({ type: 'undoPlayerSteps' });
         if (hint.kind === 'step') dispatch({ type: 'hint', step: hint.step });
+    }
+
+    // Putting the hints back undoes the player's steps, so it asks first.
+    function showHints() {
+        if (state.steps.length > 0) setConfirming({ kind: 'show' });
+        else dispatch({ type: 'showHints' });
+    }
+
+    function confirm() {
+        if (confirming?.kind === 'hint') giveHint(confirming.undo);
+        if (confirming?.kind === 'show') dispatch({ type: 'showHints' });
         setConfirming(null);
+    }
+
+    function dialogDetail(): string | undefined {
+        if (confirming?.kind === 'show' || (confirming?.undo && hintsHidden)) return 'Se desharán tus operaciones.';
+        if (confirming?.undo) return 'Tus operaciones ya no llegan al mejor resultado: se desharán.';
+        return undefined;
     }
 
     return (
@@ -215,7 +241,10 @@ function NumbersGame({ intro = false }: Props) {
                     </button>
                     <button onClick={() => dispatch({ type: 'reset' })} className={styles.secondary}>
                         Reiniciar
-                    </button>
+                    </button>                   
+                </div>
+
+                <div className={styles.hintBox}>
                     <button
                         onClick={askHint}
                         disabled={state.finished || hintsLeft <= 0 || bestValue === bestPossible}
@@ -226,7 +255,16 @@ function NumbersGame({ intro = false }: Props) {
                             <path d="M9 21h6" />
                         </svg>
                         Pista · quedan {hintsLeft}
-                    </button>                    
+                    </button> 
+                    {state.hintsUsed > 0 && (
+                        <button
+                            onClick={hintsHidden ? showHints : () => dispatch({ type: 'removeHints' })}
+                            disabled={state.finished}
+                            className={styles.secondary}
+                        >
+                            {hintsHidden ? 'Ver pistas' : 'Quitar pistas'}
+                        </button>
+                    )}
                 </div>
 
                 {state.finished && (
@@ -259,10 +297,12 @@ function NumbersGame({ intro = false }: Props) {
 
             <ConfirmDialog
                 open={confirming !== null}
-                message={`¿Usar una pista? Te restará ${nextCost} ${nextCost === 1 ? 'punto' : 'puntos'}.`}
-                detail={confirming?.undo ? 'Tus operaciones ya no llegan al mejor resultado: se desharán.' : undefined}
-                confirmLabel="Usar pista"
-                onConfirm={giveHint}
+                message={
+                    confirming?.kind === 'show' ? '¿Volver a poner las pistas?' : `¿Usar una pista? Te restará ${nextCost} ${nextCost === 1 ? 'punto' : 'puntos'}.`
+                }
+                detail={dialogDetail()}
+                confirmLabel={confirming?.kind === 'show' ? 'Poner pistas' : 'Usar pista'}
+                onConfirm={confirm}
                 onCancel={() => setConfirming(null)}
             />          
 

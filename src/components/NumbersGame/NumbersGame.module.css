@@ -307,6 +307,14 @@
     color: var(--color-letter);
 }
 
+.hintBox {
+    display: flex;
+    justify-content: cetner;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
 .hintButton {
     display: inline-flex;
     align-items: center;

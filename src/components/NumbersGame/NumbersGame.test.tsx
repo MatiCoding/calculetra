@@ -446,6 +446,102 @@ describe('NumbersGame', () => {
 
             expect((hintButton() as HTMLButtonElement).disabled).toBe(true);
         });
+
+        describe('removing and showing the hints', () => {
+            // The board after the first hint, played with the reducer.
+            function withFirstHint() {
+                const hint = nextHint(challenge.numbers, challenge.target, best, TODAY);
+                if (hint.kind !== 'step') throw new Error('Expected a hint step');
+                return gameReducer(initialState(challenge), { type: 'hint', step: hint.step });
+            }
+
+            function sorted(values: Array<number>) {
+                return values.toSorted((a, b) => a - b);
+            }
+
+            it('has no button to remove them before the first hint', () => {
+                render(<NumbersGame />);
+
+                expect(screen.queryByRole('button', { name: 'Quitar pistas' })).toBeNull();
+                expect(screen.queryByRole('button', { name: 'Ver pistas' })).toBeNull();
+            });
+
+            it('takes the hints off the board and keeps them paid', () => {
+                render(<NumbersGame />);
+                askHint();
+
+                clickButton('Quitar pistas');
+
+                expect(stepTexts()).toEqual([]);
+                expect(sorted(numberValues())).toEqual(sorted(challenge.numbers));
+                expect(hintButton().textContent).toContain('quedan 2');
+                expect(screen.getByRole('button', { name: 'Ver pistas' })).toBeTruthy();
+            });
+
+            it('puts them back without asking or charging when the board has no steps', () => {
+                render(<NumbersGame />);
+                askHint();
+                clickButton('Quitar pistas');
+
+                clickButton('Ver pistas');
+
+                expect(dialog()).toBeNull();
+                expect(sorted(numberValues())).toEqual(sorted(withFirstHint().tiles.map((tile) => tile.value)));
+                expect(hintButton().textContent).toContain('quedan 2');
+                expect(screen.getByRole('button', { name: 'Quitar pistas' })).toBeTruthy();
+            });
+
+            it('offers to show them again after "Reiniciar"', () => {
+                render(<NumbersGame />);
+                askHint();
+
+                clickButton('Reiniciar');
+
+                expect(screen.getByRole('button', { name: 'Ver pistas' })).toBeTruthy();
+            });
+
+            it('warns before undoing the player steps to put the hints back', () => {
+                render(<NumbersGame />);
+                askHint();
+                clickButton('Reiniciar');
+                playFirstSum();
+
+                clickButton('Ver pistas');
+                expect(dialog()?.textContent).toContain('¿Volver a poner las pistas?');
+                expect(dialog()?.textContent).toContain('Se desharán tus operaciones.');
+                clickButton('Poner pistas');
+
+                expect(sorted(numberValues())).toEqual(sorted(withFirstHint().tiles.map((tile) => tile.value)));
+            });
+
+            it('keeps the player steps when the player cancels', () => {
+                render(<NumbersGame />);
+                askHint();
+                clickButton('Reiniciar');
+                playFirstSum();
+                const before = numberValues();
+
+                clickButton('Ver pistas');
+                clickButton('Cancelar');
+
+                expect(numberValues()).toEqual(before);
+            });
+
+            it('puts the hints back before giving a new one', () => {
+                render(<NumbersGame />);
+                askHint();
+                clickButton('Quitar pistas');
+                if ((hintButton() as HTMLButtonElement).disabled) return;
+
+                askHint();
+
+                const first = withFirstHint();
+                const hint = nextHint(first.tiles.map((tile) => tile.value), challenge.target, best, TODAY);
+                const expected = hint.kind === 'step' ? gameReducer(first, { type: 'hint', step: hint.step }) : first;
+                expect(sorted(numberValues())).toEqual(sorted(expected.tiles.map((tile) => tile.value)));
+                expect(hintButton().textContent).toContain('quedan 1');
+            });
+        });
     });
 
     describe('entrance from the home page', () => {
