@@ -1,12 +1,16 @@
-import { useEffect, useReducer, useState } from 'react';
+import { useEffect, useReducer, useState,useMemo } from 'react';
 import { getChallengeNumber, getDailyChallenge } from '../../domain/cifras/challengeCifras';
 import { gameReducer, initialState } from '../../domain/cifras/gameCifras';
-import {calculateScore, getBestValue} from '../../domain/cifras/scoreCifras';
+import {calculateScore, getBestValue, hintPenalty, nextHintCost, scoreWithHints} from '../../domain/cifras/scoreCifras';
 import type { OperationError, Operator, GameState, Tile } from '../../domain/cifras/typesCifras';
 import { previewKind, previewOperation } from '../../domain/cifras/previewCifras';
 import { buildTree } from '../../domain/cifras/treeCifras';
 import { canDragToTree, swapCandidate } from '../../domain/cifras/substituteCifras';
 import { useDragToSwap } from './useDragToSwap';
+import { solveCifras } from '../../domain/cifras/solveCifras';
+import { MAX_HINTS_CIFRAS, nextHint } from '../../domain/cifras/hintsCifras';
+import ConfirmDialog from '../ConfirmDialog/ConfirmDialog';
+
 import SolutionTree from '../SolutionTree/SolutionTree';
 import styles from './NumbersGame.module.css';
 
@@ -70,13 +74,71 @@ function NumbersGame({ intro = false }: Props) {
         return () => clearTimeout(timer);
     }, [playingIntro]);
 
-    const [state, dispatch] = useReducer(gameReducer, undefined, () => initialState(getDailyChallenge(new Date())));
+    // The day is fixed when the game opens, so the challenge and the hints are from the same day.
+    const [today] = useState(() => new Date());
+    const [challenge] = useState(() => getDailyChallenge(today));
+    const [state, dispatch] = useReducer(gameReducer, challenge, initialState);
     const bestValue = getBestValue(state);
+
+    // The best value that can be reached today. Solving takes a moment, so it is done once.
+    const bestPossible = useMemo(() => solveCifras(challenge.numbers, challenge.target).value, [challenge]);
+    // The open hint dialog. undo: the player's steps can not reach the best value, so they will be undone.
+    const [confirming, setConfirming] = useState<{ kind: 'hint', undo: boolean } | { kind: 'show' } | null>(null);
+    const hintsLeft = MAX_HINTS_CIFRAS - state.hintsUsed;
+    const nextCost = nextHintCost(state.hintsUsed);
+    const lastHint = state.steps.filter((step) => step.byHint).at(-1);
+    // Paid hints that are not on the board: removed, undone or reset.
+    const hintsHidden = state.hintsUsed > 0 && lastHint === undefined;    
+
     const swapTile = swapCandidate(state);
     const error = errorText(state);
     const { drag, startPress, wasDragged } = useDragToSwap((oldTileId, newTileId) =>
         dispatch({ type: 'substitute', oldTileId, newTileId }),
     );
+
+    function values(tiles: Array<Tile>): Array<number> {
+        return tiles.map((tile) => tile.value);
+    }
+
+    // The board the next hint starts from: with the paid hints back if they were taken away,
+    // or without the player's steps if they have to go.
+    function hintBoard(undo: boolean): GameState {
+        if (hintsHidden) return gameReducer(state, { type: 'showHints' });
+        return undo ? gameReducer(state, { type: 'undoPlayerSteps' }) : state;
+    }
+
+    // Asks first. If the player's steps have to go, the dialog warns that they will be undone.
+    function askHint() {
+        const hint = nextHint(values(hintBoard(false).tiles), challenge.target, bestPossible, today);
+        if (hint.kind === 'done') return;
+        const undo = hint.kind === 'unreachable' || (hintsHidden && state.steps.length > 0);
+        setConfirming({ kind: 'hint', undo });
+    }
+
+    function giveHint(undo: boolean) {
+        const hint = nextHint(values(hintBoard(undo).tiles), challenge.target, bestPossible, today);
+        if (hintsHidden) dispatch({ type: 'showHints' });
+        else if (undo) dispatch({ type: 'undoPlayerSteps' });
+        if (hint.kind === 'step') dispatch({ type: 'hint', step: hint.step });
+    }
+
+    // Putting the hints back undoes the player's steps, so it asks first.
+    function showHints() {
+        if (state.steps.length > 0) setConfirming({ kind: 'show' });
+        else dispatch({ type: 'showHints' });
+    }
+
+    function confirm() {
+        if (confirming?.kind === 'hint') giveHint(confirming.undo);
+        if (confirming?.kind === 'show') dispatch({ type: 'showHints' });
+        setConfirming(null);
+    }
+
+    function dialogDetail(): string | undefined {
+        if (confirming?.kind === 'show' || (confirming?.undo && hintsHidden)) return 'Se desharán tus operaciones.';
+        if (confirming?.undo) return 'Tus operaciones ya no llegan al mejor resultado: se desharán.';
+        return undefined;
+    }
 
     return (
         <div className={`${styles.container} ${playingIntro ? styles.intro : ''}`}>
@@ -179,22 +241,71 @@ function NumbersGame({ intro = false }: Props) {
                     </button>
                     <button onClick={() => dispatch({ type: 'reset' })} className={styles.secondary}>
                         Reiniciar
-                    </button>
+                    </button>                   
+                </div>
+
+                <div className={styles.hintBox}>
+                    <button
+                        onClick={askHint}
+                        disabled={state.finished || hintsLeft <= 0 || bestValue === bestPossible}
+                        className={`${styles.secondary} ${styles.hintButton}`}
+                    >
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.1V17h6v-.2c0-.8.4-1.6 1-2.1A7 7 0 0 0 12 2z" />
+                            <path d="M9 21h6" />
+                        </svg>
+                        Pista · quedan {hintsLeft}
+                    </button> 
+                    {state.hintsUsed > 0 && (
+                        <button
+                            onClick={hintsHidden ? showHints : () => dispatch({ type: 'removeHints' })}
+                            disabled={state.finished}
+                            className={styles.secondary}
+                        >
+                            {hintsHidden ? 'Ver pistas' : 'Quitar pistas'}
+                        </button>
+                    )}
                 </div>
 
                 {state.finished && (
                     <section aria-label="Resultado" className={styles.result}>
                         <dl>
                             <dt>Puntos</dt>
-                            <dd className={styles.score}>{calculateScore(state.challenge.target, bestValue)}</dd>
+                            <dd className={styles.score}>
+                                {scoreWithHints(calculateScore(state.challenge.target, bestValue), state.hintsUsed)}
+                            </dd>
                             <dt>Mejor número</dt>
                             <dd>{bestValue}</dd>
                             <dt>Distancia</dt>
                             <dd>{Math.abs(bestValue - state.challenge.target)}</dd>
+                            {state.hintsUsed > 0 && (
+                                <>
+                                    <dt>Por pistas</dt>
+                                    <dd className={styles.penalty}>−{hintPenalty(state.hintsUsed)}</dd>
+                                </>
+                            )}                            
                         </dl>
                     </section>
                 )}
             </div>
+            
+            <p aria-live="polite" className={styles.srOnly}>
+                {lastHint === undefined
+                    ? ''
+                    : `Pista: ${lastHint.left.value} ${lastHint.operator} ${lastHint.right.value} = ${lastHint.result.value}`}
+            </p>                
+
+            <ConfirmDialog
+                open={confirming !== null}
+                message={
+                    confirming?.kind === 'show' ? '¿Volver a poner las pistas?' : `¿Usar una pista? Te restará ${nextCost} ${nextCost === 1 ? 'punto' : 'puntos'}.`
+                }
+                detail={dialogDetail()}
+                confirmLabel={confirming?.kind === 'show' ? 'Poner pistas' : 'Usar pista'}
+                onConfirm={confirm}
+                onCancel={() => setConfirming(null)}
+            />          
+
         </div>
     );
 }

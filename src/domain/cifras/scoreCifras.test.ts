@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { gameReducer, initialState } from './gameCifras';
-import { calculateScore, getBestValue } from './scoreCifras';
+import { calculateScore, getBestValue, hintPenalty, nextHintCost, scoreWithHints } from './scoreCifras';
 import type { Challenge, GameState, Operator } from './typesCifras';
 
 const challenge: Challenge = { numbers: [100, 75, 50, 25, 8, 3], target: 325 };
@@ -78,5 +78,41 @@ describe('calculateScore', () => {
     expect(calculateScore(325, 336)).toBe(0);
     expect(calculateScore(325, 314)).toBe(0);
     expect(calculateScore(325, 100)).toBe(0);
+  });
+});
+
+describe('nextHintCost', () => {
+  it('costs one point more each time', () => {
+    expect(nextHintCost(0)).toBe(1);
+    expect(nextHintCost(1)).toBe(2);
+    expect(nextHintCost(2)).toBe(3);
+  });
+});
+
+describe('hintPenalty', () => {
+  it('takes away nothing without hints', () => {
+    expect(hintPenalty(0)).toBe(0);
+  });
+
+  it('adds up 1, 2 and 3 points', () => {
+    expect(hintPenalty(1)).toBe(1);
+    expect(hintPenalty(2)).toBe(3);
+    expect(hintPenalty(3)).toBe(6);
+  });
+});
+
+describe('scoreWithHints', () => {
+  it('keeps the score without hints', () => {
+    expect(scoreWithHints(10, 0)).toBe(10);
+  });
+
+  it('takes the hints away from the score', () => {
+    expect(scoreWithHints(10, 1)).toBe(9);
+    expect(scoreWithHints(10, 3)).toBe(4);
+  });
+
+  it('never goes below 0', () => {
+    expect(scoreWithHints(5, 3)).toBe(0);
+    expect(scoreWithHints(0, 1)).toBe(0);
   });
 });

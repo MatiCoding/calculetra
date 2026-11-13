@@ -331,3 +331,234 @@ describe('immutability', () => {
     expect(steps(first)).toEqual([[100, '×', 3, 300]]);
   });
 });
+
+describe('hint', () => {
+  function hint(state: GameState, left: number, operator: Operator, right: number): GameState {
+    return gameReducer(state, { type: 'hint', step: { left, operator, right } });
+  }
+
+  it('does the operation on the board, like the player would', () => {
+    const state = hint(initialState(challenge), 100, '×', 3);
+
+    expect(steps(state)).toEqual([[100, '×', 3, 300]]);
+    expect(values(state)).toEqual([75, 50, 25, 8, 300]);
+  });
+
+  it('marks the step as done by a hint and counts the hint', () => {
+    const state = hint(initialState(challenge), 100, '×', 3);
+
+    expect(state.steps[0].byHint).toBe(true);
+    expect(state.hintsUsed).toBe(1);
+  });
+
+  it('marks the player steps as not done by a hint', () => {
+    const state = play(initialState(challenge), 100, '×', 3);
+
+    expect(state.steps[0].byHint).toBe(false);
+    expect(state.hintsUsed).toBe(0);
+  });
+
+  it('can use a result the player made', () => {
+    const withPlayerStep = play(initialState(challenge), 100, '×', 3);
+    const state = hint(withPlayerStep, 300, '+', 25);
+
+    expect(steps(state)).toEqual([
+      [100, '×', 3, 300],
+      [300, '+', 25, 325],
+    ]);
+  });
+
+  it('finishes the game when the hint reaches the target', () => {
+    const state = hint(hint(initialState(challenge), 100, '×', 3), 300, '+', 25);
+
+    expect(state.finished).toBe(true);
+  });
+
+  it('uses two different tiles when both numbers are the same', () => {
+    const twins: Challenge = { numbers: [5, 5, 1, 2, 3, 4], target: 999 };
+    const state = hint(initialState(twins), 5, '×', 5);
+
+    expect(steps(state)).toEqual([[5, '×', 5, 25]]);
+  });
+
+  it('does nothing when a number is not on the board', () => {
+    const before = initialState(challenge);
+    const after = hint(before, 999, '+', 3);
+
+    expect(after).toBe(before);
+  });
+
+  it('does not count a hint whose operation breaks the rules', () => {
+    const state = hint(initialState(challenge), 3, '-', 8);
+
+    expect(state.steps).toEqual([]);
+    expect(state.hintsUsed).toBe(0);
+  });
+});
+
+describe('undoPlayerSteps', () => {
+  function hint(state: GameState, left: number, operator: Operator, right: number): GameState {
+    return gameReducer(state, { type: 'hint', step: { left, operator, right } });
+  }
+
+  it('undoes the player steps and keeps the hint steps', () => {
+    const withHint = hint(initialState(challenge), 100, '×', 3);
+    const withPlayer = play(withHint, 75, '-', 50);
+
+    const state = gameReducer(withPlayer, { type: 'undoPlayerSteps' });
+
+    expect(steps(state)).toEqual([[100, '×', 3, 300]]);
+    expect(values(state)).toEqual([75, 50, 25, 8, 300]);
+  });
+
+  it('also undoes a hint step that was built on a player step', () => {
+    const withPlayer = play(initialState(challenge), 100, '×', 3);
+    const withHint = hint(withPlayer, 300, '-', 75);
+
+    const state = gameReducer(withHint, { type: 'undoPlayerSteps' });
+
+    expect(state.steps).toEqual([]);
+    expect(values(state)).toEqual([100, 75, 50, 25, 8, 3]);
+  });
+
+  it('keeps the hints paid', () => {
+    const withPlayer = play(initialState(challenge), 100, '×', 3);
+    const withHint = hint(withPlayer, 300, '-', 75);
+
+    expect(gameReducer(withHint, { type: 'undoPlayerSteps' }).hintsUsed).toBe(1);
+  });
+
+  it('does nothing when the player has no steps', () => {
+    const before = hint(initialState(challenge), 100, '×', 3);
+
+    expect(steps(gameReducer(before, { type: 'undoPlayerSteps' }))).toEqual(steps(before));
+  });
+});
+
+describe('reset with hints', () => {
+  it('starts the board again but keeps the hints paid', () => {
+    const withHint = gameReducer(initialState(challenge), { type: 'hint', step: { left: 100, operator: '×', right: 3 } });
+
+    const state = gameReducer(withHint, { type: 'reset' });
+
+    expect(state.steps).toEqual([]);
+    expect(values(state)).toEqual([100, 75, 50, 25, 8, 3]);
+    expect(state.hintsUsed).toBe(1);
+  });
+});
+
+describe('the paid hints', () => {
+  function hint(state: GameState, left: number, operator: Operator, right: number): GameState {
+    return gameReducer(state, { type: 'hint', step: { left, operator, right } });
+  }
+
+  it('keeps the operation of each hint, in order', () => {
+    const state = hint(hint(initialState(challenge), 100, '×', 3), 300, '+', 25);
+
+    expect(state.hints).toEqual([
+      { left: 100, operator: '×', right: 3 },
+      { left: 300, operator: '+', right: 25 },
+    ]);
+  });
+
+  it('does not keep a hint that was not done', () => {
+    expect(hint(initialState(challenge), 3, '-', 8).hints).toEqual([]);
+  });
+
+  it('keeps them after a reset', () => {
+    const withHint = hint(initialState(challenge), 100, '×', 3);
+
+    expect(gameReducer(withHint, { type: 'reset' }).hints).toEqual(withHint.hints);
+  });
+});
+
+describe('removeHints', () => {
+  function hint(state: GameState, left: number, operator: Operator, right: number): GameState {
+    return gameReducer(state, { type: 'hint', step: { left, operator, right } });
+  }
+
+  it('undoes the hint steps and keeps the player steps', () => {
+    const withHint = hint(initialState(challenge), 100, '×', 3);
+    const withPlayer = play(withHint, 75, '-', 50);
+
+    const state = gameReducer(withPlayer, { type: 'removeHints' });
+
+    expect(steps(state)).toEqual([[75, '-', 50, 25]]);
+    expect(values(state)).toEqual([100, 25, 8, 3, 25]);
+  });
+
+  it('also undoes a player step that was built on a hint step', () => {
+    const withHint = hint(initialState(challenge), 100, '×', 3);
+    const withPlayer = play(withHint, 300, '-', 75);
+
+    const state = gameReducer(withPlayer, { type: 'removeHints' });
+
+    expect(state.steps).toEqual([]);
+    expect(values(state)).toEqual([100, 75, 50, 25, 8, 3]);
+  });
+
+  it('keeps the hints paid', () => {
+    const withHint = hint(initialState(challenge), 100, '×', 3);
+    const state = gameReducer(withHint, { type: 'removeHints' });
+
+    expect(state.hintsUsed).toBe(1);
+    expect(state.hints).toEqual(withHint.hints);
+  });
+});
+
+describe('showHints', () => {
+  function hint(state: GameState, left: number, operator: Operator, right: number): GameState {
+    return gameReducer(state, { type: 'hint', step: { left, operator, right } });
+  }
+
+  it('puts the hints back on the board after a reset', () => {
+    const withHints = hint(hint(initialState(challenge), 100, '×', 3), 75, '-', 50);
+    const reset = gameReducer(withHints, { type: 'reset' });
+
+    const state = gameReducer(reset, { type: 'showHints' });
+
+    expect(steps(state)).toEqual(steps(withHints));
+    expect(state.steps.every((step) => step.byHint)).toBe(true);
+  });
+
+  it('undoes the player steps', () => {
+    const withHint = hint(initialState(challenge), 100, '×', 3);
+    const removed = gameReducer(withHint, { type: 'removeHints' });
+    const withPlayer = play(removed, 75, '+', 50);
+
+    const state = gameReducer(withPlayer, { type: 'showHints' });
+
+    expect(steps(state)).toEqual([[100, '×', 3, 300]]);
+    expect(values(state)).toEqual([75, 50, 25, 8, 300]);
+  });
+
+  it('does not charge the hints again', () => {
+    const withHint = hint(initialState(challenge), 100, '×', 3);
+    const reset = gameReducer(withHint, { type: 'reset' });
+
+    const state = gameReducer(reset, { type: 'showHints' });
+
+    expect(state.hintsUsed).toBe(1);
+    expect(state.hints).toEqual(withHint.hints);
+  });
+
+  it('skips a hint that was built on a player step', () => {
+    // The 300 was the player's, so 300 + 25 can not be done again from the start.
+    const withPlayer = play(initialState(challenge), 100, '×', 3);
+    const withHint = hint(withPlayer, 300, '+', 25);
+    const reset = gameReducer(withHint, { type: 'reset' });
+
+    const state = gameReducer(reset, { type: 'showHints' });
+
+    expect(state.steps).toEqual([]);
+    expect(state.hintsUsed).toBe(1);
+  });
+
+  it('does nothing once the game is finished', () => {
+    const withHint = hint(initialState(challenge), 100, '×', 3);
+    const removed = gameReducer(withHint, { type: 'removeHints' });
+    const finished = gameReducer(removed, { type: 'finish' });
+
+    expect(gameReducer(finished, { type: 'showHints' })).toBe(finished);
+  });
+});

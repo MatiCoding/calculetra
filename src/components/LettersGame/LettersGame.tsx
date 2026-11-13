@@ -1,9 +1,12 @@
-import { useEffect, useReducer, useState, type CSSProperties } from 'react';
+import { useEffect, useReducer, useState, useMemo, type CSSProperties, type MouseEvent } from 'react';
 import { getDailyLetters } from '../../domain/letras/challengeLetras';
 import { loadDictionary } from '../../domain/letras/dictionaryLetras';
-import { gameReducer, getWord, initialState, isPicked } from '../../domain/letras/gameLetras';
+import { gameReducer, getWord, initialState, isPicked, getSlots, usesAllHints } from '../../domain/letras/gameLetras';
 import { canSubmit } from '../../domain/letras/wordLetras';
 import { formatCountdown, msUntilNextChallenge } from '../../domain/shared/date';
+import { MAX_HINTS_LETRAS, findLongestWord, getHintPositions } from '../../domain/letras/hintsLetras';
+import { nextHintCost } from '../../domain/letras/scoreLetras';
+import ConfirmDialog from '../ConfirmDialog/ConfirmDialog';
 import styles from './LettersGame.module.css';
 
 const SLOTS = 9;
@@ -21,6 +24,11 @@ type BoardStatus = 'playing' | 'valid' | 'full' | 'invalid';
 
 function prefersReducedMotion(): boolean {
     return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+}
+
+// A mouse click does not leave the focus on these buttons. 
+function keepFocus(event: MouseEvent) {
+    event.preventDefault();
 }
 
 // Puts the index of each tile into the CSS variable --i, for animation-delay.
@@ -83,9 +91,24 @@ function LettersGame({ loadWords = loadDictionary, intro = false }: Props) {
         const timer = setTimeout(() => setPlayingIntro(false), INTRO_MS);
         return () => clearTimeout(timer);
     }, [playingIntro]);
-    const [state, dispatch] = useReducer(gameReducer, undefined, () => initialState(getDailyLetters(new Date())));
+
+    // The day is fixed when the game opens, so the letters and the hints are from the same day.
+    const [today] = useState(() => new Date());
+    const [dailyLetters] = useState(() => getDailyLetters(today));
+    const [state, dispatch] = useReducer(gameReducer, dailyLetters, initialState);
     const [dictionary, setDictionary] = useState<Set<string> | null>(null);
     const [loadFailed, setLoadFailed] = useState(false);
+    const [confirming, setConfirming] = useState<'hint' | 'show' | null> (null);    // What the open dialog asks for.
+
+    const longestWord = useMemo(
+        () => (dictionary === null ? null : findLongestWord(dailyLetters, dictionary)),
+        [dictionary, dailyLetters],
+    )
+
+    const hintPositions = useMemo(
+        () => (longestWord === null ? [] : getHintPositions(today, longestWord.length)),
+        [longestWord, today],
+    )
 
     const[reels, setReels] = useState(() => state.tiles.map((tile, index) => createReel(tile.letter, index)));
     const [landed, setLanded] = useState(() => (prefersReducedMotion() ? state.tiles.length : 0));  // How many keys have stopped spinning. They stop from left to right.
@@ -117,7 +140,8 @@ function LettersGame({ loadWords = loadDictionary, intro = false }: Props) {
     // Physical keyboard:.
     useEffect(() => {
         function handleKeyDown(event: KeyboardEvent) {
-            if (spinning || event.ctrlKey || event.metaKey || event.altKey) return;
+            // While the dialog is open, the keys are for the dialog, not for the board.
+            if (spinning || confirming !== null || event.ctrlKey || event.metaKey || event.altKey) return;
 
             if (event.key === 'Backspace') {
                 event.preventDefault();
@@ -133,7 +157,7 @@ function LettersGame({ loadWords = loadDictionary, intro = false }: Props) {
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [dictionary, spinning]);
+    }, [dictionary, spinning, confirming]);
 
     const [revealed, setRevealed] = useState(false);
     const [points, setPoints] = useState(0);
@@ -149,9 +173,10 @@ function LettersGame({ loadWords = loadDictionary, intro = false }: Props) {
 
     // Counts the points up, one by one.
     useEffect(() => {
-        if (result === null || !result.isValid || prefersReducedMotion()) return;
+        // With hints a valid word can score 0, and then there is nothing to count.
+        if (result === null || !result.isValid || result.score === 0 || prefersReducedMotion()) return;
         const score = result.score;
-        const step = score === 18 ? HOP_STEP / 2 : HOP_STEP;
+        const step = result.word.length === SLOTS ? HOP_STEP / 2 : HOP_STEP;
         let count = 0;
         const timer = setInterval(() => {
             count += 1;
@@ -164,12 +189,20 @@ function LettersGame({ loadWords = loadDictionary, intro = false }: Props) {
     const word = getWord(state);
     const letters = state.tiles.map((tile) => tile.letter);
     const finished = result !== null;
-    const slots = Array.from({length: SLOTS }, (_, index) => word[index]);
+    const slots = getSlots(state);
+    const hasLetters = state.picked.length > 0;  // letters written by the player, not the hints
+
+    const hintsLeft = Math.min(MAX_HINTS_LETRAS, hintPositions.length) - state.hints.length;
+    const nextCost = nextHintCost(state.hints.length);
+
+    // What a screen reader syas when a hint appears.
+    const lastHint = state.hints.at(-1);
+    const hintMessage = lastHint !== undefined && state.hintsShown ? `Pista: ${slots[lastHint.position]} en la casilla ${lastHint.position + 1}` : '';
 
     let status: BoardStatus = 'playing';
     if (result !== null) {
         if (!result.isValid) status = 'invalid';
-        else if (result.score === 18) status = 'full';
+        else if (result.word.length === SLOTS) status = 'full';
         else status = 'valid';
     }
 
@@ -192,6 +225,25 @@ function LettersGame({ loadWords = loadDictionary, intro = false }: Props) {
         setReels(state.tiles.map((tile, index) => createReel(tile.letter, index)));
     }
 
+    // Puts the next letter of the longest word in its slot.
+    function giveHint() {
+        if (longestWord === null || hintsLeft <= 0) return;
+        const position = hintPositions[state.hints.length];
+        dispatch({ type: 'hint', position, letter: longestWord[position] });
+    }
+
+    // Putting the hints back erases what the player wrote, so it asks first.
+    function showHints() {
+        if (hasLetters) setConfirming('show');
+        else dispatch({ type: 'toggleHints'});
+    }
+
+    function confirm() {
+        if (confirming === 'hint') giveHint();
+        if (confirming === 'show') dispatch({type: 'toggleHints'});
+        setConfirming(null);
+    }
+
     function submit() {
         if (dictionary !== null) dispatch({ type: 'submit', dictionary });
     }
@@ -203,12 +255,12 @@ function LettersGame({ loadWords = loadDictionary, intro = false }: Props) {
             <output aria-label="Tu palabra" data-status={status} className={styles.board}>
                 {slots.map((letter, index) => (
                     <span key={index} data-testid="slot" className={styles.slot}>
-                        {letter !== undefined && (
-                            <span style={delayStyle(index)} className={styles.letter}>
+                        {letter !== null && (
+                            <span style={delayStyle(index)} data-hint={state.hintsShown && state.hints.some((hint) => hint.position === index)} className={styles.letter}>
                                 {letter}
                             </span>
                         )}
-                        {letter !== undefined && (status === 'valid' || status === 'full') && (
+                        {letter !== null && (status === 'valid' || status === 'full') && (
                             <span aria-hidden="true" style={delayStyle(index)} className={styles.plus}>
                                 +1
                             </span>
@@ -263,20 +315,45 @@ function LettersGame({ loadWords = loadDictionary, intro = false }: Props) {
                     </ul>
                     
                     <div className={styles.actions}>
-                        <button onClick={() => dispatch({ type: 'removeLast' })} disabled={word === '' || finished} className={styles.secondary}>
+                        <button onClick={() => dispatch({ type: 'removeLast' })} onMouseDown={keepFocus} disabled={!hasLetters || finished} className={styles.secondary}>
                             Borrar letra
                         </button>
-                        <button onClick={() => dispatch({ type: 'clear' })} disabled={word === '' || finished} className={styles.secondary}>
+                        <button onClick={() => dispatch({ type: 'clear' })} onMouseDown={keepFocus} disabled={!hasLetters || finished} className={styles.secondary}>
                             Borrar todo
                         </button>
-                        <button onClick={submit} disabled={dictionary === null || !canSubmit(word, letters) || finished} className={styles.primary}>
+                        <button onClick={submit} disabled={dictionary === null || !canSubmit(word, letters) || !usesAllHints(state) || finished} className={styles.primary}>
                             Enviar
                         </button>
                     </div>
 
+                    <div className={styles.hintBox}>
+                        <button
+                            onClick={() => setConfirming('hint')}
+                            onMouseDown = {keepFocus}
+                            disabled={spinning || finished || longestWord === null || hintsLeft <= 0}
+                            className={`${styles.secondary} ${styles.hintButton}`}
+                        >
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.1V17h6v-.2c0-.8.4-1.6 1-2.1A7 7 0 0 0 12 2z" />
+                                <path d="M9 21h6" />
+                            </svg>
+                            Pista · quedan {Math.max(hintsLeft, 0)}
+                        </button>
+                        {state.hints.length > 0 && (
+                            <button
+                                onClick={state.hintsShown ? () => dispatch({ type: 'toggleHints' }) : showHints}
+                                onMouseDown = {keepFocus}
+                                disabled={spinning || finished}
+                                className={styles.secondary}
+                            >
+                                {state.hintsShown ? 'Quitar pistas' : 'Ver pistas'}
+                            </button>
+                        )}
+                    </div>                    
                 </>
             )} 
 
+            <p role="status" className={styles.srOnly}>{hintMessage}</p>
             {dictionary === null && !loadFailed && <p className={styles.status}>Cargando diccionario...</p>}
             {loadFailed && (
                 <p role="alert" className={styles.error}>No se ha podido cargar el diccionario. Recarga la página para jugar.</p>
@@ -285,18 +362,32 @@ function LettersGame({ loadWords = loadDictionary, intro = false }: Props) {
             {result !== null && revealed && (
                 <section aria-label="Resultado" className={styles.result}>
                     <p className={styles.resultHead} data-valid={result.isValid}>
-                        {!result.isValid ? 'No está en el diccionario' : result.score === 18 ? '¡Las nueve!' : '¡Vale!'}
+                        {!result.isValid ? 'No está en el diccionario' : result.word.length === SLOTS ? '¡Las nueve!' : '¡Vale!'}
                     </p>
                     <p className={styles.score} data-valid={result.isValid}>{result.score}</p>
                     <p className={styles.resultWord}>
                         {result.score} puntos con <b>{result.word}</b>
                     </p>
+                    {result.hintPenalty > 0 && (
+                        <p className={styles.penalty}>-{result.hintPenalty} por pistas</p>
+                    )}
                     <button onClick={playAgain} className={styles.primary}>
                         Volver a jugar
                     </button>
                     <NextChallenge />
                 </section>
             )}
+
+            <ConfirmDialog
+                open={confirming !== null}
+                message={
+                    confirming === 'show' ? "¿Volver a poner las pistas?" : `¿Usar una pista? Te restará ${nextCost} ${nextCost === 1 ? "punto" : "puntos"}.`
+                }
+                detail = {hasLetters ? "Se borrará lo que has escrito." : undefined}
+                confirmLabel={confirming === 'show' ? 'Poner pistas' : 'Usar pista'}
+                onConfirm={confirm}
+                onCancel={() => setConfirming(null)}
+            />
         </div>
     );
 }

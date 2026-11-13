@@ -1,7 +1,9 @@
 // @vitest-environment jsdom
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { getDailyLetters } from '../../domain/letras/challengeLetras';
+import { getHintPositions } from '../../domain/letras/hintsLetras';
+import { fakeDialog } from '../../test/fakeDialog';
 import LettersGame from './LettersGame';
 
 // The letters depend on today's date, so the tests fix the date.
@@ -117,6 +119,14 @@ describe('LettersGame', () => {
 
         expect(isDisabled(letterButtons()[3])).toBe(true);
         expect(letterButtons().filter(isDisabled)).toHaveLength(1);
+    });
+
+    it('does not keep the focus on the delete buttons after a mouse click', async () => {
+        await renderGame();
+        clickLetters(0, 1);
+
+        expect(fireEvent.mouseDown(button('Borrar letra'))).toBe(false);
+        expect(fireEvent.mouseDown(button('Borrar todo'))).toBe(false);
     });
 
     it('removes the last letter and makes it available again', async () => {
@@ -553,4 +563,261 @@ describe('LettersGame', () => {
             expect(screen.queryByRole('region', { name: 'Resultado' })).toBeNull();
         });
     });
+
+    describe('hints', () => {
+        // The fake dictionary only has one word: the first 5 letters of the day, so it is the longest one.
+        let longest: string;
+        let positions: Array<number>;
+
+        beforeAll(fakeDialog);
+
+        beforeEach(() => {
+            longest = letters.slice(0, 5).join('');
+            positions = getHintPositions(TODAY, longest.length);
+        });
+
+        function hintButton() {
+            return screen.getByRole('button', { name: /Pista/ });
+        }
+
+        function dialog() {
+            return screen.queryByRole('dialog');
+        }
+
+        // Clicks "Pista" and accepts the dialog.
+        function askHint() {
+            fireEvent.click(hintButton());
+            clickButton('Usar pista');
+        }
+
+        it('shows 3 hints left', async () => {
+            await renderGame([longest]);
+
+            expect(hintButton().textContent).toContain('quedan 3');
+        });
+
+        it('asks first, saying what the hint costs', async () => {
+            await renderGame([longest]);
+
+            fireEvent.click(hintButton());
+
+            expect(dialog()?.textContent).toContain('¿Usar una pista? Te restará 1 punto.');
+            expect(slotLetters().every((letter) => letter === '')).toBe(true);
+        });
+
+        it('makes each hint cost one point more', async () => {
+            await renderGame([longest]);
+            askHint();
+
+            fireEvent.click(hintButton());
+
+            expect(dialog()?.textContent).toContain('Te restará 2 puntos.');
+        });
+
+        it('does nothing when the player cancels', async () => {
+            await renderGame([longest]);
+
+            fireEvent.click(hintButton());
+            clickButton('Cancelar');
+
+            expect(dialog()).toBeNull();
+            expect(slotLetters().every((letter) => letter === '')).toBe(true);
+            expect(hintButton().textContent).toContain('quedan 3');
+        });
+
+        it('only warns about erasing when there are letters written', async () => {
+            await renderGame([longest]);
+
+            fireEvent.click(hintButton());
+
+            expect(dialog()?.textContent).not.toContain('Se borrará lo que has escrito.');
+        });
+
+        it('warns that the written letters will be erased, and erases them', async () => {
+            await renderGame([longest]);
+            clickLetters(0, 1);
+
+            fireEvent.click(hintButton());
+            expect(dialog()?.textContent).toContain('Se borrará lo que has escrito.');
+            clickButton('Usar pista');
+
+            const expected = Array<string>(9).fill('');
+            expected[positions[0]] = longest[positions[0]];
+            expect(slotLetters()).toEqual(expected);
+        });
+
+        it('ignores the keyboard while the dialog is open', async () => {
+            await renderGame([longest]);
+
+            fireEvent.click(hintButton());
+            fireEvent.keyDown(window, { key: letters[0] });
+
+            expect(shownWord()).toBe('');
+        });
+
+        it('puts a letter of the longest word in its slot', async () => {
+            await renderGame([longest]);
+
+            askHint();
+
+            const expected = Array<string>(9).fill('');
+            expected[positions[0]] = longest[positions[0]];
+            expect(slotLetters()).toEqual(expected);
+            expect(hintButton().textContent).toContain('quedan 2');
+        });
+
+        it('marks the hint letter as a hint and disables its key', async () => {
+            await renderGame([longest]);
+
+            askHint();
+
+            const slot = within(board()).getAllByTestId('slot')[positions[0]];
+            expect(slot.firstElementChild?.getAttribute('data-hint')).toBe('true');
+            expect(letterButtons().filter(isDisabled)).toHaveLength(1);
+        });
+
+        it('fills the other slots around the hint', async () => {
+            await renderGame([longest]);
+            askHint();
+
+            // The free keys, in order, fill the free slots in order.
+            const free = letterButtons().map((_, index) => index).filter((index) => !isDisabled(letterButtons()[index]));
+            clickLetters(...free.slice(0, 3));
+
+            expect(slotLetters().filter((letter) => letter !== '')).toHaveLength(4);
+            expect(slotLetters()[positions[0]]).toBe(longest[positions[0]]);
+        });
+
+        it('cannot delete a hint letter', async () => {
+            await renderGame([longest]);
+
+            askHint();
+
+            expect(isDisabled(button('Borrar letra'))).toBe(true);
+            expect(isDisabled(button('Borrar todo'))).toBe(true);
+        });
+
+        it('gives 3 hints at most, each one in a different slot', async () => {
+            await renderGame([longest]);
+
+            askHint();
+            askHint();
+            askHint();
+
+            expect(slotLetters().filter((letter) => letter !== '')).toHaveLength(3);
+            expect(isDisabled(hintButton())).toBe(true);
+            expect(hintButton().textContent).toContain('quedan 0');
+        });
+
+        it('only shows the button to take the hints off once there is a hint', async () => {
+            await renderGame([longest]);
+
+            expect(screen.queryByRole('button', { name: 'Quitar pistas' })).toBeNull();
+            askHint();
+            expect(button('Quitar pistas')).toBeTruthy();
+        });
+
+        it('takes the hint letters off the board and puts them back', async () => {
+            await renderGame([longest]);
+            askHint();
+
+            clickButton('Quitar pistas');
+
+            expect(shownWord()).toBe('');
+            expect(letterButtons().some(isDisabled)).toBe(false);
+
+            clickButton('Ver pistas');
+
+            expect(slotLetters()[positions[0]]).toBe(longest[positions[0]]);
+            expect(letterButtons().filter(isDisabled)).toHaveLength(1);
+        });
+
+        it('asks before putting the hints back over written letters', async () => {
+            await renderGame([longest]);
+            askHint();
+            clickButton('Quitar pistas');
+            clickLetters(0, 1);
+
+            clickButton('Ver pistas');
+            expect(dialog()?.textContent).toContain('Se borrará lo que has escrito.');
+            clickButton('Poner pistas');
+
+            expect(slotLetters().filter((letter) => letter !== '')).toEqual([longest[positions[0]]]);
+        });
+
+        it('does not give the hint back for free: the count stays the same', async () => {
+            await renderGame([longest]);
+            askHint();
+
+            clickButton('Quitar pistas');
+
+            expect(hintButton().textContent).toContain('quedan 2');
+        });
+
+        it('does not keep the focus on the hint buttons after a mouse click, so Enter sends the word', async () => {
+            await renderGame([longest]);
+            askHint();
+
+            // fireEvent returns false when the component called preventDefault().
+            expect(fireEvent.mouseDown(hintButton())).toBe(false);
+            expect(fireEvent.mouseDown(button('Quitar pistas'))).toBe(false);
+        });
+
+        it('starts again without hints when playing again', async () => {
+            await renderGame([longest]);
+            askHint();
+            // Fills every free slot, so the word reaches the hint and can be sent.
+            const free = letterButtons().map((_, index) => index).filter((index) => !isDisabled(letterButtons()[index]));
+            clickLetters(...free);
+            send();
+
+            clickButton('Volver a jugar');
+            finishAnimations();
+
+            expect(slotLetters().every((letter) => letter === '')).toBe(true);
+            expect(hintButton().textContent).toContain('quedan 3');
+        });
+
+        it('tells screen readers which letter the hint gave and where', async () => {
+            await renderGame([longest]);
+
+            askHint();
+
+            const letter = longest[positions[0]];
+            expect(screen.getByText(`Pista: ${letter} en la casilla ${positions[0] + 1}`).getAttribute('role')).toBe('status');
+        });
+
+        it('shows the points taken away for hints in the result', async () => {
+            await renderGame([longest]);
+            askHint();
+            askHint();
+            // Fills every free slot, so the word reaches the hints and can be sent.
+            const free = letterButtons().map((_, index) => index).filter((index) => !isDisabled(letterButtons()[index]));
+            clickLetters(...free);
+            send();
+
+            expect(screen.getByText('-3 por pistas')).toBeTruthy();
+        });
+
+        it('does not talk about hints in the result when none were used', async () => {
+            await renderGame([longest]);
+            clickLetters(0, 1, 2);
+            send();
+
+            expect(screen.queryByText(/por pistas/)).toBeNull();
+        });
+
+        it('cannot ask for a hint while the dictionary is loading', () => {
+            render(<LettersGame loadWords={() => new Promise(() => {})} />);
+            finishAnimations();
+
+            expect(isDisabled(hintButton())).toBe(true);
+        });
+
+        it('cannot ask for a hint when no word can be made', async () => {
+            await renderGame([]);
+
+            expect(isDisabled(hintButton())).toBe(true);
+        });
+    });    
 });

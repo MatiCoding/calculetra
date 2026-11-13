@@ -11,6 +11,8 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - Cifras: a "Cómo has llegado" box with a tree of your operations. Tap a result to undo that branch, and only that branch.
 - Cifras: swap a starting number in the tree for a free one, by dragging it onto the tree or by tapping both. Every operation that depends on it is calculated again, and if any stops being valid a message explains why.
 - Cifras: when you open the game from the home page, the orange shrinks onto the six tiles and their numbers appear.
+- Letras: a "Pista" button puts a letter of the longest word in its place on the board. The position is the same for every player on the same day. You can use up to 3 hints; they cost 1, 2 and 3 points, and a message asks you to confirm each one. Your word has to use the hint letters, and "Quitar pistas" / "Ver pistas" lets you take them away to send a shorter word.
+- Cifras: a "Pista" button does the next operation of one of the shortest solutions to the best possible number. You can use up to 3 hints; they cost 1, 2 and 3 points, and a message asks you to confirm each one. If your operations can no longer reach the best number, they are undone first. "Quitar pistas" / "Ver pistas" takes the hints off the board or puts them back without paying again.
 
 ### Changed
 - Cifras has a new look, like the rest of the app: "Reto nº N · objetivo" above the target, bigger tiles and buttons, and a beige background. On wide screens the board is on the left and the tree on the right, so you do not have to scroll. The tree replaces the old list of steps.

@@ -32,7 +32,7 @@ export function substitute(state: GameState, oldTileId: number, newTileId: numbe
         }
         const resultTile = { id: step.result.id, value: result.value };
         changed.set(resultTile.id, resultTile);
-        steps.push({ left, operator: step.operator, right, result: resultTile });
+        steps.push({ ...step, left, right, result: resultTile });
     }
 
     // The old number goes back to the board, where the new one was.

@@ -1,0 +1,59 @@
+.dialog {
+    box-sizing: border-box;
+    max-width: min(400px, calc(100vw - 32px));
+    padding: 24px;
+    border: none;
+    border-radius: 12px;
+    background: var(--color-card);
+    color: var(--color-text);
+    text-align: center;
+}
+
+/* The dark layer behind the dialog while it is open. */
+.dialog::backdrop {
+    background: rgb(0 0 0 / 0.5);
+}
+
+.message {
+    margin: 0 0 8px;
+    font-weight: 700;
+}
+
+.detail {
+    margin: 0 0 8px;
+    color: var(--color-danger);
+}
+
+.buttons {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.cancel, .confirm {
+    cursor: pointer;
+    font: inherit;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 12px;
+}
+
+.cancel {
+    background: transparent;
+    color: var(--color-text);
+    border: 1px solid rgba(31, 36, 48, 0.15);
+}
+
+.confirm {
+    background: var(--color-accent);
+    color: #ffffff;
+    border: 1px solid transparent;
+}
+
+.cancel:focus-visible,
+.confirm:focus-visible {
+    outline: 3px solid var(--color-text);
+    outline-offset: 2px;
+}

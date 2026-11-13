@@ -7,7 +7,8 @@ export type OperationResult = { ok: true, value: number } | { ok: false, reason:
 
 export type SubstituteError = {value: number, reason: OperationError};
 export type Tile = {id: number, value: number};
-export type Step = {left: Tile, operator: Operator, right: Tile, result: Tile};
+export type HintStep = {left: number, operator: Operator, right: number};  // the values to combine, like a SolverStep
+export type Step = {left: Tile, operator: Operator, right: Tile, result: Tile, byHint: boolean};  // byHint: a hint did it, not the player
 export type GameState = {
     challenge: Challenge, 
     tiles: Array<Tile>,
@@ -17,6 +18,8 @@ export type GameState = {
     error: OperationError | null,
     substituteError: SubstituteError | null,
     changedIds: Array<number>,   // The tiles that changed in the last swap: the new number and the results with a new value.
+    hintsUsed: number,           // Paid hints. Undoing or resetting does not give them back.
+    hints: Array<HintStep>,      // The paid hints' operations, in order, to put them back on the board.    
     finished: boolean
 }
 export type GameAction =
@@ -25,6 +28,10 @@ export type GameAction =
     | { type: 'undo' }
     | { type: 'undoTo', resultId: number}
     | {type: 'substitute', oldTileId: number, newTileId: number}
+    | { type: 'hint', step: HintStep }
+    | { type: 'undoPlayerSteps' }
+    | { type: 'removeHints' }
+    | { type: 'showHints' }    
     | { type: 'reset' }
     | { type: 'finish' }
 

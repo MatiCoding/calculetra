@@ -1,5 +1,5 @@
 import { applyOperation } from './operation';
-import type { Challenge, GameAction, GameState, Tile } from './typesCifras';
+import type { Challenge, GameAction, GameState, Tile, HintStep, Operator } from './typesCifras';
 import { substitute } from './substituteCifras';
 
 export function initialState(challenge: Challenge): GameState {
@@ -13,6 +13,8 @@ export function initialState(challenge: Challenge): GameState {
         substituteError: null,
         finished: false,
         changedIds: [],
+        hintsUsed: 0,
+        hints: [],
     };
 }
 
@@ -100,8 +102,22 @@ export function reduce(state: GameState, action: GameAction): GameState {
         }
         case 'substitute':
             return substitute(state, action.oldTileId, action.newTileId);        
+        case 'hint':
+            return applyHint(state, action.step);
+        case 'undoPlayerSteps':
+            return undoSteps(state, false);
+        case 'removeHints':
+            return undoSteps(state, true);
+        case 'showHints': {
+            // The board from the start, with the paid hints done again. The player's steps go.
+            let next: GameState = { ...initialState(state.challenge), hintsUsed: state.hintsUsed, hints: state.hints };
+            for (const hint of state.hints) {
+                next = doHint(next, hint);
+            }
+            return next;
+        }
         case 'reset':
-            return initialState(state.challenge);
+            return { ...initialState(state.challenge), hintsUsed: state.hintsUsed, hints: state.hints };
         case 'finish':
             return { ...state, finished: true, selectedId: null, operator: null, error: null };
         default: {
@@ -120,6 +136,41 @@ function combine(state: GameState, secondId: number): GameState {
         return state;
     }
 
+    return addStep(state, left, operator, right, false);
+}
+
+// Does the hint's operation with two tiles of the board that have those values.
+function doHint(state: GameState, hint: HintStep): GameState {
+    const left = state.tiles.find((tile) => tile.value === hint.left);
+    const right = state.tiles.find((tile) => tile.value === hint.right && tile !== left);
+    if (left === undefined || right === undefined) {
+        return state;
+    }
+    return addStep(state, left, hint.operator, right, true);
+}
+
+// A new hint. It is only paid and kept when its operation was really done.
+function applyHint(state: GameState, hint: HintStep): GameState {
+    const next = doHint(state, hint);
+    if (next.steps.length === state.steps.length) return next;
+    return { ...next, hintsUsed: state.hintsUsed + 1, hints: [...state.hints, hint] };
+}
+
+// Undoes the hints' steps (byHint true) or the player's (byHint false) one by one.
+// undoTo also takes away what was built on them.
+function undoSteps(state: GameState, byHint: boolean): GameState {
+    let next = state;
+    let step = next.steps.find((step) => step.byHint === byHint);
+    while (step !== undefined) {
+        next = reduce(next, { type: 'undoTo', resultId: step.result.id });
+        step = next.steps.find((step) => step.byHint === byHint);
+    }
+    return next;
+}
+
+// Puts the result of left operator right on the board, as a new step.
+function addStep(state: GameState, left: Tile, operator: Operator, right: Tile, byHint: boolean): GameState {        
+
     const result = applyOperation(left.value, operator, right.value);
     if (!result.ok) {
         return { ...state, error: result.reason, selectedId: null, operator: null };
@@ -134,7 +185,7 @@ function combine(state: GameState, secondId: number): GameState {
     return {
         ...state,
         tiles: [...state.tiles.filter((tile) => tile !== left && tile !== right), resultTile],
-        steps: [...state.steps, { left, operator, right, result: resultTile }],
+        steps: [...state.steps, { left, operator, right, result: resultTile, byHint }],
         selectedId: null,
         operator: null,
         error: null,

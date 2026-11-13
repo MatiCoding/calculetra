@@ -23,7 +23,10 @@ export default withMermaid(
       sidebar: [
         {
           text: 'Rules',
-          items: [{ text: 'Cifras', link: '/rules/cifras' }],
+          items: [
+            { text: 'Cifras', link: '/rules/cifras' },
+            { text: 'Letras', link: '/rules/letras' },
+          ],
         },
         {
           text: 'Architecture',

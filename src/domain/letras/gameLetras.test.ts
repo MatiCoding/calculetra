@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { gameReducer, getWord, initialState, isPicked } from './gameLetras';
+import { gameReducer, getSlots, getWord, initialState, isHint, isPicked, usesAllHints } from './gameLetras';
 import type { GameState } from './typesLetras';
 
 const LETTERS = ['P', 'A', 'O', 'H', 'C', 'I', 'E', 'A', 'L'];
@@ -149,14 +149,14 @@ describe('submit', () => {
     // C H A P E L A
     const state = submit(pick(initialState(LETTERS), 4, 3, 1, 0, 6, 8, 7));
 
-    expect(state.result).toEqual({ word: 'CHAPELA', isValid: true, score: 7 });
+    expect(state.result).toEqual({ word: 'CHAPELA', isValid: true, score: 7, hintPenalty: 0 });
   });
 
   it('gives 0 points for a word that is not in the dictionary', () => {
     // P A L O H C I E A
     const state = submit(pick(initialState(LETTERS), 0, 1, 8, 2, 3, 4, 5, 6, 7));
 
-    expect(state.result).toEqual({ word: 'PALOHCIEA', isValid: false, score: 0 });
+    expect(state.result).toEqual({ word: 'PALOHCIEA', isValid: false, score: 0, hintPenalty: 0 });
   });
 
   it('does not send a word shorter than 3 letters', () => {
@@ -191,5 +191,205 @@ describe('restart', () => {
     const state = gameReducer(pick(initialState(LETTERS), 0, 1), { type: 'restart' });
 
     expect(getWord(state)).toBe('');
+  });
+});
+
+describe('hint', () => {
+  function hint(state: GameState, position: number, letter: string): GameState {
+    return gameReducer(state, { type: 'hint', position, letter });
+  }
+
+  it('locks a tile with the letter in its slot', () => {
+    const state = hint(initialState(LETTERS), 3, 'H');
+
+    expect(getSlots(state)).toEqual([null, null, null, 'H', null, null, null, null, null]);
+    expect(state.hints).toEqual([{ position: 3, tileId: 3 }]);
+  });
+
+  it('marks the hint tile as used, so it cannot be picked or typed', () => {
+    const state = hint(initialState(LETTERS), 3, 'H');
+
+    expect(isHint(state, 3)).toBe(true);
+    expect(isPicked(state, 3)).toBe(true);
+    expect(pick(state, 3)).toBe(state);
+    expect(gameReducer(state, { type: 'type', letter: 'H' })).toBe(state);
+  });
+
+  it('fills the free slots around the hints with the player letters', () => {
+    // Hint H in slot 1, then the player picks C, A, P, E, L, A: C H A P E L A
+    const state = pick(hint(initialState(LETTERS), 1, 'H'), 4, 1, 0, 6, 8, 7);
+
+    expect(getWord(state)).toBe('CHAPELA');
+  });
+
+  it('only counts the word up to the first empty slot', () => {
+    // Hint in slot 4 and only two letters written: the H is not part of the word yet.
+    const state = pick(hint(initialState(LETTERS), 4, 'H'), 4, 1);
+
+    expect(getSlots(state)).toEqual(['C', 'A', null, null, 'H', null, null, null, null]);
+    expect(getWord(state)).toBe('CA');
+  });
+
+  it('erases the player letters and keeps the earlier hints', () => {
+    const withLetters = pick(hint(initialState(LETTERS), 0, 'C'), 3, 1);
+    const state = hint(withLetters, 5, 'E');
+
+    expect(state.picked).toEqual([]);
+    expect(state.hints).toEqual([
+      { position: 0, tileId: 4 },
+      { position: 5, tileId: 6 },
+    ]);
+  });
+
+  it('uses another tile when the same letter is given twice', () => {
+    const state = hint(hint(initialState(LETTERS), 2, 'A'), 6, 'A');
+
+    expect(state.hints.map((h) => h.tileId)).toEqual([1, 7]);
+  });
+
+  it('ignores a slot that already has a hint', () => {
+    const before = hint(initialState(LETTERS), 3, 'H');
+
+    expect(hint(before, 3, 'P')).toBe(before);
+  });
+
+  it('ignores a slot outside the board', () => {
+    const before = initialState(LETTERS);
+
+    expect(hint(before, -1, 'P')).toBe(before);
+    expect(hint(before, 9, 'P')).toBe(before);
+  });
+
+  it('ignores a letter with no free tile', () => {
+    const before = hint(initialState(LETTERS), 0, 'P');
+
+    expect(hint(before, 1, 'Z')).toBe(before);
+    expect(hint(before, 1, 'P')).toBe(before);
+  });
+
+  it('gives 3 hints at most', () => {
+    const three = hint(hint(hint(initialState(LETTERS), 0, 'P'), 1, 'A'), 2, 'L');
+
+    expect(hint(three, 3, 'O')).toBe(three);
+  });
+});
+
+describe('submit with hints', () => {
+  const dictionary = new Set(['CHAPELA', 'PALOHCIEA']);
+
+  function hint(state: GameState, position: number, letter: string): GameState {
+    return gameReducer(state, { type: 'hint', position, letter });
+  }
+
+  function submit(state: GameState): GameState {
+    return gameReducer(state, { type: 'submit', dictionary });
+  }
+
+  it('takes 1 point for the first hint and 2 for the second away from the score', () => {
+    // Hints H (slot 1) and P (slot 3), then C, A, E, L, A: C H A P E L A
+    const withHints = hint(hint(initialState(LETTERS), 1, 'H'), 3, 'P');
+    const state = submit(pick(withHints, 4, 1, 6, 8, 7));
+
+    expect(state.result).toEqual({ word: 'CHAPELA', isValid: true, score: 4, hintPenalty: 3 });
+  });
+
+  it('never gives less than 0 points', () => {
+    // A word that is not in the dictionary, with one hint: 0 - 1 stays 0.
+    const withHint = hint(initialState(LETTERS), 0, 'C');
+    const state = submit(pick(withHint, 1, 2));
+
+    expect(state.result).toEqual({ word: 'CAO', isValid: false, score: 0, hintPenalty: 1 });
+  });
+
+  it('does not send a word that leaves a hint out', () => {
+    // Hint in slot 5, but the word only reaches slot 2.
+    const before = pick(hint(initialState(LETTERS), 5, 'E'), 4, 3, 1);
+
+    expect(getWord(before)).toBe('CHA');
+    expect(submit(before)).toBe(before);
+  });
+
+  it('sends the word once it reaches the last hint', () => {
+    // Hint E in slot 4: C H A P E L A
+    const state = submit(pick(hint(initialState(LETTERS), 4, 'E'), 4, 3, 1, 0, 8, 7));
+
+    expect(state.result?.word).toBe('CHAPELA');
+  });
+});
+
+describe('restart with hints', () => {
+  it('starts again without hints, so each game pays for its own', () => {
+    const withHint = gameReducer(initialState(LETTERS), { type: 'hint', position: 2, letter: 'A' });
+    const state = gameReducer(pick(withHint, 4, 3), { type: 'restart' });
+
+    expect(state).toEqual(initialState(LETTERS));
+  });
+});
+
+describe('toggleHints', () => {
+  function hint(state: GameState, position: number, letter: string): GameState {
+    return gameReducer(state, { type: 'hint', position, letter });
+  }
+
+  function toggle(state: GameState): GameState {
+    return gameReducer(state, { type: 'toggleHints' });
+  }
+
+  it('takes the hint letters off the board and frees their tiles', () => {
+    const state = toggle(hint(initialState(LETTERS), 3, 'H'));
+
+    expect(state.hintsShown).toBe(false);
+    expect(getSlots(state).every((slot) => slot === null)).toBe(true);
+    expect(isPicked(state, 3)).toBe(false);
+  });
+
+  it('keeps the player letters when taking the hints off, without the gaps', () => {
+    // Hint H in slot 1, the player writes C A P: C H A P. Without the hint: C A P.
+    const state = toggle(pick(hint(initialState(LETTERS), 1, 'H'), 4, 1, 0));
+
+    expect(getWord(state)).toBe('CAP');
+  });
+
+  it('lets the player use a hint tile while the hints are off', () => {
+    const state = pick(toggle(hint(initialState(LETTERS), 3, 'H')), 3);
+
+    expect(getWord(state)).toBe('H');
+  });
+
+  it('keeps the hints paid: they still count in the result', () => {
+    const dictionary = new Set(['PEZ', 'CAP']);
+    const state = gameReducer(pick(toggle(hint(initialState(LETTERS), 1, 'H')), 4, 1, 0), { type: 'submit', dictionary });
+
+    expect(state.result?.hintPenalty).toBe(1);
+  });
+
+  it('can send a word shorter than the hints while they are off', () => {
+    const state = toggle(hint(initialState(LETTERS), 8, 'L'));
+    const withWord = pick(state, 4, 1, 0);
+
+    expect(usesAllHints(withWord)).toBe(true);
+  });
+
+  it('puts the hints back and erases the player letters', () => {
+    const hidden = pick(toggle(hint(initialState(LETTERS), 3, 'H')), 4, 3);
+    const state = toggle(hidden);
+
+    expect(state.hintsShown).toBe(true);
+    expect(state.picked).toEqual([]);
+    expect(getSlots(state)[3]).toBe('H');
+  });
+
+  it('puts the hints back when a new hint is given', () => {
+    const state = hint(toggle(hint(initialState(LETTERS), 3, 'H')), 0, 'C');
+
+    expect(state.hintsShown).toBe(true);
+    expect(getSlots(state)[3]).toBe('H');
+    expect(getSlots(state)[0]).toBe('C');
+  });
+
+  it('does nothing without hints', () => {
+    const before = initialState(LETTERS);
+
+    expect(toggle(before)).toBe(before);
   });
 });
