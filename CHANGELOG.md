@@ -6,6 +6,8 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-13
+
 ### Added
 - Cifras: after you pick a number and an operator, every other number shows the result it would give. It turns orange when it is 10 or less away from the target, blue when it is the target, and says "no vale" when the operation is not allowed.
 - Cifras: a "Cómo has llegado" box with a tree of your operations. Tap a result to undo that branch, and only that branch.
