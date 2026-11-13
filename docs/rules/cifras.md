@@ -55,12 +55,29 @@ The two numbers swap places: the new one goes into the tree and the old one goes
 - If any operation stops being valid after the swap (a result of 0 or less, or a division that is not exact), nothing changes and a message explains why, for example "Con 25 no sale: el resultado tiene que ser mayor que 0".
 - If a new result is the target, the game ends as usual.
 
+### Pistas (hints)
+
+The **Pista** button does the next operation of a solution for you. You can use up to 3 hints a day.
+
+- The solution is one of the shortest ways to reach the best possible number: the target, or the closest number if it can not be reached exactly. It is picked at random, but it is the same for every player on the same day.
+- Before each hint a message says what it costs and asks you to confirm.
+- If your operations can still reach the best number, they stay and the hint carries on from them. If not, the message warns you and they are undone first. The operations of earlier hints stay.
+- The button is disabled once the best number is on the board, or when you have no hints left.
+- Hints are paid when you use them. Undoing them, swapping their numbers or pressing **Reiniciar** does not give the points back.
+
+After your first hint, a second button appears next to it:
+
+- **Quitar pistas** undoes the operations of the hints, and the ones built on them. Your other operations stay.
+- **Ver pistas** puts the hints back from the start, without paying again. If you have operations on the board, it asks first, because they will be undone.
+
 ## Buttons
 
 - **Deshacer (Undo)** removes the last operation and puts its two numbers back on the board. You can undo step by step back to the start.
 - **A result in the tree** undoes that branch of the tree (see [Cómo has llegado](#como-has-llegado-the-solution-tree)).
 - **Reiniciar (Reset)** goes back to the original 6 numbers and clears all operations. It works even after the game has finished.
 - **Terminar (Finish)** ends the game with the numbers you have.
+- **Pista** does the next operation for you (see [Pistas](#pistas-hints)).
+- **Quitar pistas / Ver pistas** takes the hints off the board or puts them back.
 
 ## End of the game
 
@@ -87,6 +104,8 @@ The number closest to the target is your result. If two numbers are equally clos
 | 1 to 5                 |      7 |
 | 6 to 10                |      5 |
 | more than 10           |      0 |
+
+Each hint costs one point more than the one before: 1 point for the first, 2 for the second and 3 for the third (6 in total). The points are taken from the score at the end, and it never goes below 0. The result shows them in a **Por pistas** row.
 
 ## Worked example
 

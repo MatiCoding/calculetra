@@ -176,6 +176,7 @@ Game logic lives in `src/domain` and is kept separate from the UI, so it can be 
 The documentation is published at **[maticoding.github.io/calculetra](https://maticoding.github.io/calculetra/)**, with search and a sidebar. The same Markdown files live in [`docs/`](docs), so you can also read them here:
 
 - [Cifras rules](docs/rules/cifras.md): how the game works, with a worked example.
+- [Letras rules](docs/rules/letras.md): how the game works, with a worked example.
 - [Architecture](docs/architecture.md): how the app is built and why, with diagrams.
 - [Architecture decisions](docs/decisions/README.md): the ADRs, the record of each important technical decision and its reasons.
 - [Contributing guide](CONTRIBUTING.md): how to propose a change.
