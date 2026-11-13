@@ -1,12 +1,15 @@
 // @vitest-environment jsdom
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { getDailyChallenge } from '../../domain/cifras/challengeCifras';
 import { gameReducer, initialState } from '../../domain/cifras/gameCifras';
 import { applyOperation } from '../../domain/cifras/operation';
 import { previewKind } from '../../domain/cifras/previewCifras';
-import { calculateScore, getBestValue } from '../../domain/cifras/scoreCifras';
-import type { Challenge } from '../../domain/cifras/typesCifras';
+import { calculateScore, getBestValue, scoreWithHints } from '../../domain/cifras/scoreCifras';
+import { solveCifras } from '../../domain/cifras/solveCifras';
+import { nextHint } from '../../domain/cifras/hintsCifras';
+import { fakeDialog } from '../../test/fakeDialog';
+import type { Challenge, Operator } from '../../domain/cifras/typesCifras';
 import NumbersGame from './NumbersGame';
 
 // The challenge depends on today's date, so the tests fix the date.
@@ -284,6 +287,165 @@ describe('NumbersGame', () => {
         clickNumber(0);
 
         expect(screen.getByRole('alert').textContent).toBe('');
+    });
+
+    describe('hints', () => {
+        let best: number;
+
+        beforeAll(fakeDialog);
+
+        beforeEach(() => {
+            best = solveCifras(challenge.numbers, challenge.target).value;
+        });
+
+        function hintButton() {
+            return screen.getByRole('button', { name: /Pista/ });
+        }
+
+        function dialog() {
+            return screen.queryByRole('dialog');
+        }
+
+        // Clicks "Pista" and accepts the dialog.
+        function askHint() {
+            fireEvent.click(hintButton());
+            clickButton('Usar pista');
+        }
+
+        it('shows 3 hints left', () => {
+            render(<NumbersGame />);
+
+            expect(hintButton().textContent).toContain('quedan 3');
+        });
+
+        it('asks first, saying what the hint costs', () => {
+            render(<NumbersGame />);
+
+            fireEvent.click(hintButton());
+
+            expect(dialog()?.textContent).toContain('¿Usar una pista? Te restará 1 punto.');
+            expect(stepTexts()).toEqual([]);
+        });
+
+        it('does nothing when the player cancels', () => {
+            render(<NumbersGame />);
+
+            fireEvent.click(hintButton());
+            clickButton('Cancelar');
+
+            expect(dialog()).toBeNull();
+            expect(stepTexts()).toEqual([]);
+            expect(hintButton().textContent).toContain('quedan 3');
+        });
+
+        it('does the next operation of a solution on the board', () => {
+            render(<NumbersGame />);
+            const hint = nextHint(challenge.numbers, challenge.target, best, TODAY);
+
+            askHint();
+
+            expect(hint.kind).toBe('step');
+            if (hint.kind !== 'step') return;
+            expect(stepTexts()).toHaveLength(1);
+            expect(numberValues()).toContain(hint.step.result);
+            expect(hintButton().textContent).toContain('quedan 2');
+        });
+
+        it('tells screen readers which operation the hint did', () => {
+            render(<NumbersGame />);
+            const hint = nextHint(challenge.numbers, challenge.target, best, TODAY);
+
+            askHint();
+
+            if (hint.kind !== 'step') throw new Error('Expected a hint step');
+            const { left, operator, right, result } = hint.step;
+            expect(screen.getByText(`Pista: ${left} ${operator} ${right} = ${result}`)).toBeTruthy();
+        });
+
+        it('makes each hint cost one point more', () => {
+            render(<NumbersGame />);
+            askHint();
+
+            if (!(hintButton() as HTMLButtonElement).disabled) {
+                fireEvent.click(hintButton());
+                expect(dialog()?.textContent).toContain('Te restará 2 puntos.');
+            }
+        });
+
+        it('warns and undoes the player steps when they can not reach the best value any more', () => {
+            // Finds an operation that leaves the board unable to reach the best value.
+            const labels: Record<Operator, string> = { '+': 'Sumar', '-': 'Restar', '×': 'Multiplicar', '÷': 'Dividir' };
+            const numbers = challenge.numbers;
+            let move: [number, Operator, number] | null = null;
+            for (let i = 0; i < numbers.length && move === null; i++) {
+                for (let j = 0; j < numbers.length && move === null; j++) {
+                    if (i === j) continue;
+                    for (const operator of ['+', '-', '×', '÷'] as Array<Operator>) {
+                        const result = applyOperation(numbers[i], operator, numbers[j]);
+                        if (!result.ok) continue;
+                        const board = [...numbers.filter((_, index) => index !== i && index !== j), result.value];
+                        if (nextHint(board, challenge.target, best, TODAY).kind === 'unreachable') {
+                            move = [i, operator, j];
+                            break;
+                        }
+                    }
+                }
+            }
+            if (move === null) throw new Error('Every operation can still reach the best value');
+
+            render(<NumbersGame />);
+            const [i, operator, j] = move;
+            clickNumber(i);
+            clickButton(labels[operator]);
+            clickNumber(j);
+
+            fireEvent.click(hintButton());
+            expect(dialog()?.textContent).toContain('se desharán');
+            clickButton('Usar pista');
+
+            const hint = nextHint(numbers, challenge.target, best, TODAY);
+            if (hint.kind !== 'step') throw new Error('Expected a hint step');
+            expect(stepTexts()).toHaveLength(1);
+            expect(numberValues()).toContain(hint.step.result);
+        });
+
+        it('takes the hints away from the score in the result', () => {
+            render(<NumbersGame />);
+            const hint = nextHint(challenge.numbers, challenge.target, best, TODAY);
+            if (hint.kind !== 'step') throw new Error('Expected a hint step');
+            askHint();
+
+            // The hint can finish the game; if not, the player finishes it.
+            if (screen.queryByRole('region', { name: 'Resultado' }) === null) clickButton('Terminar');
+
+            // The same hint, played with the reducer, gives the best number on the board.
+            const state = gameReducer(initialState(challenge), { type: 'hint', step: hint.step });
+            const expected = scoreWithHints(calculateScore(challenge.target, getBestValue(state)), 1);
+            const result = screen.getByRole('region', { name: 'Resultado' });
+            expect(result.querySelector('dd')?.textContent).toBe(String(expected));
+            expect(within(result).getByText('Por pistas')).toBeTruthy();
+            expect(within(result).getByText('−1')).toBeTruthy();
+        });
+
+        it('keeps the hints paid after "Reiniciar"', () => {
+            render(<NumbersGame />);
+            askHint();
+
+            clickButton('Reiniciar');
+
+            expect(stepTexts()).toEqual([]);
+            expect(hintButton().textContent).toContain('quedan 2');
+        });
+
+        it('disables the button once the best value is on the board or there are no hints left', () => {
+            render(<NumbersGame />);
+
+            for (let hint = 0; hint < 3 && !(hintButton() as HTMLButtonElement).disabled; hint++) {
+                askHint();
+            }
+
+            expect((hintButton() as HTMLButtonElement).disabled).toBe(true);
+        });
     });
 
     describe('entrance from the home page', () => {

@@ -307,6 +307,36 @@
     color: var(--color-letter);
 }
 
+.hintButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.hintButton svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.srOnly {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+.result .penalty {
+    color: var(--color-danger);
+}
+
 @media (max-width: 420px) {
     .container {
         gap: 10px;
