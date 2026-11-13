@@ -99,7 +99,8 @@ First playable version.
 - 404 page for unknown addresses.
 - Documentation website with the game rules, the architecture and the technical decisions.
 
-[Unreleased]: https://github.com/MatiCoding/calculetra/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/MatiCoding/calculetra/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/MatiCoding/calculetra/compare/v0.5.1...v0.6.0
 [0.5.1]: https://github.com/MatiCoding/calculetra/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/MatiCoding/calculetra/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/MatiCoding/calculetra/compare/v0.3.0...v0.4.0
