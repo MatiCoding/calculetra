@@ -77,9 +77,11 @@ function NextChallenge() {
 type Props = {
     loadWords?: () => Promise<Set<string>>;
     intro?: boolean;
+    leaving?: boolean; // Exit to the home page: the circles grow out of the keys, and then onLeft is called.
+    onLeft?: () => void;    
 };
 
-function LettersGame({ loadWords = loadDictionary, intro = false }: Props) {
+function LettersGame({ loadWords = loadDictionary, intro = false, leaving = false, onLeft }: Props) {
     const [playingIntro, setPlayingIntro] = useState(intro);
 
     // When the entrance ends, the circles are removed.
@@ -88,6 +90,13 @@ function LettersGame({ loadWords = loadDictionary, intro = false }: Props) {
         const timer = setTimeout(() => setPlayingIntro(false), INTRO_MS);
         return () => clearTimeout(timer);
     }, [playingIntro]);
+
+    // When the last circle has covered the screen, the page can go home.
+    useEffect(() => {
+        if (!leaving) return;
+        const timer = setTimeout(() => onLeft?.(), magnetTime(SLOTS));
+        return () => clearTimeout(timer);
+    }, [leaving, onLeft]);
 
     // The day is fixed when the game opens, so the letters and the hints are from the same day.
     const [today] = useState(() => new Date());
@@ -138,7 +147,7 @@ function LettersGame({ loadWords = loadDictionary, intro = false }: Props) {
     useEffect(() => {
         function handleKeyDown(event: KeyboardEvent) {
             // While the dialog is open, the keys are for the dialog, not for the board.
-            if (spinning || confirming !== null || event.ctrlKey || event.metaKey || event.altKey) return;
+            if (spinning || leaving || confirming !== null || event.ctrlKey || event.metaKey || event.altKey) return;
 
             if (event.key === 'Backspace') {
                 event.preventDefault();
@@ -154,7 +163,7 @@ function LettersGame({ loadWords = loadDictionary, intro = false }: Props) {
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [dictionary, spinning, confirming]);
+    }, [dictionary, spinning, leaving, confirming]);
 
     const [revealed, setRevealed] = useState(false);
     const [points, setPoints] = useState(0);
@@ -246,7 +255,7 @@ function LettersGame({ loadWords = loadDictionary, intro = false }: Props) {
     }
 
     return (
-        <div className={`${styles.container} ${playingIntro ? styles.intro : ''}`}>
+        <div className={`${styles.container} ${playingIntro ? styles.intro : ''} ${leaving ? styles.leaving : ''}`} inert={leaving}>
             <h2 className={styles.title}>Forma la palabra más larga</h2>
 
             <output aria-label="Tu palabra" data-status={status} className={styles.board}>
@@ -261,6 +270,15 @@ function LettersGame({ loadWords = loadDictionary, intro = false }: Props) {
                             <span aria-hidden="true" style={delayStyle(index)} className={styles.plus}>
                                 +1
                             </span>
+                        )}
+                        {/* With the result on screen there are no keys, so the exit circles grow out of the slots. */}
+                        {leaving && revealed && (
+                            <span
+                                className={styles.magnet}
+                                data-testid="exit-magnet"
+                                aria-hidden="true"
+                                style={{ animationDelay: `${index * MAGNET_GAP_MS}ms` }}
+                            />
                         )}
                     </span>
                 ))}
@@ -299,10 +317,10 @@ function LettersGame({ loadWords = loadDictionary, intro = false }: Props) {
                                         </span>
                                     )}
                                 </button>
-                                {playingIntro && (
+                                {(playingIntro || leaving) && (
                                     <span
                                         className={styles.magnet}
-                                        data-testid="intro-magnet"
+                                        data-testid={leaving ? 'exit-magnet' : 'intro-magnet'}
                                         aria-hidden="true"
                                         style={{ animationDelay: `${index * MAGNET_GAP_MS}ms` }}
                                     />
