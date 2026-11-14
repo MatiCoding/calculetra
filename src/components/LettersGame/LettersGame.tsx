@@ -7,6 +7,7 @@ import { formatCountdown, msUntilNextChallenge } from '../../domain/shared/date'
 import { MAX_HINTS_LETRAS, findLongestWord, getHintPositions } from '../../domain/letras/hintsLetras';
 import { nextHintCost } from '../../domain/letras/scoreLetras';
 import ConfirmDialog from '../ConfirmDialog/ConfirmDialog';
+import { MAGNET_GAP_MS, magnetTime } from '../magnet';
 import styles from './LettersGame.module.css';
 
 const SLOTS = 9;
@@ -54,12 +55,8 @@ function reelStyle(reel: Array<string>, index: number) : CSSProperties {
 }
 
 // Entrance from the home page: the blue shrinks onto the nine keys, and then they spin.
-// Each blue circle starts a bit later than the one before.
-const MAGNET_GAP_MS = 40;
-// How long a circle takes to shrink into its key.
-const MAGNET_MS = 750;
-// How long the whole entrance lasts: until the last circle has arrived.
-const INTRO_MS = MAGNET_MS + 8 * MAGNET_GAP_MS;
+// It lasts until the last circle has arrived.
+const INTRO_MS = magnetTime(SLOTS);
 
 // How long until the next letters, updated every second.
 function NextChallenge() {

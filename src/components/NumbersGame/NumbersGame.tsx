@@ -9,6 +9,7 @@ import { canDragToTree, swapCandidate } from '../../domain/cifras/substituteCifr
 import { useDragToSwap } from './useDragToSwap';
 import { solveCifras } from '../../domain/cifras/solveCifras';
 import { MAX_HINTS_CIFRAS, nextHint } from '../../domain/cifras/hintsCifras';
+import { MAGNET_GAP_MS, MAGNET_MS } from '../magnet';
 import ConfirmDialog from '../ConfirmDialog/ConfirmDialog';
 
 import SolutionTree from '../SolutionTree/SolutionTree';
@@ -55,10 +56,6 @@ function errorText(state: GameState): string | null {
 
 // How long the entrance from the home page lasts: the orange shrinks onto the tiles and their numbers appear.
 const INTRO_MS = 1400;
-// Each orange circle starts a bit later than the one before.
-const MAGNET_GAP_MS = 40;
-// How long a circle takes to shrink into its tile.
-const MAGNET_MS = 750;
 
 type Props = {
     intro?: boolean;
