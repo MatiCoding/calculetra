@@ -9,7 +9,7 @@ import { canDragToTree, swapCandidate } from '../../domain/cifras/substituteCifr
 import { useDragToSwap } from './useDragToSwap';
 import { solveCifras } from '../../domain/cifras/solveCifras';
 import { MAX_HINTS_CIFRAS, nextHint } from '../../domain/cifras/hintsCifras';
-import { MAGNET_GAP_MS, MAGNET_MS } from '../magnet';
+import { MAGNET_GAP_MS, MAGNET_MS, magnetTime } from '../magnet';
 import ConfirmDialog from '../ConfirmDialog/ConfirmDialog';
 
 import SolutionTree from '../SolutionTree/SolutionTree';
@@ -59,9 +59,11 @@ const INTRO_MS = 1400;
 
 type Props = {
     intro?: boolean;
+    leaving?: boolean;  // Exit to the home page: the circles grow out of the tiles, and then onLeft is called.
+    onLeft?: () => void;
 };
 
-function NumbersGame({ intro = false }: Props) {
+function NumbersGame({ intro = false, leaving = false, onLeft }: Props) {
     const [playingIntro, setPlayingIntro] = useState(intro);
 
     // When the entrance ends, the circles are removed.
@@ -76,6 +78,15 @@ function NumbersGame({ intro = false }: Props) {
     const [challenge] = useState(() => getDailyChallenge(today));
     const [state, dispatch] = useReducer(gameReducer, challenge, initialState);
     const bestValue = getBestValue(state);
+
+    // When the last circle has covered the screen, the page can go home.
+    // There is one circle for each tile on screen, so the exit lasts more with more tiles.
+    const tileCount = state.tiles.length;
+    useEffect(()=> {
+        if (!leaving) return;
+        const timer = setTimeout(() => onLeft?.(), magnetTime(tileCount));
+        return () => clearTimeout(timer);
+    }, [leaving, onLeft, tileCount])
 
     // The best value that can be reached today. Solving takes a moment, so it is done once.
     const bestPossible = useMemo(() => solveCifras(challenge.numbers, challenge.target).value, [challenge]);
@@ -138,7 +149,7 @@ function NumbersGame({ intro = false }: Props) {
     }
 
     return (
-        <div className={`${styles.container} ${playingIntro ? styles.intro : ''}`}>
+        <div className={`${styles.container} ${playingIntro ? styles.intro : ''} ${leaving ? styles.leaving : ''}`} inert={leaving}>
             <div className={styles.top}>
                 <p className={styles.eyebrow}>Reto nº {getChallengeNumber(new Date())} · objetivo</p>
                 <h2 className={styles.target} aria-label={`Objetivo: ${state.challenge.target}`}>
@@ -173,10 +184,10 @@ function NumbersGame({ intro = false }: Props) {
                                 >
                                     {tile.value}
                                 </button>
-                                {playingIntro && (
+                                {(playingIntro || leaving) && (
                                     <span
                                         className={styles.magnet}
-                                        data-testid="intro-magnet"
+                                        data-testid={leaving ? 'exit-magnet' : 'intro-magnet'}
                                         aria-hidden="true"
                                         style={{ animationDelay: `${index * MAGNET_GAP_MS}ms` }}
                                     />
