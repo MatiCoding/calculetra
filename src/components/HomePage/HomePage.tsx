@@ -1,5 +1,5 @@
 import { getChallengeNumber } from "../../domain/cifras/challengeCifras";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { useRef, useState, useEffect, useLayoutEffect } from "react";
 import { getActiveIndex } from "./carousel";
 import { useMediaQuery } from "../../hooks/useMediaQuery";
@@ -16,6 +16,29 @@ const CARDS = [...GAMES, 'Más retos']
 const GROW_MS = 500
 const MOBILE = '(max-width: 600px)'
 
+type Game = (typeof GAMES)[number]
+
+function isGame(value: unknown): value is Game {
+    return GAMES.some((game) => game === value)
+}
+
+// Coming back from a game, the navigation state says which one it was.
+// It is kept in a state, so the page still knows it after the navigation state is forgotten.
+// A game that is not on the home page counts as no game: Cifras stays in the middle.
+function useArrival(): Game | null {
+    const location = useLocation()
+    const navigate = useNavigate()
+    const from = location.state?.from
+    const [arrival] = useState(() => (isGame(from) ? from : null))
+
+    // Forget the state, so reloading the page does not play the arrival again.
+    useEffect(() => {
+        if (from !== undefined) navigate('/', { replace: true })
+    }, [from, navigate])
+
+    return arrival
+}
+
 function prefersReducedMotion() {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches
 }
@@ -24,8 +47,11 @@ function HomePage() {
     const navigate = useNavigate()
     const isMobile = useMediaQuery(MOBILE)
 
+    const arrival = useArrival()
+    const first = arrival === null ? CIFRAS : GAMES.indexOf(arrival)    // The card in the middle at the start: the game we come from, or Cifras.    
+
     const trackRef = useRef<HTMLDivElement>(null)
-    const [active, setActive] = useState(CIFRAS)
+    const [active, setActive] = useState(first)
     const [opening, setOpening] = useState<{ game: string, from: DOMRect } | null>(null)
     const [pointed, setPointed] = useState<number | null> (null)    // The card under the pointer or with the focus.
 
@@ -57,10 +83,10 @@ function HomePage() {
 
     useLayoutEffect(() => {
         const track = trackRef.current
-        const card = track?.children[CIFRAS] as HTMLElement | undefined
+        const card = track?.children[first] as HTMLElement | undefined
         if (!track || !card) return
         track.scrollLeft = card.offsetLeft + card.offsetWidth / 2 - track.clientWidth / 2
-    }, [isMobile])
+    }, [isMobile, first])
 
     useEffect(() => {
         if (!opening) return
