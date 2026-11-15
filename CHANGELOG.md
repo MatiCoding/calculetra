@@ -6,6 +6,8 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-11-15
+
 ### Added
 - A logo for Calculetra: a blue letter tile with a C and an orange number coin with an L, leaning on each other. It is the new browser tab icon, the icon when you add Calculetra to your phone's home screen, and the image of the card that WhatsApp, Discord, X and other apps show when you share a link.
 - Brand guidelines in `docs/brand/`: a PDF that explains how to use the logo, the colours, the fonts, the tiles and the tone of voice, plus the logo files in SVG and PNG.
@@ -115,7 +117,8 @@ First playable version.
 - 404 page for unknown addresses.
 - Documentation website with the game rules, the architecture and the technical decisions.
 
-[Unreleased]: https://github.com/MatiCoding/calculetra/compare/v0.6.1...HEAD
+[Unreleased]: https://github.com/MatiCoding/calculetra/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/MatiCoding/calculetra/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/MatiCoding/calculetra/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/MatiCoding/calculetra/compare/v0.5.1...v0.6.0
 [0.5.1]: https://github.com/MatiCoding/calculetra/compare/v0.5.0...v0.5.1
