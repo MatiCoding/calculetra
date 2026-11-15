@@ -72,4 +72,24 @@ describe('HomePage arrival from a game', () => {
         // The page still remembers where we came from.
         expect(letrasCard().dataset.active).toBe('true');
     });
+
+    it('covers the screen with the colour of the game we come back from', () => {
+        renderHomeFrom('Letras');
+
+        expect(screen.getByTestId('cover').dataset.game).toBe('Letras');
+    });
+
+    it('marks only the card of that game, for its arrival animation', () => {
+        renderHomeFrom('Letras');
+
+        expect(letrasCard().dataset.arrived).toBe('true');
+        expect(cifrasCard().dataset.arrived).toBe('false');
+    });
+
+    it('has no arrival when the page is opened directly', () => {
+        renderHomeFrom();
+
+        expect(screen.queryByTestId('cover')).toBeNull();
+        expect(cifrasCard().dataset.arrived).toBe('false');
+    });
 });

@@ -261,6 +261,74 @@
     }
 }
 
+/* Coming back from a game: the screen starts full of the game's colour, which fades out. */
+.cover {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: var(--color-number);
+    pointer-events: none;
+    animation: fade-out 220ms forwards;
+}
+
+.cover[data-game="Letras"] {
+    background: var(--color-letter);
+}
+
+@keyframes fade-out {
+    to {
+        opacity: 0;
+    }
+}
+
+/* At the same time, the card of that game grows a little. */
+.card[data-arrived="true"] {
+    animation: arrive 300ms ease-out;
+}
+
+@keyframes arrive {
+    from {
+        transform: scale(0.9);
+    }
+}
+
+/* Then its four tiles jump into place, one after the other.
+   --i is the position of each tile, for the delay. */
+.tiles span:nth-child(2) { --i: 1; }
+.tiles span:nth-child(3) { --i: 2; }
+.tiles span:nth-child(4) { --i: 3; }
+
+.card[data-arrived="true"] .tiles span {
+    animation: jump 420ms cubic-bezier(0.3, 1.6, 0.5, 1) calc(250ms + var(--i, 0) * 90ms) backwards;
+}
+
+/* The Cifras tiles also bob. The jump moves them with transform and bob with translate,
+   so both animations can run together without breaking each other. */
+.cifras[data-arrived="true"][data-active="true"] .tiles span {
+    animation:
+        jump 420ms cubic-bezier(0.3, 1.6, 0.5, 1) calc(250ms + var(--i, 0) * 90ms) backwards,
+        bob 2.4s ease-in-out calc(var(--i, 0) * 0.2s) infinite;
+}
+
+@keyframes jump {
+    from {
+        transform: scale(0) rotate(-40deg);
+    }
+}
+
+/* Last, the rest of the page fades in. */
+.home[data-arrival] .card:not([data-arrived="true"]),
+.home[data-arrival] .eyebrow,
+.home[data-arrival] .nav {
+    animation: fade-in 350ms 650ms backwards;
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+}
+
 @media (max-width: 380px) {
     .card {
         padding: 22px 20px;
@@ -290,7 +358,16 @@
         transition: none;
     }
 
-    .cifras[data-active="true"] .tiles span {
+    .cifras[data-active="true"] .tiles span,
+    .card[data-arrived="true"],
+    .card[data-arrived="true"] .tiles span,
+    .home[data-arrival] .card,
+    .home[data-arrival] .eyebrow,
+    .home[data-arrival] .nav {
         animation: none;
+    }
+
+    .cover {
+        display: none;
     }
 }

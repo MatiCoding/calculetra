@@ -119,18 +119,23 @@ function HomePage() {
                 />
     )
 
+    const cover = arrival && (
+                <div className={styles.cover} data-testid="cover" data-game={arrival} aria-hidden="true" />
+    )    
+
     if (isMobile) {
         return (
-            <main className={styles.home}>
+            <main className={styles.home} data-arrival={arrival ?? undefined}>
                 <p className={styles.eyebrow}>Reto nº {getChallengeNumber(new Date())}</p>
                 <GameList onPlay={openGame} arrival={arrival} />
                 {grow}
+                {cover}
             </main>
         )    
     }
 
     return (
-        <main className={styles.home}>
+        <main className={styles.home} data-arrival={arrival ?? undefined}>
             <FloatingTiles game={pointed === null ? null : GAMES[pointed]} />
             <p className={styles.eyebrow}>Reto nº {getChallengeNumber(new Date())} · desliza para elegir</p>
 
@@ -140,6 +145,7 @@ function HomePage() {
                     type="button" 
                     className={`${styles.card} ${styles.letras}`} 
                     data-active={active === 0}
+                    data-arrived={arrival === 'Letras'}                    
                     onClick={() => handleCardClick(0)}
                     onPointerEnter={() => setPointed(0)}
                     onPointerLeave={() => setPointed(null)}
@@ -163,6 +169,7 @@ function HomePage() {
                     className={`${styles.card} ${styles.cifras}`} 
                     onClick={() => handleCardClick(1)}
                     data-active={active === 1}
+                    data-arrived={arrival === 'Cifras'}                    
                     onPointerEnter={() => setPointed(1)}
                     onPointerLeave={() => setPointed(null)}
                     onFocus={() => setPointed(1)}
@@ -203,6 +210,7 @@ function HomePage() {
                 <button type="button" className={styles.arrow} aria-label="Siguiente" disabled={active === CARDS.length - 1} onClick={() => goTo(active + 1)}>🢂</button>
             </div>
             {grow}
+            {cover}
         </main>
     )
 }

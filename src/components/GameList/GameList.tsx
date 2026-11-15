@@ -43,12 +43,12 @@ function GameList({ onPlay, arrival = null }: GameListProps) {
     const [open, setOpen] = useState(() => Math.max(0, GAMES.findIndex((game) => game.name === arrival)));
 
     return (
-        <div className={styles.list}>
+        <div className={styles.list} data-arrival={arrival ?? undefined}>
             {GAMES.map((game, i) => {
                 const isOpen = open === i;
                 const bodyId = `game-list-${i}`;
                 return (
-                    <section key={game.name} className={`${styles.card} ${game.className}`} data-open={isOpen}>
+                    <section key={game.name} className={`${styles.card} ${game.className}`} data-open={isOpen} data-arrived={arrival === game.name}>
                         <h2 className={styles.title}>
                             <button
                                 type="button"
