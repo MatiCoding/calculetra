@@ -11,6 +11,7 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 - Scrollbars no longer appear while a game card grows to fill the screen, or during the Letras entrance.
+- The Letras tiles on the home page now bob like the Cifras ones while their card is in the middle of the carousel (or open in the list on phones), and the arrow of "Jugar el reto" moves on hover on the Letras card too.
 
 ## [0.6.0] - 2026-11-13
 
