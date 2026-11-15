@@ -4,6 +4,7 @@ import { MemoryRouter } from 'react-router';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { fakeDialog } from './test/fakeDialog';
 import { fakeMatchMedia } from './test/fakeMatchMedia';
+import { magnetTime } from './components/magnet';
 import App from './App';
 
 // SignUpForm uses useAuth, but these tests only check navigation,
@@ -97,7 +98,38 @@ describe('App routes', () => {
     expect(screen.getByRole('list', { name: 'Letras' })).toBeTruthy();
   });
 
-  it('goes back to the home page from the game', () => {
+  it('plays the exit of Cifras and then goes back to the home page', () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    renderAt('/cifras');
+
+    fireEvent.click(screen.getByRole('link', { name: 'Volver a los juegos' }));
+
+    // The game is still there while the circles grow out of its six tiles.
+    expect(screen.getByRole('heading', { name: /Objetivo/ })).toBeTruthy();
+    expect(screen.getAllByTestId('exit-magnet')).toHaveLength(6);
+
+    act(() => vi.advanceTimersByTime(magnetTime(6)));
+    expect(screen.getByText(/Reto nº \d+/)).toBeTruthy();
+    expect(screen.queryByText(/Objetivo/)).toBeNull();
+    vi.useRealTimers();
+  });
+
+  it('plays the exit of Letras and then goes back to the home page', () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    renderAt('/letras');
+
+    fireEvent.click(screen.getByRole('link', { name: 'Volver a los juegos' }));
+
+    expect(screen.getAllByTestId('exit-magnet')).toHaveLength(9);
+
+    act(() => vi.advanceTimersByTime(magnetTime(9)));
+    expect(screen.getByText(/Reto nº \d+/)).toBeTruthy();
+    expect(screen.queryByRole('list', { name: 'Letras' })).toBeNull();
+    vi.useRealTimers();
+  });
+
+  it('goes back to the home page at once with reduced motion', () => {
+    fakeMatchMedia(true);
     renderAt('/cifras');
 
     fireEvent.click(screen.getByRole('link', { name: 'Volver a los juegos' }));

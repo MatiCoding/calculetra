@@ -363,7 +363,8 @@
    grew until it filled it. That orange is really six huge circles, one centred
    on each tile, so together they cover everything. They shrink until each one
    is the size of its tile, and then the numbers appear. */
-:global(body):has(.intro) {
+:global(body):has(.intro),
+:global(body):has(.leaving) {
     overflow: hidden;
 }
 
@@ -387,6 +388,19 @@
         width: 100%;
         height: 100%;
         visibility: hidden;
+    }
+}
+
+/* Exit to the home page: the circles grow out of the tiles until they cover the screen.
+   It is the entrance backwards: it starts at the size of the tile and ends as the big circle. */
+.leaving .magnet {
+    animation-name: unmagnet;
+}
+
+@keyframes unmagnet {
+    from {
+        width: 100%;
+        height: 100%;
     }
 }
 

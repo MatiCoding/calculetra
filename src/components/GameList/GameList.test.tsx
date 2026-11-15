@@ -3,9 +3,9 @@ import { cleanup, fireEvent, render, screen, within } from '@testing-library/rea
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import GameList from './GameList';
 
-function renderList() {
+function renderList(arrival?: string) {
   const onPlay = vi.fn();
-  render(<GameList onPlay={onPlay} />);
+  render(<GameList onPlay={onPlay} arrival={arrival} />);
   return onPlay;
 }
 
@@ -39,6 +39,18 @@ describe('GameList', () => {
     expect(row(/Cifras/).getAttribute('aria-expanded')).toBe('true');
     expect(row(/Letras/).getAttribute('aria-expanded')).toBe('false');
     expect(row(/Más retos/).getAttribute('aria-expanded')).toBe('false');
+  });
+
+  it('starts with the Letras card open when we come back from Letras', () => {
+    renderList('Letras');
+    expect(row(/Letras/).getAttribute('aria-expanded')).toBe('true');
+    expect(row(/Cifras/).getAttribute('aria-expanded')).toBe('false');
+  });
+
+  it('starts with the Cifras card open when we come back from a game that is not in the list', () => {
+    renderList('Panel');
+    expect(row(/Cifras/).getAttribute('aria-expanded')).toBe('true');
+    expect(row(/Letras/).getAttribute('aria-expanded')).toBe('false');
   });
 
   it('links each row to the part it opens', () => {

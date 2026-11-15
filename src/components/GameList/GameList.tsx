@@ -35,18 +35,20 @@ const GAMES = [
 type GameListProps = {
     // Called with the game and its open card, so the page can grow it.
     onPlay: (game: string, card: HTMLElement) => void;
+    // The game we come back from. Its card starts open; without it (or with an unknown game), Cifras.
+    arrival?: string | null;    
 };
 
-function GameList({ onPlay }: GameListProps) {
-    const [open, setOpen] = useState(0);
+function GameList({ onPlay, arrival = null }: GameListProps) {
+    const [open, setOpen] = useState(() => Math.max(0, GAMES.findIndex((game) => game.name === arrival)));
 
     return (
-        <div className={styles.list}>
+        <div className={styles.list} data-arrival={arrival ?? undefined}>
             {GAMES.map((game, i) => {
                 const isOpen = open === i;
                 const bodyId = `game-list-${i}`;
                 return (
-                    <section key={game.name} className={`${styles.card} ${game.className}`} data-open={isOpen}>
+                    <section key={game.name} className={`${styles.card} ${game.className}`} data-open={isOpen} data-arrived={arrival === game.name}>
                         <h2 className={styles.title}>
                             <button
                                 type="button"

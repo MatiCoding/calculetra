@@ -6,6 +6,12 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- Going back from a game to the home page has its own animation, like opening it backwards: a circle of the game's colour grows out of each key (Letras) or tile (Cifras) until the screen is covered. Then the home page opens with that game in the middle of the carousel (or its card open in the list on phones), its tiles jump into place one by one and the rest of the page fades in. Nothing moves if your system asks for reduced motion, but the game you were playing is still the one in the middle.
+
+### Fixed
+- Scrollbars no longer appear while a game card grows to fill the screen, or during the Letras entrance.
+
 ## [0.6.0] - 2026-11-13
 
 ### Added

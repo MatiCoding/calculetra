@@ -1,5 +1,5 @@
 import { Outlet, Route, Routes, useLocation, useNavigate } from 'react-router'
-import { useEffect } from 'react'
+import { useEffect, useCallback, useState } from 'react'
 
 import Header from './components/Header/Header'
 import NumbersGame from './components/NumbersGame/NumbersGame'
@@ -31,12 +31,33 @@ function useIntro(): boolean {
   return intro
 }
 
+// Starts the exit of the game. When it ends, the page goes home and tells the home page which game it comes from, like the home page does with {intro: true}
+function useExit(game: string){
+  const navigate = useNavigate()
+  const [leaving, setLeaving] = useState(false)
+  const start = useCallback(() => setLeaving(true), [])
+  const leave = useCallback(() => navigate('/', {state: {from: game}}), [navigate, game])
+  return { leaving, start, leave}
+}
+
 function CifrasPage() {
-  return <NumbersGame intro={useIntro()} />
+  const exit = useExit('Cifras')
+  return (
+    <>
+      <BackToGames game="Cifras" onLeave={exit.start} />
+      <NumbersGame intro={useIntro()} leaving={exit.leaving} onLeft={exit.leave} />
+    </>
+  )
 }
 
 function LetrasPage() {
-  return <LettersGame intro={useIntro()} />
+  const exit = useExit('Letras')
+  return (
+    <>
+      <BackToGames game="Letras" onLeave={exit.start} />
+      <LettersGame intro={useIntro()} leaving={exit.leaving} onLeft={exit.leave} />
+    </>
+  )
 }
 
 function WithHeader() {
@@ -64,8 +85,8 @@ function App() {
               </>
             }
           />
-          <Route path="/cifras" element={<main><BackToGames /><CifrasPage /></main>} />
-          <Route path="/letras" element={<main><BackToGames /><LetrasPage /></main>} />
+          <Route path="/cifras" element={<main><CifrasPage /></main>} />
+          <Route path="/letras" element={<main><LetrasPage /></main>} />
           <Route path="/account" element={<main><RequireAuth><AccountPage /></RequireAuth></main>} />
           <Route path="/forgot-password" element={<main><ForgotPasswordForm /></main>} />
           <Route path="/reset-password" element={<main><ResetPasswordPage /></main>} />
