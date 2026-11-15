@@ -263,7 +263,7 @@
 /* Entrance from the home page. The screen is full of blue because the card grew until it
    filled it. That blue is really nine huge circles, one centred on each key, so together
    they cover everything. They shrink into their keys, and then the keys spin. */
-:global(body):has(.intro) 
+:global(body):has(.intro), 
 :global(body):has(.leaving) 
 {
     overflow: hidden;

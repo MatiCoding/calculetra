@@ -234,6 +234,11 @@
     background: var(--color-text);
 }
 
+/* While the card grows the page cannot scroll, so no scrollbar shows over the colour. */
+:global(body):has(.grow) {
+    overflow: hidden;
+}
+
 .grow {
     position: fixed;
     z-index: 50;
