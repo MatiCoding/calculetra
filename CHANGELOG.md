@@ -6,6 +6,13 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- A logo for Calculetra: a blue letter tile with a C and an orange number coin with an L, leaning on each other. It is the new browser tab icon, the icon when you add Calculetra to your phone's home screen, and the image of the card that WhatsApp, Discord, X and other apps show when you share a link.
+- Brand guidelines in `docs/brand/`: a PDF that explains how to use the logo, the colours, the fonts, the tiles and the tone of voice, plus the logo files in SVG and PNG.
+
+### Changed
+- The browser tab now says "Calculetra" with a capital C.
+
 ## [0.6.1] - 2026-11-15
 
 ### Added
