@@ -6,6 +6,8 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-11-15
+
 ### Added
 - Going back from a game to the home page has its own animation, like opening it backwards: a circle of the game's colour grows out of each key (Letras) or tile (Cifras) until the screen is covered. Then the home page opens with that game in the middle of the carousel (or its card open in the list on phones), its tiles jump into place one by one and the rest of the page fades in. Nothing moves if your system asks for reduced motion, but the game you were playing is still the one in the middle.
 
@@ -106,7 +108,8 @@ First playable version.
 - 404 page for unknown addresses.
 - Documentation website with the game rules, the architecture and the technical decisions.
 
-[Unreleased]: https://github.com/MatiCoding/calculetra/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/MatiCoding/calculetra/compare/v0.6.1...HEAD
+[0.6.1]: https://github.com/MatiCoding/calculetra/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/MatiCoding/calculetra/compare/v0.5.1...v0.6.0
 [0.5.1]: https://github.com/MatiCoding/calculetra/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/MatiCoding/calculetra/compare/v0.4.0...v0.5.0
