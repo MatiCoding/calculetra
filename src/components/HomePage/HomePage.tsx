@@ -123,7 +123,7 @@ function HomePage() {
         return (
             <main className={styles.home}>
                 <p className={styles.eyebrow}>Reto nº {getChallengeNumber(new Date())}</p>
-                <GameList onPlay={openGame} />
+                <GameList onPlay={openGame} arrival={arrival} />
                 {grow}
             </main>
         )    
