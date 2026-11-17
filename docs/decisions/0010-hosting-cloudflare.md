@@ -38,7 +38,7 @@ This ADR supersedes ADR 0003. The rules about when to deploy are the same; only 
 ## Consequences
 
 - `npm run dev` does not need Wrangler. The headers in `_headers` only apply on Cloudflare, so they have to be checked on the deployed site.
-- There are no preview deployments of each branch, as there were on Vercel. A change can be checked before a release with a manual `npx wrangler deploy` from a local build.
+- There are no preview deployments of each branch, as there were on Vercel. A change can be checked before a release with `npx wrangler versions upload` from a local build: it uploads a version with its own preview URL and does not change production.
 - Rolling back is still running the Deploy workflow with an older tag. Tags up to v0.7.0 have no `wrangler.jsonc`, so they cannot be deployed to Cloudflare. In the Cloudflare dashboard, **Deployments** can also roll back to an earlier upload.
 - The Cloudflare API token must be renewed in Cloudflare and in the `CLOUDFLARE_API_TOKEN` secret if it expires or is revoked.
 - The site URL changed. The Site URL and redirect URLs in Supabase, the GitHub OAuth app and the Google OAuth client point to the new URL. They must be changed again when Calculetra gets its own domain.
