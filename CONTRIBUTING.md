@@ -83,7 +83,7 @@ Releases are made by the maintainer, when they decide to publish what is in `mai
 - **Patch** (`0.1.1`): only fixes to the published version, including hotfixes.
 - **Major** (`1.0.0`): reserved for when Cifras and Letras are stable.
 
-A version without a suffix is a normal release and is marked as *Latest* on GitHub. Only test versions with a suffix (`v1.0.0-rc.1`, `v0.4.0-beta.1`) are published as a *pre-release*: they are tagged on `developer`, tested on its Vercel preview deployment and never merged into `main`.
+A version without a suffix is a normal release and is marked as *Latest* on GitHub. Only test versions with a suffix (`v1.0.0-rc.1`, `v0.4.0-beta.1`) are published as a *pre-release*: they are tagged on `developer`, tested on a preview URL from `npx wrangler versions upload` and never merged into `main`.
 
 ### Steps
 
@@ -123,11 +123,12 @@ A version without a suffix is a normal release and is marked as *Latest* on GitH
    git push
    ```
 
-Publishing the release in step 5 is what deploys it: the **Deploy** workflow sends that tag to Vercel production and the **Docs** workflow publishes the documentation site. Merging into `main` deploys nothing on its own, and pre-releases are never deployed to production.
+Publishing the release in step 5 is what deploys it: the **Deploy** workflow builds that tag and deploys it to Cloudflare with Wrangler and the **Docs** workflow publishes the documentation site. Merging into `main` deploys nothing on its own, and pre-releases are never deployed to production.
 
 ### Deploying an older version
 
-To go back to a previous version, open **Actions → Deploy → Run workflow** on GitHub and enter its tag (for example `v0.1.1`). It deploys that tag to production without changing `main`. Then fix the problem and publish a new patch release.
+To go back to a previous version, open **Actions → Deploy → Run workflow** on GitHub and enter its tag (for example `v0.8.0`). It deploys that tag to production without changing `main`. Then fix the problem and publish a new patch release.
+Tags up to v0.7.0 were hosted on Vercel and cannot be deployed this way.
 
 ## Commit messages
 
@@ -195,7 +196,7 @@ In **Authentication → URL Configuration**:
 ### 2. GitHub
 
 1. GitHub → **Settings → Developer settings → OAuth Apps → New OAuth App**.
-2. Application name `Calculetra`, homepage URL `https://calculetra.vercel.app`, and as **Redirect URI** the Supabase callback URL. Leave wildcard matching and device flow off.
+2. Application name `Calculetra`, homepage URL `calculetra.maticoding.workers.dev`, and as **Redirect URI** the Supabase callback URL. Leave wildcard matching and device flow off.
 3. Copy the **Client ID**, generate a **client secret** and copy it.
 4. Supabase → **Authentication → Sign In / Providers → GitHub**: enable it and paste both.
 

@@ -10,11 +10,11 @@ A daily numbers-and-letters puzzle inspired by the Spanish TV show *Cifras y Let
 [![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white)](https://vite.dev)
 [![Vitest](https://img.shields.io/badge/Vitest-5-6E9F18?logo=vitest&logoColor=white)](https://vitest.dev)
 [![Supabase](https://img.shields.io/badge/Supabase-Auth-3FCF8E?logo=supabase&logoColor=white)](https://supabase.com)
-[![Vercel](https://img.shields.io/badge/Vercel-deployed-000000?logo=vercel&logoColor=white)](https://calculetra.vercel.app)
+[![Cloudflare](https://img.shields.io/badge/Cloudflare-Workers-F38020?logo=cloudflare&logoColor=white)](https://calculetra.maticoding.workers.dev)
 [![License](https://img.shields.io/badge/License-GPL--3.0-blue)](LICENSE)
 [![Docs](https://github.com/MatiCoding/calculetra/actions/workflows/docs.yml/badge.svg?branch=main)](https://maticoding.github.io/calculetra/)
 
-**[Play it](https://calculetra.vercel.app)** · [Rules](docs/rules/cifras.md) · [Getting started](#getting-started) · [Documentation](https://maticoding.github.io/calculetra/) · [Contributing](CONTRIBUTING.md)
+**[Play it](https://calculetra.maticoding.workers.dev)** · [Rules](docs/rules/cifras.md) · [Getting started](#getting-started) · [Documentation](https://maticoding.github.io/calculetra/) · [Contributing](CONTRIBUTING.md)
 
 </div>
 
@@ -53,7 +53,7 @@ You can click the letters or type them, delete with Backspace and send with Ente
 - [Vitest](https://vitest.dev) and [Testing Library](https://testing-library.com) for tests
 - [ESLint](https://eslint.org) for linting
 - [GitHub Actions](https://github.com/features/actions) for CI
-- [Vercel](https://vercel.com) for hosting
+- [Cloudflare Workers](https://developers.cloudflare.com/workers/static-assets/) for hosting (see [why Cloudflare](docs/decisions/0010-hosting-cloudflare.md))
 
 ## Getting started
 
