@@ -1,6 +1,6 @@
 # 3. Deploy to production when a release is published
 
-- Status: Accepted
+- Status: Superseded by [0010](0010-hosting-cloudflare.md)
 - Date: 2026-10-20
 
 ## Context
