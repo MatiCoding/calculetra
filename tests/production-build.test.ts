@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { build, type Rolldown } from 'vite';
 
-// Builds the app like Vercel does and reads the generated JavaScript.
+// Builds the app like the deploy workflow does and reads the generated JavaScript.
 // Values in process.env win over .env files, so a local .env.local
 // cannot change the result of these tests.
 async function buildJs(flag: string): Promise<string> {

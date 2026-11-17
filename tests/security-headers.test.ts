@@ -1,19 +1,25 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
-type Header = { key: string; value: string };
-type VercelConfig = { headers?: { source: string; headers: Header[] }[] };
-
-// Vitest runs from the project root, so this path points to our vercel.json.
-const config: VercelConfig = JSON.parse(readFileSync('vercel.json', 'utf-8'));
+// Vitest runs from the project root, so this path points to our _headers file.
+// Vite copies public/_headers to dist/, and Cloudflare reads it from there.
+const lines = readFileSync('public/_headers', 'utf-8')
+    .split('\n')
+    .map((line) => line.trim());
 
 function getHeader(key: string): string | undefined {
-    const allPages = config.headers?.find((rule) => rule.source === '/(.*)');
-    return allPages?.headers.find((header) => header.key === key)?.value;
+    // Every header goes under the "/*" rule, so it applies to all pages.
+    const rules = lines.slice(lines.indexOf('/*') + 1);
+    const line = rules.find((rule) => rule.startsWith(`${key}:`));
+    return line?.slice(key.length + 1).trim();
 }
 
 describe('security headers', () => {
     const csp = getHeader('Content-Security-Policy') ?? '';
+
+    it('applies the headers to every page', () => {
+        expect(lines).toContain('/*');
+    });
 
     it('sends a Content-Security-Policy', () => {
         expect(csp).not.toBe('');
@@ -36,5 +42,9 @@ describe('security headers', () => {
 
     it('does not let the browser guess file types', () => {
         expect(getHeader('X-Content-Type-Options')).toBe('nosniff');
+    });
+
+    it('only sends the origin to other sites', () => {
+        expect(getHeader('Referrer-Policy')).toBe('strict-origin-when-cross-origin');
     });
 });

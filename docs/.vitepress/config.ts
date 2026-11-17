@@ -15,7 +15,7 @@ export default withMermaid(
 
     themeConfig: {
       nav: [
-        { text: 'Play', link: 'https://calculetra.vercel.app' },
+        { text: 'Play', link: 'https://calculetra.maticoding.workers.dev' },
         { text: 'Contributing', link: `${repo}/blob/main/CONTRIBUTING.md` },
       ],
 
@@ -42,6 +42,10 @@ export default withMermaid(
             { text: '0004. Keep the session in localStorage and reduce the risk', link: '/decisions/0004-session-storage'},
             { text: '0005. Merge into main without making a release', link: '/decisions/0005-merge-without-release'},
             { text: '0006. Delete accounts with a database function', link: '/decisions/0006-delete-account' },
+            { text: '0007. One account per email, linked automatically', link: '/decisions/0007-one-account-per-email' },
+            { text: '0008. Letras dictionary: a generated word list', link: '/decisions/0008-letras-dictionary' },
+            { text: '0009. Send auth emails through Gmail SMTP', link: '/decisions/0009-auth-email-sender' },
+            { text: '0010. Host the app on Cloudflare Workers', link: '/decisions/0010-hosting-cloudflare' },
           ],
         },
       ],

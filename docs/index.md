@@ -7,4 +7,4 @@ Calculetra is a daily puzzle inspired by the Spanish TV show *Cifras y Letras*. 
 - [Architecture](architecture.md): how the app is built and why, with diagrams.
 - [Architecture decisions](decisions/README.md): the ADRs, the record of each important technical decision and its reasons.
 
-To play, go to [calculetra.vercel.app](https://calculetra.vercel.app). To run the project or propose a change, read the [README](https://github.com/MatiCoding/calculetra#readme) and the [contributing guide](https://github.com/MatiCoding/calculetra/blob/main/CONTRIBUTING.md).
+To play, go to [calculetra.maticoding.workers.dev](https://calculetra.maticoding.workers.dev). To run the project or propose a change, read the [README](https://github.com/MatiCoding/calculetra#readme) and the [contributing guide](https://github.com/MatiCoding/calculetra/blob/main/CONTRIBUTING.md).

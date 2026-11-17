@@ -22,12 +22,12 @@ Calculetra is a daily puzzle inspired by the Spanish TV show *Cifras y Letras*. 
 flowchart LR
     player(["Player"])
     browser["Calculetra<br/>React app in the browser"]
-    vercel["Vercel<br/>static hosting"]
+    cloudflare["Cloudflare Workers<br/>static assets"]
     supabase[("Supabase Auth")]
     db[("Supabase database<br/>delete_account function<br/>results and leaderboard (planned)")]
 
     player -->|plays and logs in| browser
-    vercel -->|HTML, JS and CSS| browser
+    cloudflare -->|HTML, JS and CSS| browser
     browser -->|sign up, log in, log out, session, password reset| supabase
     browser -->|delete account| db
     browser -.->|planned: results| db
@@ -36,7 +36,7 @@ flowchart LR
 | Partner | What goes between it and the app |
 | --- | --- |
 | Player | Uses the app in a browser. The game works without an account. |
-| Vercel | Serves the static build (`dist/`). Every page, including `/login` or `/signup`, is answered with `index.html` (see `vercel.json`) so the router in the browser can handle it. Each published release is deployed by the Deploy workflow (see [ADR 0003](decisions/0003-deploy-on-release.md)); merges into main are not deployed on their own. |
+| Cloudflare Workers | Serves the static build (`dist/`) with the security headers in `public/_headers`. Every page, including `/login` or `/signup`, is answered with `index.html` (`not_found_handling` in `wrangler.jsonc`) so the router in the browser can handle it. Each published release is deployed by the Deploy workflow (see [ADR 0010](decisions/0010-hosting-cloudflare.md)); merges into main are not deployed on their own. |
 | Supabase Auth | Accounts with email and password, called directly from the browser through `@supabase/supabase-js`. See [ADR 0001](decisions/0001-backend-supabase.md). |
 | Supabase database | Has one function, `delete_account()`, that lets a logged-in user delete their own account, because the browser key cannot delete users. The SQL is in `supabase/migrations/` and is run by hand in the Supabase SQL Editor. See [ADR 0006](decisions/0006-delete-account.md). Game results, the daily leaderboard and stats are **planned** and not stored yet. |
 
@@ -131,7 +131,7 @@ Vite reads variables that start with `VITE_` from `.env` files and replaces them
 | `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase public key | Same as above. |
 | `VITE_UNDER_CONSTRUCTION` | Feature flag: show only the "under construction" page | The flag is off and the app is shown. Only the exact value `true` turns it on. |
 
-Locally the values go in `.env` (copy `.env.example`); in production they are set in Vercel. Both are public values in the browser bundle; the Supabase secret key must never be used here (see [ADR 0001](decisions/0001-backend-supabase.md)).
+Locally the values go in `.env` (copy `.env.example`); in production they are GitHub repository variables that the Deploy workflow passes to the build. Both are public values in the browser bundle; the Supabase secret key must never be used here (see [ADR 0001](decisions/0001-backend-supabase.md)).
 
 ## 9. Decisions
 

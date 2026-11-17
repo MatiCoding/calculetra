@@ -6,6 +6,9 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+- Calculetra has a new address: https://calculetra.maticoding.workers.dev. It is now hosted on Cloudflare instead of Vercel. Your account stays the same.
+
 ## [0.7.0] - 2026-11-15
 
 ### Added

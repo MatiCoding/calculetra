@@ -6,7 +6,7 @@
 
 ## Context
 
-Calculetra is a static React app deployed on Vercel. Milestone 2 needs a backend for:
+Calculetra is a static React app deployed on Cloudflare Workers ([ADR 0010](0010-hosting-cloudflare.md)). Milestone 2 needs a backend for:
 
 - User accounts: sign up, log in, log out and password reset.
 - Saving each player's results, one row per game.
@@ -31,6 +31,6 @@ Use [Supabase](https://supabase.com) for authentication and data storage.
 
 - The project URL and the public (publishable) key are shipped in the browser bundle. This is expected: data is protected by **Row Level Security** policies in the database, which must be enabled on every table we create.
 - The secret key (`service_role`) must never be used in the frontend or committed to the repository.
-- The keys are read from `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`, set in a local `.env` and in Vercel (Production and Preview).
+- The keys are read from `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`, set in a local .env and in the GitHub repository variables used by the Deploy workflow.
 - On the free plan, projects are paused after a period of inactivity and have usage limits. That is acceptable for now.
 - Because the provider is wrapped in `src/auth/`, switching to another provider later would only require changes in that folder.
