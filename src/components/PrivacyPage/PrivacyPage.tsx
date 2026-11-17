@@ -14,7 +14,7 @@ function PrivacyPage() {
                     <span className={styles.letterTile}>S</span>
                 </div>
                 <h1 className={styles.title}>Política de privacidad</h1>
-                <p className={styles.updated}>Última actualización: 25 de octubre de 2026.</p>
+                <p className={styles.updated}>Última actualización: 17 de noviembre de 2026.</p>
             </div>
 
             <section className={styles.section}>
