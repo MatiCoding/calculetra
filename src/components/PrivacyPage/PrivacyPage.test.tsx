@@ -33,7 +33,7 @@ describe('PrivacyPage', () => {
         renderPrivacyPage();
 
         expect(screen.getAllByText(/Supabase/).length).toBeGreaterThan(0);
-        expect(screen.getAllByText(/Vercel/).length).toBeGreaterThan(0);
+        expect(screen.getAllByText(/Cloudflare/).length).toBeGreaterThan(0);
     });
 
     it('links to the account page to delete the account', () => {

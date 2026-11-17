@@ -38,7 +38,7 @@ function PrivacyPage() {
                 <h2>Quién los trata</h2>
                 <p>
                     Tus datos se guardan en Supabase, que nos da la base de datos y el
-                    inicio de sesión. La web está alojada en Vercel. No los compartimos
+                    inicio de sesión. La web está alojada en Cloudflare. No los compartimos
                     con nadie más.
                 </p>
             </section>

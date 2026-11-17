@@ -28,7 +28,6 @@ dist-ssr
 # VitePress
 docs/.vitepress/dist
 docs/.vitepress/cache
-.vercel
 .wrangler
 .env*
 
