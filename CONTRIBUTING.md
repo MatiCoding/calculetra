@@ -190,13 +190,13 @@ There are two redirects, and each one is configured in a different place:
 
 In **Authentication → URL Configuration**:
 
-- **Site URL:** `https://calculetra.vercel.app` (or your own deployment).
-- **Redirect URLs:** `https://calculetra.vercel.app/**` and `http://localhost:5173/**`.
+- **Site URL:** `https://calculetra.maticoding.workers.dev` (or your own deployment).
+- **Redirect URLs:** `https://calculetra.maticoding.workers.dev/**` and `http://localhost:5173/**`.
 
 ### 2. GitHub
 
 1. GitHub → **Settings → Developer settings → OAuth Apps → New OAuth App**.
-2. Application name `Calculetra`, homepage URL `calculetra.maticoding.workers.dev`, and as **Redirect URI** the Supabase callback URL. Leave wildcard matching and device flow off.
+2. Application name `Calculetra`, homepage URL `https://calculetra.maticoding.workers.dev`, and as **Redirect URI** the Supabase callback URL. Leave wildcard matching and device flow off.
 3. Copy the **Client ID**, generate a **client secret** and copy it.
 4. Supabase → **Authentication → Sign In / Providers → GitHub**: enable it and paste both.
 
@@ -207,8 +207,8 @@ GitHub apps work for every user straight away, with no review.
 1. In [Google Cloud](https://console.cloud.google.com), create a project called `Calculetra`.
 2. **Google Auth Platform → Get started**: app name `Calculetra`, your support email, audience **External**, your contact email.
 3. **Data access**: add the scopes `openid`, `.../auth/userinfo.email` and `.../auth/userinfo.profile`. They are non-sensitive, so they need no verification.
-4. **Branding**: homepage `https://calculetra.vercel.app`, and as authorized domains `calculetra.vercel.app` and `<your-project>.supabase.co`. Do not upload a logo yet: a logo makes Google ask for verification.
-5. **Clients → Create client**: type **Web application**, JavaScript origins `https://calculetra.vercel.app` and `http://localhost:5173`, and as redirect URI the Supabase callback URL. Copy the client ID and the client secret.
+4. **Branding**: homepage `https://maticoding.workers.dev`, and as authorized domains `maticoding.workers.dev` and `<your-project>.supabase.co`. Do not upload a logo yet: a logo makes Google ask for verification.
+5. **Clients → Create client**: type **Web application**, JavaScript origins `https://maticoding.workers.dev` and `http://localhost:5173`, and as redirect URI the Supabase callback URL. Copy the client ID and the client secret.
 6. Supabase → **Authentication → Sign In / Providers → Google**: enable it and paste both.
 7. While the app is in **Testing**, only the users listed in **Audience → Test users** can log in. To open it to everyone, press **Publish app** in **Audience** (see the requirements below).
 
