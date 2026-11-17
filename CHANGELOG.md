@@ -6,6 +6,8 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-11-17
+
 ### Changed
 - Calculetra has a new address: https://calculetra.maticoding.workers.dev. It is now hosted on Cloudflare instead of Vercel. Your account stays the same.
 
@@ -120,7 +122,8 @@ First playable version.
 - 404 page for unknown addresses.
 - Documentation website with the game rules, the architecture and the technical decisions.
 
-[Unreleased]: https://github.com/MatiCoding/calculetra/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/MatiCoding/calculetra/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/MatiCoding/calculetra/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/MatiCoding/calculetra/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/MatiCoding/calculetra/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/MatiCoding/calculetra/compare/v0.5.1...v0.6.0
