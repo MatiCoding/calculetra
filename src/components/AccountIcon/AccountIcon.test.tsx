@@ -3,7 +3,7 @@ import { cleanup, render } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
 import AccountIcon, { type AccountIconName } from './AccountIcon'
 
-const NAMES: AccountIconName[] = ['summary', 'password', 'email', 'delete']
+const NAMES: AccountIconName[] = ['summary', 'profile', 'password', 'email', 'delete']
 
 describe('AccountIcon', () => {
     afterEach(cleanup)

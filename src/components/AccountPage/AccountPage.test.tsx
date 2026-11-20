@@ -58,11 +58,11 @@ describe('AccountPage', () => {
         expect(screen.getByRole('region', { name: 'Tu perfil' })).toBeTruthy();
     });
 
-    it('shows four tabs to a user with a password', () => {
+    it('shows five tabs to a user with a password', () => {
         renderPage();
 
         expect(screen.getByRole('tablist', { name: 'Opciones de la cuenta' })).toBeTruthy();
-        expect(tabNames()).toEqual(['Resumen', 'Contraseña', 'Correo', 'Eliminar cuenta']);
+        expect(tabNames()).toEqual(['Resumen', 'Perfil', 'Contraseña', 'Correo', 'Eliminar cuenta']);
     });
 
     it('selects Resumen at first', () => {
@@ -88,6 +88,16 @@ describe('AccountPage', () => {
         const panel = screen.getByRole('tabpanel');
         expect(tab.getAttribute('aria-controls')).toBe(panel.id);
         expect(panel.getAttribute('aria-labelledby')).toBe(tab.id);
+    });
+
+    it('shows the Perfil panel on the Perfil tab', () => {
+        renderPage();
+
+        fireEvent.click(screen.getByRole('tab', { name: 'Perfil' }));
+
+        expect(screen.getByRole('tab', { name: 'Perfil' }).getAttribute('aria-selected')).toBe('true');
+        expect(screen.getByRole('tabpanel', { name: 'Perfil' })).toBeTruthy();
+        expect(screen.getByRole('heading', { name: 'Perfil' })).toBeTruthy();
     });
 
     it('shows the change password form on the Contraseña tab', () => {
@@ -125,10 +135,16 @@ describe('AccountPage', () => {
             auth.user = fakeUser({ email: 'ana@gmail.com', hasPassword: false, providers: ['google'] });
         });
 
-        it('only shows the Resumen and Eliminar cuenta tabs', () => {
+        it('only shows the Resumen, Perfil and Eliminar cuenta tabs', () => {
             renderPage();
 
-            expect(tabNames()).toEqual(['Resumen', 'Eliminar cuenta']);
+            expect(tabNames()).toEqual(['Resumen', 'Perfil', 'Eliminar cuenta']);
+        });
+
+        it('lets them open the Perfil tab', () => {
+            renderPage('/account?tab=perfil');
+
+            expect(screen.getByRole('tab', { name: 'Perfil' }).getAttribute('aria-selected')).toBe('true');
         });
 
         it('explains why on the Resumen tab', () => {
@@ -171,9 +187,9 @@ describe('AccountPage', () => {
 
             fireEvent.keyDown(screen.getByRole('tab', { name: 'Resumen' }), { key: 'ArrowRight' });
 
-            expect(selectedTab()).toBe('Contraseña');
-            expect(document.activeElement).toBe(screen.getByRole('tab', { name: 'Contraseña' }));
-            expect(screen.getByRole('tab', { name: 'Contraseña' }).tabIndex).toBe(0);
+            expect(selectedTab()).toBe('Perfil');
+            expect(document.activeElement).toBe(screen.getByRole('tab', { name: 'Perfil' }));
+            expect(screen.getByRole('tab', { name: 'Perfil' }).tabIndex).toBe(0);
         });
 
         it('goes back to the first tab after the last one', () => {
@@ -205,9 +221,9 @@ describe('AccountPage', () => {
 
         it('only moves between the tabs the user has', () => {
             auth.user = fakeUser({ hasPassword: false, providers: ['github'] });
-            renderPage();
+            renderPage('/account?tab=perfil');
 
-            fireEvent.keyDown(screen.getByRole('tab', { name: 'Resumen' }), { key: 'ArrowRight' });
+            fireEvent.keyDown(screen.getByRole('tab', { name: 'Perfil' }), { key: 'ArrowRight' });
 
             expect(selectedTab()).toBe('Eliminar cuenta');
         });
@@ -231,6 +247,13 @@ describe('AccountPage', () => {
 
             expect(selectedTab()).toBe('Correo');
             expect(screen.getByLabelText('Correo nuevo')).toBeTruthy();
+        });
+
+        it('opens Perfil with ?tab=perfil', () => {
+            renderPage('/account?tab=perfil');
+
+            expect(selectedTab()).toBe('Perfil');
+            expect(screen.getByRole('tabpanel', { name: 'Perfil' })).toBeTruthy();
         });
 
         it('opens Resumen when the tab in ?tab= does not exist', () => {
@@ -267,7 +290,7 @@ describe('AccountPage', () => {
 
             fireEvent.keyDown(screen.getByRole('tab', { name: 'Resumen' }), { key: 'ArrowRight' });
 
-            expect(currentUrl()).toBe('/account?tab=contrasena');
+            expect(currentUrl()).toBe('/account?tab=perfil');
         });
     });
 });

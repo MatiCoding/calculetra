@@ -13,7 +13,7 @@
 }
 
 .flat {
-    background: #fff;
+    background: var(--color);
     color: var(--text);
 }
 
