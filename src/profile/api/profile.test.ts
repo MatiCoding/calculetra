@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { getProfile, isNicknameAvailable, NicknameTakenError, updateProfile, type Avatar } from './profile'
+import { getProfile, isNicknameAvailable, NicknameTakenError, updateProfile } from './profile'
+import type { Avatar } from '../avatar'
 import { supabase } from '../../auth/api/supabaseClient'
 
 // Replace the real client with a fake one, so the tests never call Supabase
