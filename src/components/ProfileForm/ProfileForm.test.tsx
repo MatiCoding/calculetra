@@ -1,8 +1,10 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { isNicknameAvailable, NicknameTakenError, updateProfile } from '../../profile/api/profile'
 import { fakeProfile } from '../../test/fakeProfile'
+import { AVATAR_PALETTE } from '../Avatar/avatarPalette'
+import { thumbDataUri } from '../Avatar/thumb'
 import ProfileForm from './ProfileForm'
 
 // A fake API, so the tests never call Supabase.
@@ -33,6 +35,18 @@ function typeNickname(value: string) {
 
 function hint() {
   return document.getElementById('nickname-hint')?.textContent
+}
+
+function group(name: string) {
+  return within(screen.getByRole('group', { name }))
+}
+
+function pressed(name: string, groupName: string) {
+  return group(groupName).getByRole('button', { name }).getAttribute('aria-pressed')
+}
+
+function preview() {
+  return screen.getByRole('img', { name: /^Avatar de/ })
 }
 
 function saveButton() {
@@ -66,6 +80,12 @@ describe('ProfileForm', () => {
     renderForm()
 
     expect(screen.getByText('De 3 a 20 caracteres: letras, números y _.')).toBeTruthy()
+  })
+
+  it('does not show the avatar options as images to screen readers, only the preview', () => {
+    renderForm()
+
+    expect(screen.getAllByRole('img')).toHaveLength(1)
   })
 
   it('cannot save while nothing has changed', () => {
@@ -241,6 +261,189 @@ describe('ProfileForm', () => {
       await screen.findByRole('status')
 
       typeNickname('Mateo2')
+
+      expect(screen.queryByRole('status')).toBeNull()
+    })
+  })
+
+  describe('the avatar', () => {
+    it('shows the current avatar options as pressed', () => {
+      renderForm()
+
+      expect(pressed('Avatar', 'Contenido')).toBe('true')
+      expect(pressed('Feliz', 'Expresión')).toBe('true')
+      expect(pressed('Mostaza', 'Color del avatar')).toBe('true')
+      expect(pressed('Azul', 'Color de fondo')).toBe('true')
+      expect(pressed('Plana', 'Estilo')).toBe('true')
+    })
+
+    it('has the 8 expressions and the 8 colours', () => {
+      renderForm()
+
+      expect(group('Expresión').getAllByRole('button')).toHaveLength(8)
+      expect(group('Color del avatar').getAllByRole('button')).toHaveLength(8)
+      expect(group('Color de fondo').getAllByRole('button')).toHaveLength(8)
+    })
+
+    it('changes the expression and shows it in the preview', () => {
+      renderForm()
+
+      fireEvent.click(group('Expresión').getByRole('button', { name: 'Guiño' }))
+
+      expect(pressed('Guiño', 'Expresión')).toBe('true')
+      expect(pressed('Feliz', 'Expresión')).toBe('false')
+      expect(preview().querySelector('img')?.getAttribute('src')).toBe(thumbDataUri('wink', 'mustard'))
+    })
+
+    it('changes the colour of the character', () => {
+      renderForm()
+
+      fireEvent.click(group('Color del avatar').getByRole('button', { name: 'Turquesa' }))
+
+      expect(preview().querySelector('img')?.getAttribute('src')).toBe(thumbDataUri('happy', 'teal'))
+    })
+
+    it('changes the background colour', () => {
+      renderForm()
+
+      fireEvent.click(group('Color de fondo').getByRole('button', { name: 'Ciruela' }))
+
+      expect(preview().style.getPropertyValue('--color')).toBe(AVATAR_PALETTE.plum.hex)
+    })
+
+    it('does not let the character and the background have the same colour', () => {
+      renderForm()
+
+      const sameAsBackground = group('Color del avatar').getByRole('button', { name: 'Azul' }) as HTMLButtonElement
+      const sameAsCharacter = group('Color de fondo').getByRole('button', { name: 'Mostaza' }) as HTMLButtonElement
+      expect(sameAsBackground.disabled).toBe(true)
+      expect(sameAsCharacter.disabled).toBe(true)
+    })
+
+    it('changes the style', () => {
+      renderForm()
+
+      fireEvent.click(group('Estilo').getByRole('button', { name: 'Contorno' }))
+
+      expect(pressed('Contorno', 'Estilo')).toBe('true')
+      expect(preview().className).toContain('outline')
+    })
+
+    it('can save when only the avatar has changed', () => {
+      renderForm()
+
+      fireEvent.click(group('Estilo').getByRole('button', { name: 'Contorno' }))
+
+      expect(saveButton().disabled).toBe(false)
+    })
+
+    it('cannot save after going back to the saved avatar', () => {
+      renderForm()
+
+      fireEvent.click(group('Estilo').getByRole('button', { name: 'Contorno' }))
+      fireEvent.click(group('Estilo').getByRole('button', { name: 'Plana' }))
+
+      expect(saveButton().disabled).toBe(true)
+    })
+
+    describe('with text', () => {
+      function chooseText() {
+        fireEvent.click(group('Contenido').getByRole('button', { name: 'Texto' }))
+      }
+
+      function textField() {
+        return screen.getByLabelText('Texto') as HTMLInputElement
+      }
+
+      it('shows a text field instead of the expressions and the colour of the character', () => {
+        renderForm()
+
+        chooseText()
+
+        expect(textField()).toBeTruthy()
+        expect(screen.queryByRole('group', { name: 'Expresión' })).toBeNull()
+        expect(screen.queryByRole('group', { name: 'Color del avatar' })).toBeNull()
+        expect(screen.getByRole('group', { name: 'Color' })).toBeTruthy()
+      })
+
+      it('shows the text in the preview, in capitals', () => {
+        renderForm()
+        chooseText()
+
+        fireEvent.change(textField(), { target: { value: 'mr' } })
+
+        expect(textField().value).toBe('MR')
+        expect(within(preview()).getByText('MR')).toBeTruthy()
+      })
+
+      it('keeps only 3 letters or numbers', () => {
+        renderForm()
+        chooseText()
+
+        fireEvent.change(textField(), { target: { value: 'a-b c!d' } })
+
+        expect(textField().value).toBe('ABC')
+      })
+
+      it('shows the first letter of the nickname when the text is empty', () => {
+        renderForm()
+        chooseText()
+
+        expect(within(preview()).getByText('P')).toBeTruthy()
+        expect(textField().placeholder).toBe('P')
+      })
+
+      it('lets any colour be the background', () => {
+        renderForm()
+        chooseText()
+
+        const mustard = group('Color').getByRole('button', { name: 'Mostaza' }) as HTMLButtonElement
+        expect(mustard.disabled).toBe(false)
+      })
+
+      it('gives the character another colour if the background takes its colour', async () => {
+        vi.mocked(updateProfile).mockImplementation(async (_id, nickname, avatar) => ({ ...profile, nickname, avatar }))
+        renderForm()
+        chooseText()
+
+        fireEvent.click(group('Color').getByRole('button', { name: 'Mostaza' }))
+        fireEvent.click(saveButton())
+
+        await waitFor(() => expect(updateProfile).toHaveBeenCalled())
+        const saved = vi.mocked(updateProfile).mock.calls[0][2]
+        expect(saved.color).toBe('mustard')
+        expect(saved.thumbColor).not.toBe('mustard')
+      })
+    })
+
+    it('saves the chosen avatar with the nickname', async () => {
+      vi.mocked(updateProfile).mockImplementation(async (_id, nickname, avatar) => ({ ...profile, nickname, avatar }))
+      renderForm()
+
+      fireEvent.click(group('Expresión').getByRole('button', { name: 'Risa' }))
+      fireEvent.click(group('Color de fondo').getByRole('button', { name: 'Verde' }))
+      fireEvent.click(group('Estilo').getByRole('button', { name: 'Contorno' }))
+      fireEvent.click(saveButton())
+
+      await waitFor(() =>
+        expect(updateProfile).toHaveBeenCalledWith('user-1', 'player_4821', {
+          ...profile.avatar,
+          expression: 'laugh',
+          color: 'green',
+          style: 'outline',
+        }),
+      )
+      expect(await screen.findByRole('status')).toBeTruthy()
+    })
+
+    it('hides "Perfil guardado" when the avatar changes again', async () => {
+      vi.mocked(updateProfile).mockImplementation(async (_id, nickname, avatar) => ({ ...profile, nickname, avatar }))
+      renderForm()
+      fireEvent.click(group('Estilo').getByRole('button', { name: 'Contorno' }))
+      fireEvent.click(saveButton())
+      await screen.findByRole('status')
+
+      fireEvent.click(group('Expresión').getByRole('button', { name: 'Beso' }))
 
       expect(screen.queryByRole('status')).toBeNull()
     })

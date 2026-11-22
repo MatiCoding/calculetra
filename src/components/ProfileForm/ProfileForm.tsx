@@ -2,6 +2,11 @@ import { useEffect, useState, type SubmitEvent } from 'react'
 import { isNicknameAvailable, NicknameTakenError, updateProfile, type Profile } from '../../profile/api/profile'
 import { normalizeNickname, validateNickname } from '../../profile/nickname'
 import Avatar from '../Avatar/Avatar'
+import { AVATAR_COLORS, THUMB_EXPRESSIONS, cleanTileText, sameAvatar, withColor,
+  type Avatar as AvatarData, type AvatarColor } from '../../profile/avatar'
+import { AVATAR_PALETTE } from '../Avatar/avatarPalette'
+import { THUMB_EXPRESSIONS_INFO } from '../Avatar/thumb'
+
 import styles from './ProfileForm.module.css'
 import buttons from '../buttons.module.css'
 
@@ -13,6 +18,43 @@ type ProfileFormProps = {
 const CHECK_DELAY_MS = 400  // How long to wait after the last key before asking if the nickname is free.
 
 type Check = { nickname: string; available: boolean }   // The answer of the last availability check, and the nickname it was for.
+
+const STYLES: { id: AvatarData['style']; name: string }[] = [
+  { id: 'flat', name: 'Plana' },
+  { id: 'outline', name: 'Contorno' },
+]
+
+type ColorChoicesProps = {
+  label: string
+  selected: AvatarColor
+  onChoose: (color: AvatarColor) => void
+  // A colour that cannot be chosen (the one of the character or of the background).
+  unavailable?: AvatarColor
+}
+
+// A row of round buttons, one per colour of the palette.
+function ColorChoices({ label, selected, onChoose, unavailable }: ColorChoicesProps) {
+  return (
+    <fieldset className={styles.group}>
+      <legend>{label}</legend>
+      <div className={styles.choices}>
+        {AVATAR_COLORS.map((color) => (
+          <button
+            key={color}
+            type="button"
+            className={styles.swatch}
+            style={{ background: AVATAR_PALETTE[color].hex }}
+            aria-label={AVATAR_PALETTE[color].name}
+            title={AVATAR_PALETTE[color].name}
+            aria-pressed={color === selected}
+            disabled={color === unavailable}
+            onClick={() => onChoose(color)}
+          />
+        ))}
+      </div>
+    </fieldset>
+  )
+}
 
 // The line under the nickname field.
 function nicknameHint(error: string | null, isCurrent: boolean, check: Check | null, nickname: string) {
@@ -26,6 +68,7 @@ function nicknameHint(error: string | null, isCurrent: boolean, check: Check | n
 
 function ProfileForm({ profile, onSaved }: ProfileFormProps) {
   const [nickname, setNickname] = useState(profile.nickname)
+  const [avatar, setAvatar] = useState(profile.avatar)  
   const [check, setCheck] = useState<Check | null>(null)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -58,7 +101,14 @@ function ProfileForm({ profile, onSaved }: ProfileFormProps) {
 
   const hint = nicknameHint(validationError, isCurrent, check, clean)
   const taken = check?.nickname === clean && !check.available
-  const canSave = validationError === null && !taken && !isCurrent && !saving
+  const changed = !isCurrent || !sameAvatar(avatar, profile.avatar)
+  const canSave = validationError === null && !taken && changed && !saving
+
+  // Every change of the avatar goes through here, so "Perfil guardado" goes away.
+  function changeAvatar(change: (avatar: AvatarData) => AvatarData) {
+    setAvatar(change)
+    setSaved(false)
+  }
 
   async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -67,8 +117,9 @@ function ProfileForm({ profile, onSaved }: ProfileFormProps) {
     setError(null)
 
     try {
-      const result = await updateProfile(profile.id, nickname, profile.avatar)
+      const result = await updateProfile(profile.id, nickname, avatar)
       setNickname(result.nickname)
+      setAvatar(result.avatar)
       setSaved(true)
       onSaved(result)
     } catch (err) {
@@ -86,7 +137,7 @@ function ProfileForm({ profile, onSaved }: ProfileFormProps) {
   return (
     <form onSubmit={handleSubmit} className={styles.form} noValidate>
       <div className={styles.preview}>
-        <Avatar nickname={clean || profile.nickname} avatar={profile.avatar} size={110} />
+        <Avatar nickname={clean || profile.nickname} avatar={avatar} size={110} />
         <span className={styles.caption}>{clean}</span>
       </div>
 
@@ -112,6 +163,98 @@ function ProfileForm({ profile, onSaved }: ProfileFormProps) {
             De 3 a 20 caracteres: letras, números y _.
           </p>
         </div>
+        <fieldset className={styles.group}>
+          <legend>Contenido</legend>
+          <div className={styles.segmented}>
+            <button
+              type="button"
+              aria-pressed={avatar.kind === 'thumb'}
+              onClick={() => changeAvatar((a) => ({ ...a, kind: 'thumb' }))}
+            >
+              Avatar
+            </button>
+            <button
+              type="button"
+              aria-pressed={avatar.kind === 'text'}
+              onClick={() => changeAvatar((a) => ({ ...a, kind: 'text' }))}
+            >
+              Texto
+            </button>
+          </div>
+        </fieldset>
+
+        {avatar.kind === 'thumb' ? (
+          <>
+            <fieldset className={styles.group}>
+              <legend>Expresión</legend>
+              <div className={styles.choices}>
+                {THUMB_EXPRESSIONS.map((expression) => (
+                  <button
+                    key={expression}
+                    type="button"
+                    className={styles.expression}
+                    aria-pressed={expression === avatar.expression}
+                    onClick={() => changeAvatar((a) => ({ ...a, expression }))}
+                  >
+                    <Avatar nickname={clean} avatar={{ ...avatar, expression }} size={48} decorative />
+                    {THUMB_EXPRESSIONS_INFO[expression].name}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+
+            <ColorChoices
+              label="Color del avatar"
+              selected={avatar.thumbColor}
+              unavailable={avatar.color}
+              onChoose={(thumbColor) => changeAvatar((a) => ({ ...a, thumbColor }))}
+            />
+          </>
+        ) : (
+          <div className={styles.field}>
+            <label htmlFor="tile-text">Texto</label>
+            <input
+              id="tile-text"
+              className={styles.short}
+              value={avatar.text}
+              placeholder={[...clean][0]?.toUpperCase()}
+              onChange={(e) => {
+                const text = cleanTileText(e.target.value)
+                changeAvatar((a) => ({ ...a, text }))
+              }}
+              autoComplete="off"
+              aria-describedby="tile-text-hint"
+            />
+            <p id="tile-text-hint" className={styles.hint}>
+              De 1 a 3 letras o números. Si lo dejas vacío, se usa la inicial de tu nickname.
+            </p>
+          </div>
+        )}
+
+        <ColorChoices
+          label={avatar.kind === 'thumb' ? 'Color de fondo' : 'Color'}
+          selected={avatar.color}
+          unavailable={avatar.kind === 'thumb' ? avatar.thumbColor : undefined}
+          onChoose={(color) => changeAvatar((a) => withColor(a, color))}
+        />
+
+        <fieldset className={styles.group}>
+          <legend>Estilo</legend>
+          <div className={styles.choices}>
+            {STYLES.map((style) => (
+              <button
+                key={style.id}
+                type="button"
+                className={styles.style}
+                aria-pressed={style.id === avatar.style}
+                onClick={() => changeAvatar((a) => ({ ...a, style: style.id }))}
+              >
+                <Avatar nickname={clean} avatar={{ ...avatar, style: style.id }} size={36} decorative />
+                {style.name}
+              </button>
+            ))}
+          </div>
+        </fieldset>
       </div>
 
       <div className={styles.actions}>

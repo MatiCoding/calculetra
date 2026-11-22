@@ -103,4 +103,11 @@ describe('Avatar', () => {
     const tile = screen.getByRole('img', { name: 'Avatar de mateo' })
     expect(tile.className).toContain(style)
   })
+
+  it('can be hidden from screen readers, for a button that already has a name', () => {
+    const { container } = render(<Avatar nickname="mateo" avatar={thumbAvatar} decorative />)
+
+    expect(screen.queryByRole('img')).toBeNull()
+    expect(container.firstElementChild?.getAttribute('aria-hidden')).toBe('true')
+  })
 })
