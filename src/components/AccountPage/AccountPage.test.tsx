@@ -5,6 +5,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AuthContextValue } from '../../auth/context/AuthContext';
 import AccountPage from './AccountPage';
 import { fakeUser } from '../../test/fakeUser';
+import { fakeProfile } from '../../test/fakeProfile';
+import { getProfile } from '../../profile/api/profile';
 
 // Each test can change `auth.user` before rendering.
 const { auth } = vi.hoisted(() => ({
@@ -13,6 +15,14 @@ const { auth } = vi.hoisted(() => ({
 
 vi.mock('../../auth/context/useAuth', () => ({
     useAuth: () => auth,
+}));
+
+// The page loads the profile of the user. A fake API, so no Supabase client.
+vi.mock('../../profile/api/profile', () => ({
+    getProfile: vi.fn(),
+    updateProfile: vi.fn(),
+    isNicknameAvailable: vi.fn(),
+    NicknameTakenError: class NicknameTakenError extends Error {},
 }));
 
 // Shows the current URL, so the tests can check the ?tab= part.
@@ -48,6 +58,7 @@ describe('AccountPage', () => {
         auth.changeEmail = vi.fn();
         auth.deleteAccount = vi.fn();
         auth.logOut = vi.fn();
+        vi.mocked(getProfile).mockResolvedValue(fakeProfile());
     });
 
     afterEach(cleanup);
@@ -98,6 +109,34 @@ describe('AccountPage', () => {
         expect(screen.getByRole('tab', { name: 'Perfil' }).getAttribute('aria-selected')).toBe('true');
         expect(screen.getByRole('tabpanel', { name: 'Perfil' })).toBeTruthy();
         expect(screen.getByRole('heading', { name: 'Perfil' })).toBeTruthy();
+    });
+
+    it('loads the profile of the user', () => {
+        renderPage();
+
+        expect(getProfile).toHaveBeenCalledWith('1');
+    });
+
+    it('says the profile is loading on the Perfil tab', () => {
+        vi.mocked(getProfile).mockReturnValue(new Promise(() => {}));
+        renderPage('/account?tab=perfil');
+
+        expect(screen.getByRole('status').textContent).toBe('Cargando tu perfil…');
+    });
+
+    it('shows the profile form with the current nickname once it is loaded', async () => {
+        vi.mocked(getProfile).mockResolvedValue(fakeProfile({ nickname: 'Mateo' }));
+        renderPage('/account?tab=perfil');
+
+        const field = await screen.findByLabelText('Nickname');
+        expect((field as HTMLInputElement).value).toBe('Mateo');
+    });
+
+    it('says so when the profile cannot be loaded', async () => {
+        vi.mocked(getProfile).mockRejectedValue(new Error('Network down'));
+        renderPage('/account?tab=perfil');
+
+        expect((await screen.findByRole('alert')).textContent).toBe('No se ha podido cargar tu perfil. Recarga la página.');
     });
 
     it('shows the change password form on the Contraseña tab', () => {
