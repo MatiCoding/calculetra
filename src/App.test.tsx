@@ -13,6 +13,15 @@ vi.mock('./auth/context/useAuth', () => ({
   useAuth: () => ({ user: null, loading: false, signUp: vi.fn(), logIn: vi.fn(), logOut: vi.fn() }),
 }))
 
+// The account page loads the profile, which would create the real Supabase
+// client. These tests do not need it, so replace the profile API.
+vi.mock('./profile/api/profile', () => ({
+  getProfile: vi.fn(() => new Promise(() => {})),
+  updateProfile: vi.fn(),
+  isNicknameAvailable: vi.fn(),
+  NicknameTakenError: class NicknameTakenError extends Error {},
+}))
+
 // MemoryRouter keeps the URL in memory, so each test chooses the page it
 // starts on. The last entry in initialEntries is the current page.
 function renderAt(path: string) {

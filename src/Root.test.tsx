@@ -21,6 +21,15 @@ vi.mock('./auth/api/auth', () => ({
   logInWithProvider: vi.fn(),
 }));
 
+// The account page loads the profile, which would also create the real
+// Supabase client. Replace the profile API too.
+vi.mock('./profile/api/profile', () => ({
+  getProfile: vi.fn(() => new Promise(() => {})),
+  updateProfile: vi.fn(),
+  isNicknameAvailable: vi.fn(),
+  NicknameTakenError: class NicknameTakenError extends Error {},
+}));
+
 // The home page asks the screen width, and jsdom has no matchMedia.
 beforeAll(() => fakeMatchMedia(false));
 

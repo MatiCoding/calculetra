@@ -1,7 +1,6 @@
 import type { KeyboardEvent } from 'react';
 import { useSearchParams } from 'react-router';
 import {useAuth} from '../../auth/context/useAuth';
-import styles from './AccountPage.module.css';
 import NewPasswordForm from '../NewPasswordForm/NewPasswordForm';
 import ChangeEmailForm from '../ChangeEmailForm/ChangeEmailForm';
 import DeleteAccountForm from '../DeleteAccountForm/DeleteAccountForm';
@@ -9,8 +8,12 @@ import ProfileCard from '../ProfileCard/ProfileCard';
 import BackToGames from '../BackToGames/BackToGames';
 import AccountIcon, { type AccountIconName } from '../AccountIcon/AccountIcon';
 import AccountSummary from '../AccountSummary/AccountSummary';
+import ProfileForm from '../ProfileForm/ProfileForm';
+import { useProfile } from '../../profile/useProfile';
 
-type TabId = 'resumen' | 'contrasena' | 'correo' | 'eliminar';
+import styles from './AccountPage.module.css';
+
+type TabId = 'resumen' | 'perfil' | 'contrasena' | 'correo' | 'eliminar';
 
 type Tab = {
     id: TabId;
@@ -19,6 +22,7 @@ type Tab = {
 };
 
 const SUMMARY: Tab = { id: 'resumen', label: 'Resumen', icon: 'summary' };
+const PROFILE: Tab = {id: 'perfil', label: 'Perfil', icon: 'profile'};
 const PASSWORD: Tab = { id: 'contrasena', label: 'Contraseña', icon: 'password' };
 const EMAIL: Tab = { id: 'correo', label: 'Correo', icon: 'email' };
 const DELETE: Tab = { id: 'eliminar', label: 'Eliminar cuenta', icon: 'delete' };
@@ -26,11 +30,12 @@ const DELETE: Tab = { id: 'eliminar', label: 'Eliminar cuenta', icon: 'delete' }
 // Users who log in with Google or GitHub have no password and cannot change
 // their email here, so they do not get those tabs.
 function tabsFor(hasPassword: boolean): Tab[] {
-    return hasPassword ? [SUMMARY, PASSWORD, EMAIL, DELETE] : [SUMMARY, DELETE];
+    return hasPassword ? [SUMMARY, PROFILE, PASSWORD, EMAIL, DELETE] : [SUMMARY, PROFILE, DELETE];
 }
 
 function AccountPage() {
     const {user} = useAuth();
+    const { profile, setProfile, failed } = useProfile(user?.id);    
     const [searchParams, setSearchParams] = useSearchParams();
 
     const tabs = tabsFor(user?.hasPassword ?? false);
@@ -71,7 +76,7 @@ function AccountPage() {
 
             <div className={styles.layout}>
                 <div className={styles.side}>
-                    {user && <ProfileCard user={user} />}
+                    {user && <ProfileCard user={user} profile={profile} />}
 
                     <div role="tablist" aria-label="Opciones de la cuenta" className={styles.tabs} onKeyDown={handleKeyDown}>
                         {tabs.map((tab) => (
@@ -100,7 +105,20 @@ function AccountPage() {
                     className={selected === 'eliminar' ? `${styles.panel} ${styles.danger}` : styles.panel}
                 >
                     {selected === 'resumen' && user && <AccountSummary user={user} />}
-                    
+
+                    {selected === 'perfil' && (
+                        <>
+                            <h3>Perfil</h3>
+                            {profile ? (
+                                <ProfileForm profile={profile} onSaved={setProfile} />
+                            ) : (
+                                <p role={failed ? 'alert' : 'status'}>
+                                    {failed ? 'No se ha podido cargar tu perfil. Recarga la página.' : 'Cargando tu perfil…'}
+                                </p>
+                            )}
+                        </>
+                    )}
+
                     {selected === 'contrasena' && (
                         <>
                             <h3>Cambiar contraseña</h3>

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-export type AccountIconName = 'summary' | 'password' | 'email' | 'delete'
+export type AccountIconName = 'summary' | 'profile' | 'password' | 'email' | 'delete'
 
 // The inside of each 24×24 icon. They are drawn with lines, so they take the color of the text (currentColor) like the rest of the tab.
 const SHAPES: Record<AccountIconName, ReactNode> = {
@@ -10,6 +10,13 @@ const SHAPES: Record<AccountIconName, ReactNode> = {
             <rect x="3" y="12" width="4.5" height="8" rx="1.2" />
             <rect x="9.75" y="7" width="4.5" height="13" rx="1.2" />
             <rect x="16.5" y="3.5" width="4.5" height="16.5" rx="1.2" />
+        </>
+    ),
+    // A person: head and shoulders.
+    profile: (
+        <>
+            <circle cx="12" cy="8" r="4" />
+            <path d="M4.5 20.5a7.5 7.5 0 0 1 15 0" />
         </>
     ),
     // A padlock.

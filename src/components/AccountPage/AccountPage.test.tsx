@@ -5,6 +5,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AuthContextValue } from '../../auth/context/AuthContext';
 import AccountPage from './AccountPage';
 import { fakeUser } from '../../test/fakeUser';
+import { fakeProfile } from '../../test/fakeProfile';
+import { getProfile } from '../../profile/api/profile';
 
 // Each test can change `auth.user` before rendering.
 const { auth } = vi.hoisted(() => ({
@@ -13,6 +15,14 @@ const { auth } = vi.hoisted(() => ({
 
 vi.mock('../../auth/context/useAuth', () => ({
     useAuth: () => auth,
+}));
+
+// The page loads the profile of the user. A fake API, so no Supabase client.
+vi.mock('../../profile/api/profile', () => ({
+    getProfile: vi.fn(),
+    updateProfile: vi.fn(),
+    isNicknameAvailable: vi.fn(),
+    NicknameTakenError: class NicknameTakenError extends Error {},
 }));
 
 // Shows the current URL, so the tests can check the ?tab= part.
@@ -48,6 +58,7 @@ describe('AccountPage', () => {
         auth.changeEmail = vi.fn();
         auth.deleteAccount = vi.fn();
         auth.logOut = vi.fn();
+        vi.mocked(getProfile).mockResolvedValue(fakeProfile());
     });
 
     afterEach(cleanup);
@@ -58,11 +69,11 @@ describe('AccountPage', () => {
         expect(screen.getByRole('region', { name: 'Tu perfil' })).toBeTruthy();
     });
 
-    it('shows four tabs to a user with a password', () => {
+    it('shows five tabs to a user with a password', () => {
         renderPage();
 
         expect(screen.getByRole('tablist', { name: 'Opciones de la cuenta' })).toBeTruthy();
-        expect(tabNames()).toEqual(['Resumen', 'Contraseña', 'Correo', 'Eliminar cuenta']);
+        expect(tabNames()).toEqual(['Resumen', 'Perfil', 'Contraseña', 'Correo', 'Eliminar cuenta']);
     });
 
     it('selects Resumen at first', () => {
@@ -88,6 +99,44 @@ describe('AccountPage', () => {
         const panel = screen.getByRole('tabpanel');
         expect(tab.getAttribute('aria-controls')).toBe(panel.id);
         expect(panel.getAttribute('aria-labelledby')).toBe(tab.id);
+    });
+
+    it('shows the Perfil panel on the Perfil tab', () => {
+        renderPage();
+
+        fireEvent.click(screen.getByRole('tab', { name: 'Perfil' }));
+
+        expect(screen.getByRole('tab', { name: 'Perfil' }).getAttribute('aria-selected')).toBe('true');
+        expect(screen.getByRole('tabpanel', { name: 'Perfil' })).toBeTruthy();
+        expect(screen.getByRole('heading', { name: 'Perfil' })).toBeTruthy();
+    });
+
+    it('loads the profile of the user', () => {
+        renderPage();
+
+        expect(getProfile).toHaveBeenCalledWith('1');
+    });
+
+    it('says the profile is loading on the Perfil tab', () => {
+        vi.mocked(getProfile).mockReturnValue(new Promise(() => {}));
+        renderPage('/account?tab=perfil');
+
+        expect(screen.getByRole('status').textContent).toBe('Cargando tu perfil…');
+    });
+
+    it('shows the profile form with the current nickname once it is loaded', async () => {
+        vi.mocked(getProfile).mockResolvedValue(fakeProfile({ nickname: 'Mateo' }));
+        renderPage('/account?tab=perfil');
+
+        const field = await screen.findByLabelText('Nickname');
+        expect((field as HTMLInputElement).value).toBe('Mateo');
+    });
+
+    it('says so when the profile cannot be loaded', async () => {
+        vi.mocked(getProfile).mockRejectedValue(new Error('Network down'));
+        renderPage('/account?tab=perfil');
+
+        expect((await screen.findByRole('alert')).textContent).toBe('No se ha podido cargar tu perfil. Recarga la página.');
     });
 
     it('shows the change password form on the Contraseña tab', () => {
@@ -125,10 +174,16 @@ describe('AccountPage', () => {
             auth.user = fakeUser({ email: 'ana@gmail.com', hasPassword: false, providers: ['google'] });
         });
 
-        it('only shows the Resumen and Eliminar cuenta tabs', () => {
+        it('only shows the Resumen, Perfil and Eliminar cuenta tabs', () => {
             renderPage();
 
-            expect(tabNames()).toEqual(['Resumen', 'Eliminar cuenta']);
+            expect(tabNames()).toEqual(['Resumen', 'Perfil', 'Eliminar cuenta']);
+        });
+
+        it('lets them open the Perfil tab', () => {
+            renderPage('/account?tab=perfil');
+
+            expect(screen.getByRole('tab', { name: 'Perfil' }).getAttribute('aria-selected')).toBe('true');
         });
 
         it('explains why on the Resumen tab', () => {
@@ -171,9 +226,9 @@ describe('AccountPage', () => {
 
             fireEvent.keyDown(screen.getByRole('tab', { name: 'Resumen' }), { key: 'ArrowRight' });
 
-            expect(selectedTab()).toBe('Contraseña');
-            expect(document.activeElement).toBe(screen.getByRole('tab', { name: 'Contraseña' }));
-            expect(screen.getByRole('tab', { name: 'Contraseña' }).tabIndex).toBe(0);
+            expect(selectedTab()).toBe('Perfil');
+            expect(document.activeElement).toBe(screen.getByRole('tab', { name: 'Perfil' }));
+            expect(screen.getByRole('tab', { name: 'Perfil' }).tabIndex).toBe(0);
         });
 
         it('goes back to the first tab after the last one', () => {
@@ -205,9 +260,9 @@ describe('AccountPage', () => {
 
         it('only moves between the tabs the user has', () => {
             auth.user = fakeUser({ hasPassword: false, providers: ['github'] });
-            renderPage();
+            renderPage('/account?tab=perfil');
 
-            fireEvent.keyDown(screen.getByRole('tab', { name: 'Resumen' }), { key: 'ArrowRight' });
+            fireEvent.keyDown(screen.getByRole('tab', { name: 'Perfil' }), { key: 'ArrowRight' });
 
             expect(selectedTab()).toBe('Eliminar cuenta');
         });
@@ -231,6 +286,13 @@ describe('AccountPage', () => {
 
             expect(selectedTab()).toBe('Correo');
             expect(screen.getByLabelText('Correo nuevo')).toBeTruthy();
+        });
+
+        it('opens Perfil with ?tab=perfil', () => {
+            renderPage('/account?tab=perfil');
+
+            expect(selectedTab()).toBe('Perfil');
+            expect(screen.getByRole('tabpanel', { name: 'Perfil' })).toBeTruthy();
         });
 
         it('opens Resumen when the tab in ?tab= does not exist', () => {
@@ -267,7 +329,7 @@ describe('AccountPage', () => {
 
             fireEvent.keyDown(screen.getByRole('tab', { name: 'Resumen' }), { key: 'ArrowRight' });
 
-            expect(currentUrl()).toBe('/account?tab=contrasena');
+            expect(currentUrl()).toBe('/account?tab=perfil');
         });
     });
 });
