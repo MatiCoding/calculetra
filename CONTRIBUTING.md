@@ -177,6 +177,8 @@ Accounts use [Supabase](https://supabase.com), which needs two environment varia
 
 To run the app locally, create a free Supabase project, copy `.env.example` to `.env` and fill in the URL and the publishable key from your project settings. Never commit your `.env` file (it is already in `.gitignore`).
 
+Your Supabase project also needs the database migrations. Run each file of [`supabase/migrations/`](supabase/migrations/), in order, in the SQL Editor of your project. Without `…_profiles.sql`, the Perfil tab of the account page cannot load your profile.
+
 ## Setting up log in with Google and GitHub
 
 Log in with Google and GitHub goes through Supabase Auth: the browser only ever talks to Supabase, and the provider's client secret is stored in Supabase, never in `.env` or in the repository. You only need this if you want to try these buttons with your own Supabase project; email and password work without it.

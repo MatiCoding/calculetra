@@ -188,7 +188,7 @@ src/
 │   ├── cifras/      #   Cifras: challenge, operations, game state, tree, solver, hints, score
 │   ├── letras/      #   Letras: daily letters, word checks, dictionary, game state, score, hints
 │   └── shared/      #   seeded random and the date in Madrid, used by both games
-├── auth/            # accounts; the only folder that knows about Supabase
+├── auth/            # accounts and the Supabase client
 │   ├── api/         #   Supabase client and calls
 │   ├── context/     #   AuthProvider and the useAuth hook
 │   ├── signUp/      #   sign up validation and error messages
@@ -196,6 +196,8 @@ src/
 │   ├── oauth/       #   coming back from Google or GitHub
 │   ├── password/    #   new password validation and error messages
 │   └── email/       #   new email validation and error messages
+├── profile/         # nickname and avatar rules, and the useProfile hook
+│   └── api/         #   calls to the profiles table
 ├── components/      # React components, one folder each (Name.tsx, Name.test.tsx, Name.module.css)
 ├── config/          # feature flags
 ├── hooks/           # React hooks shared by several components
