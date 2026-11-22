@@ -76,7 +76,7 @@ function AccountPage() {
 
             <div className={styles.layout}>
                 <div className={styles.side}>
-                    {user && <ProfileCard user={user} />}
+                    {user && <ProfileCard user={user} profile={profile} />}
 
                     <div role="tablist" aria-label="Opciones de la cuenta" className={styles.tabs} onKeyDown={handleKeyDown}>
                         {tabs.map((tab) => (

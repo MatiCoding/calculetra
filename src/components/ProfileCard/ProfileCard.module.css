@@ -1,15 +1,16 @@
 .card {
-    background: var(--color-number);
-    color: var(--color-text);
+    background: var(--card, var(--color-number));
+    color: var(--card-text, var(--color-text));
     border-radius: 18px;
     padding: 20px;
-    box-shadow: 0 5px 0 #b97f0f;
+    box-shadow: 0 5px 0 var(--card-dark, #b97f0f);
     display: grid;
     grid-template-columns: auto 1fr;
     column-gap: 16px;
     row-gap: 10px;
     align-items: center;
     text-align: left;
+    transition: background-color 0.4s, color 0.4s, box-shadow 0.4s;
 }
 
 .tile {
@@ -25,6 +26,24 @@
     border-radius: 12px;
     box-shadow: 0 4px 0 #c7d4e6;
     transform: rotate(-4deg);
+}
+
+.avatar {
+    grid-row: span 4;
+    justify-self: start;
+    display: inline-flex;
+    padding: 3px;
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.18);
+    transform: rotate(-4deg);
+}
+
+.nickname {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 800;
+    overflow-wrap: anywhere;
 }
 
 .email {
@@ -45,6 +64,7 @@
     border-radius: 12px;
     font-size: 0.8rem;
     font-weight: 600;
+    color: var(--color-text);
 }
 
 .chipIcon {
@@ -61,7 +81,7 @@
 .since {
     margin: 0;
     font-size: 0.8rem;
-    color: #5a4206;
+    opacity: 0.8;
 }
 
 /* In a narrow column (the left column of the account page on a computer),
@@ -71,7 +91,7 @@
         grid-template-columns: 1fr;
     }
 
-    .tile {
+    .tile, .avatar {
         grid-row: auto;
         margin-bottom: 8px;
     }
