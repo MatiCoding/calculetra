@@ -17,13 +17,13 @@ Supabase Auth already lets each user keep their own data in `user_metadata`, but
 
 Keep the profile in its own table, `public.profiles`, with one row per user.
 
-- `id` is the user's id and references `auth.users(id)` with `on delete cascade`, so deleting the account deletes the profile ([ADR 0006](0006-delete-account.md)).
+- `id` is the user's id and references `auth.users(id)` with `on delete cascade`, so deleting the account deletes the profile ([ADR 0006](./0006-delete-account.md)).
 - Columns: `nickname`, and for the avatar `tile_kind` (`thumb` or `text`), `tile_text`, `thumb_expression`, `thumb_color`, `tile_color`, `tile_style` (`flat` or `outline`) and `updated_at`.
 - The database checks the rules too, not only the app: check constraints for the nickname (3 to 20 letters, numbers or `_`), the text (up to 3 letters or numbers) and the allowed values, a check so the character and the background are not the same colour, and a unique index on `lower(nickname)`.
 - Row Level Security: every logged-in user can read every profile; a user can only update their own row, and only the columns of the nickname and the avatar. Nobody can insert or delete rows from the browser, and `anon` has no access.
 - A trigger on `auth.users` creates the profile when an account is created, with a free nickname `player_` plus 4 digits (more digits if they run out). The migration gives a profile to the accounts that already existed.
 - The SQL is in `supabase/migrations/` and is run by hand in the Supabase SQL Editor, like `delete_account()`.
-- The app reads and writes profiles only through `src/profile/api`. Components never call Supabase for profiles, so the storage can change (for example with the hosting, [ADR 0010](0010-hosting-cloudflare.md)) without touching them.
+- The app reads and writes profiles only through `src/profile/api`. Components never call Supabase for profiles, so the storage can change (for example with the hosting, [ADR 0010](./0010-hosting-cloudflare.md)) without touching them.
 
 The avatar is drawn in the browser from those columns: a Thumbs character from [DiceBear](https://www.dicebear.com) (CC0, no credit needed) or 1 to 3 letters, on a colour of our own palette. No image is stored.
 
