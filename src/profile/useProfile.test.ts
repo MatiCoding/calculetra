@@ -74,4 +74,42 @@ describe('useProfile', () => {
 
     expect(result.current.profile).toBeNull()
   })
+
+  it('forgets the profile when the user logs out', async () => {
+    vi.mocked(getProfile).mockResolvedValue(profile)
+    const { result, rerender } = renderHook(({ userId }) => useProfile(userId), {
+      initialProps: { userId: 'user-1' as string | undefined },
+    })
+    await waitFor(() => expect(result.current.profile).toEqual(profile))
+
+    rerender({ userId: undefined })
+
+    expect(result.current.profile).toBeNull()
+    expect(result.current.failed).toBe(false)
+  })
+
+  it('does not show the profile of the old user while the new one loads', async () => {
+    vi.mocked(getProfile).mockResolvedValueOnce(profile).mockReturnValueOnce(new Promise(() => {}))
+    const { result, rerender } = renderHook(({ userId }) => useProfile(userId), {
+      initialProps: { userId: 'user-1' },
+    })
+    await waitFor(() => expect(result.current.profile).toEqual(profile))
+
+    rerender({ userId: 'user-2' })
+
+    expect(result.current.profile).toBeNull()
+    expect(getProfile).toHaveBeenLastCalledWith('user-2')
+  })
+
+  it('does not keep the error of the old user', async () => {
+    vi.mocked(getProfile).mockRejectedValueOnce(new Error('Network down')).mockReturnValueOnce(new Promise(() => {}))
+    const { result, rerender } = renderHook(({ userId }) => useProfile(userId), {
+      initialProps: { userId: 'user-1' },
+    })
+    await waitFor(() => expect(result.current.failed).toBe(true))
+
+    rerender({ userId: 'user-2' })
+
+    expect(result.current.failed).toBe(false)
+  })
 })

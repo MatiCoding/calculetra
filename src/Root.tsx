@@ -3,6 +3,7 @@ import App from './App.tsx'
 import UnderConstruction from './components/UnderDevelopment/UnderDevelopment.tsx'
 import { IS_UNDER_CONSTRUCTION } from './config/flags'
 import { AuthProvider } from './auth/context/AuthProvider.tsx'
+import { ProfileProvider } from './profile/context/ProfileProvider.tsx'
 
 function Root() {
   if (IS_UNDER_CONSTRUCTION) return <UnderConstruction />
@@ -16,7 +17,9 @@ function Root() {
   return (
     <BrowserRouter useTransitions={false}>
       <AuthProvider>
-        <App />
+        <ProfileProvider>
+          <App />
+        </ProfileProvider>
       </AuthProvider>
     </BrowserRouter>
   )
