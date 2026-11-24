@@ -7,6 +7,7 @@ import AccountPage from './AccountPage';
 import { fakeUser } from '../../test/fakeUser';
 import { fakeProfile } from '../../test/fakeProfile';
 import { getProfile } from '../../profile/api/profile';
+import { ProfileProvider } from '../../profile/context/ProfileProvider';
 
 // Each test can change `auth.user` before rendering.
 const { auth } = vi.hoisted(() => ({
@@ -32,12 +33,15 @@ function ShowLocation() {
 }
 
 // The page reads the tab from the URL and DeleteAccountForm uses
-// useNavigate, so it needs a router.
+// useNavigate, so it needs a router. It gets the profile from ProfileProvider,
+// which uses the fake useAuth and the fake profile API above.
 function renderPage(url = '/account') {
     render(
         <MemoryRouter initialEntries={[url]}>
-            <AccountPage />
-            <ShowLocation />
+            <ProfileProvider>
+                <AccountPage />
+                <ShowLocation />
+            </ProfileProvider>
         </MemoryRouter>,
     );
 }

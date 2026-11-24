@@ -6,6 +6,7 @@ import { fakeDialog } from './test/fakeDialog';
 import { fakeMatchMedia } from './test/fakeMatchMedia';
 import { magnetTime } from './components/magnet';
 import App from './App';
+import { ProfileProvider } from './profile/context/ProfileProvider';
 
 // SignUpForm uses useAuth, but these tests only check navigation,
 // so a fake hook is enough and no AuthProvider is needed.
@@ -24,10 +25,13 @@ vi.mock('./profile/api/profile', () => ({
 
 // MemoryRouter keeps the URL in memory, so each test chooses the page it
 // starts on. The last entry in initialEntries is the current page.
+// The header and the account page read the profile, so App needs ProfileProvider (as in Root).
 function renderAt(path: string) {
   render(
     <MemoryRouter initialEntries={[path]}>
-      <App />
+      <ProfileProvider>
+        <App />
+      </ProfileProvider>
     </MemoryRouter>,
   );
 }
@@ -195,7 +199,9 @@ describe('App routes', () => {
   it('shows the notice left by another page on /', () => {
     render(
       <MemoryRouter initialEntries={[{ pathname: '/', state: { notice: 'Tu cuenta se ha eliminado.' } }]}>
-        <App />
+        <ProfileProvider>
+          <App />
+        </ProfileProvider>
       </MemoryRouter>,
     );
 
