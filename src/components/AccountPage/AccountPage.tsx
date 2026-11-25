@@ -9,7 +9,7 @@ import BackToGames from '../BackToGames/BackToGames';
 import AccountIcon, { type AccountIconName } from '../AccountIcon/AccountIcon';
 import AccountSummary from '../AccountSummary/AccountSummary';
 import ProfileForm from '../ProfileForm/ProfileForm';
-import { useProfile } from '../../profile/useProfile';
+import { useMyProfile } from '../../profile/context/useMyProfile';
 
 import styles from './AccountPage.module.css';
 
@@ -35,7 +35,7 @@ function tabsFor(hasPassword: boolean): Tab[] {
 
 function AccountPage() {
     const {user} = useAuth();
-    const { profile, setProfile, failed } = useProfile(user?.id);    
+    const { profile, setProfile, failed } = useMyProfile();    
     const [searchParams, setSearchParams] = useSearchParams();
 
     const tabs = tabsFor(user?.hasPassword ?? false);

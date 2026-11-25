@@ -10,6 +10,8 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - Every player has a profile with a nickname and an avatar. New accounts get a nickname like `player_4821`, and so do the accounts that already existed.
 - A new Perfil tab on the account page (`/account?tab=perfil`) to change both. The nickname has 3 to 20 letters, numbers or `_`, and the page says while you type whether it is free. The avatar is a little character with 8 expressions, or up to 3 letters (empty is the first letter of your nickname), with the colours of a new palette of 8 and a flat or outline style. The big preview changes as you choose.
 - The card at the top of the account page shows your avatar and your nickname, and takes the colour of your avatar.
+### Changed
+- The header shows your avatar and your nickname instead of your email, as a link to your account. On very narrow phones only the avatar is shown. It changes as soon as you save your profile, and if your profile cannot be loaded it shows your email as before.
 
 ## [0.8.0] - 2026-11-17
 

@@ -197,7 +197,8 @@ src/
 │   ├── password/    #   new password validation and error messages
 │   └── email/       #   new email validation and error messages
 ├── profile/         # nickname and avatar rules, and the useProfile hook
-│   └── api/         #   calls to the profiles table
+│   ├── api/         #   calls to the profiles table
+│   └── context/     #   ProfileProvider and the useMyProfile hook
 ├── components/      # React components, one folder each (Name.tsx, Name.test.tsx, Name.module.css)
 ├── config/          # feature flags
 ├── hooks/           # React hooks shared by several components

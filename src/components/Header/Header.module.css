@@ -26,6 +26,25 @@
     gap: 8px;
 }
 
+.account {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    color: inherit;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.account:hover .nickname,
+.account:focus-visible .nickname {
+    text-decoration: underline;
+}
+
+.nickname {
+    white-space: nowrap;
+}
+
 /* On narrow phones the big title leaves no room for the link and stops
    being centered, so it gets a bit smaller. */
 @media (max-width: 820px) {
@@ -43,5 +62,11 @@
         justify-self: center;
         flex-wrap: wrap;
         justify-content: center;
+    }
+}
+
+@media (max-width: 399px) {
+    .nickname {
+        display: none;
     }
 }
